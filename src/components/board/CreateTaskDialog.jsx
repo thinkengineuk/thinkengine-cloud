@@ -41,6 +41,7 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
   const [users, setUsers] = useState([]);
   const [boardMembers, setBoardMembers] = useState([]);
   const [newTag, setNewTag] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -54,6 +55,7 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
         priority: "medium"
       });
       setNewTag("");
+      setIsSubmitting(false);
       loadUsers();
     }
   }, [open]);
@@ -102,9 +104,18 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Prevent double submission
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      await onSubmit(formData);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -122,6 +133,7 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g., Design new landing page"
               required
+              disabled={isSubmitting}
             />
           </div>
 
@@ -133,6 +145,7 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Add details, links, etc."
               rows={3}
+              disabled={isSubmitting}
             />
           </div>
 
@@ -142,6 +155,7 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
               <Select
                 value={formData.assigned_to}
                 onValueChange={(value) => setFormData({ ...formData, assigned_to: value })}
+                disabled={isSubmitting}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select user" />
@@ -160,7 +174,11 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
               <Label>Due Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start text-left font-normal"
+                    disabled={isSubmitting}
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.due_date ? format(formData.due_date, 'PPP') : 'Set date'}
                   </Button>
@@ -185,8 +203,9 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
                 placeholder="Add a tag and press Enter"
+                disabled={isSubmitting}
               />
-              <Button type="button" onClick={handleAddTag}>Add</Button>
+              <Button type="button" onClick={handleAddTag} disabled={isSubmitting}>Add</Button>
             </div>
             {formData.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
@@ -200,6 +219,7 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
                       className="hover:text-red-600 font-bold"
+                      disabled={isSubmitting}
                     >
                       ×
                     </button>
@@ -218,6 +238,7 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
                     id={`watcher-${user.id}`}
                     checked={formData.watchers.includes(user.email)}
                     onCheckedChange={() => handleWatcherToggle(user.email)}
+                    disabled={isSubmitting}
                   />
                   <label
                     htmlFor={`watcher-${user.id}`}
@@ -231,11 +252,20 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
           </div>
 
           <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              Create Task
+            <Button 
+              type="submit" 
+              className="bg-blue-600 hover:bg-blue-700"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating...' : 'Create Task'}
             </Button>
           </div>
         </form>

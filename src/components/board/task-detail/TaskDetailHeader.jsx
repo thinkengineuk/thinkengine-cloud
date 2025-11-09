@@ -88,17 +88,14 @@ export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onR
   return (
     <>
       <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 bg-white">
-        <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex-1 min-w-0 pr-4">
-          {task.title}
-        </h2>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="flex-shrink-0">
                 <MoreVertical className="w-5 h-5 text-slate-600" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="start">
               <DropdownMenuItem onClick={handleDuplicate}>
                 <Copy className="w-4 h-4 mr-2" />
                 Duplicate Task
@@ -118,6 +115,10 @@ export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onR
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex-1 min-w-0 pr-4">
+            {task.title}
+          </h2>
         </div>
       </div>
 
