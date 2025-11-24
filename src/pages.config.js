@@ -3,7 +3,7 @@ import Board from './pages/Board';
 import ImportBoard from './pages/ImportBoard';
 import BoardSettings from './pages/BoardSettings';
 import Users from './pages/Users';
-import Layout from './Layout.jsx';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -17,5 +17,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Dashboard",
     Pages: PAGES,
-    Layout: Layout,
+    Layout: __Layout,
 };

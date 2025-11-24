@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Board as BoardEntity } from "@/entities/Board";
 import { Column } from "@/entities/Column";
@@ -198,9 +197,10 @@ export default function BoardPage() {
 
       (async () => {
         try {
-          for (let i = 0; i < reorderedColumns.length; i++) {
-            await Column.update(reorderedColumns[i].id, { position: i });
-          }
+          const updates = reorderedColumns.map((col, index) => 
+            Column.update(col.id, { position: index })
+          );
+          await Promise.all(updates);
         } catch (error) {
           console.error('Error updating column positions:', error);
           loadBoard();
@@ -211,50 +211,85 @@ export default function BoardPage() {
     }
 
     const taskId = draggableId;
+    const sourceColumnId = source.droppableId;
     const destColumnId = destination.droppableId;
+
+    // Get all tasks in the source and destination columns
+    const sourceColumnTasks = allTasks.filter(t => t.column_id === sourceColumnId).sort((a, b) => a.position - b.position);
+    const destColumnTasks = sourceColumnId === destColumnId 
+      ? sourceColumnTasks 
+      : allTasks.filter(t => t.column_id === destColumnId).sort((a, b) => a.position - b.position);
+
+    // Find the dragged task
+    const draggedTask = allTasks.find(t => t.id === taskId);
+    if (!draggedTask) return;
+
+    // Remove dragged task from source
+    const newSourceTasks = sourceColumnTasks.filter(t => t.id !== taskId);
     
-    // Create new tasks array with updated task
-    const newAllTasks = allTasks.map(task => {
-      if (task.id === taskId) {
-        const destColumn = columns.find(col => col.id === destColumnId);
-        const updatedTask = {
-          ...task,
+    // Add to destination at the right position
+    let newDestTasks = [...destColumnTasks];
+    if (sourceColumnId === destColumnId) {
+      newDestTasks = newSourceTasks;
+    } else {
+      newDestTasks = newDestTasks.filter(t => t.id !== taskId);
+    }
+    newDestTasks.splice(destination.index, 0, draggedTask);
+
+    // Check if moving to/from completed column
+    const destColumn = columns.find(col => col.id === destColumnId);
+    let newStatus = draggedTask.status;
+    if (destColumn?.name.toLowerCase() === 'completed' && draggedTask.status !== 'completed') {
+      newStatus = 'completed';
+    } else if (draggedTask.status === 'completed' && destColumn?.name.toLowerCase() !== 'completed') {
+      newStatus = 'active';
+    }
+
+    // Create updates array with recalculated positions
+    const tasksToUpdate = [];
+    
+    // Update positions in destination column
+    newDestTasks.forEach((task, index) => {
+      tasksToUpdate.push({
+        id: task.id,
+        updates: {
           column_id: destColumnId,
-          position: destination.index
-        };
-        
-        if (destColumn?.name.toLowerCase() === 'completed' && task.status !== 'completed') {
-          updatedTask.status = 'completed';
-        } else if (task.status === 'completed' && destColumn?.name.toLowerCase() !== 'completed') {
-          updatedTask.status = 'active';
+          position: index,
+          ...(task.id === taskId && newStatus !== draggedTask.status ? { status: newStatus } : {})
         }
-        
-        return updatedTask;
+      });
+    });
+
+    // If different columns, update positions in source column too
+    if (sourceColumnId !== destColumnId) {
+      newSourceTasks.forEach((task, index) => {
+        tasksToUpdate.push({
+          id: task.id,
+          updates: { position: index }
+        });
+      });
+    }
+
+    // Optimistically update UI
+    const updatedAllTasks = allTasks.map(task => {
+      const update = tasksToUpdate.find(u => u.id === task.id);
+      if (update) {
+        return { ...task, ...update.updates };
       }
       return task;
     });
     
-    setAllTasks(newAllTasks);
-    
+    setAllTasks(updatedAllTasks);
+
+    // Batch update database
     (async () => {
       try {
-        const destColumn = columns.find(col => col.id === destColumnId);
-        const task = allTasks.find(t => t.id === taskId);
-        
-        const updates = { 
-          column_id: destColumnId,
-          position: destination.index 
-        };
-        
-        if (destColumn?.name.toLowerCase() === 'completed' && task?.status !== 'completed') {
-          updates.status = 'completed';
-        } else if (task?.status === 'completed' && destColumn?.name.toLowerCase() !== 'completed') {
-          updates.status = 'active';
-        }
-        
-        await Task.update(taskId, updates);
+        const dbUpdates = tasksToUpdate.map(({ id, updates }) => 
+          Task.update(id, updates)
+        );
+        await Promise.all(dbUpdates);
       } catch (error) {
-        console.error('Error updating task:', error);
+        console.error('Error updating tasks:', error);
         loadBoard();
       }
     })();
@@ -606,9 +641,9 @@ export default function BoardPage() {
                       >
                         <BoardColumn
                           column={column}
-                          tasks={tasks.filter(t => t.column_id === column.id)}
+                          tasks={tasks.filter(t => t.column_id === column.id).sort((a, b) => a.position - b.position)}
                           users={users}
-                          usersMap={usersMap} // Pass usersMap to BoardColumn
+                          usersMap={usersMap}
                           onTaskClick={setSelectedTask}
                           onRefresh={loadBoard}
                           dragHandleProps={provided.dragHandleProps}
