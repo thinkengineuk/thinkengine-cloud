@@ -217,6 +217,7 @@ export default function BoardPage() {
     // Switch destination column to manual sort mode when dragging within same column
     if (sourceColumnId === destColumnId) {
       localStorage.setItem(`column-${destColumnId}-sort`, 'manual');
+      window.dispatchEvent(new Event('sort-change'));
     }
 
     // Get all tasks in the source and destination columns
@@ -293,11 +294,6 @@ export default function BoardPage() {
           Task.update(id, updates)
         );
         await Promise.all(dbUpdates);
-        
-        // Trigger a re-render to update the column sort indicator
-        if (sourceColumnId === destColumnId) {
-          window.dispatchEvent(new Event('storage'));
-        }
       } catch (error) {
         console.error('Error updating tasks:', error);
         loadBoard();

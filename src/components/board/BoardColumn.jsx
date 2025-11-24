@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,6 +69,24 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
       console.error('Failed to save sort preference:', error);
     }
   }, [sortBy, column.id]);
+
+  // Listen for storage changes to update sort mode
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newSort = getSavedSortPreference();
+      if (newSort !== sortBy) {
+        setSortBy(newSort);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('sort-change', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('sort-change', handleStorageChange);
+    };
+  }, [sortBy]);
 
   const sortedTasks = React.useMemo(() => {
     const tasksCopy = [...tasks];
