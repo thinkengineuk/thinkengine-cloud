@@ -647,7 +647,7 @@ export default function BoardPage() {
                       >
                         <BoardColumn
                           column={column}
-                          tasks={tasks.filter(t => t.column_id === column.id).sort((a, b) => a.position - b.position)}
+                          tasks={tasks.filter(t => t.column_id === column.id)}
                           users={users}
                           usersMap={usersMap}
                           onTaskClick={setSelectedTask}
