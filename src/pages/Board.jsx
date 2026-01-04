@@ -214,17 +214,16 @@ export default function BoardPage() {
     const sourceColumnId = source.droppableId;
     const destColumnId = destination.droppableId;
 
-    // Switch destination column to manual sort mode when dragging within same column
-    if (sourceColumnId === destColumnId) {
-      localStorage.setItem(`column-${destColumnId}-sort`, 'manual');
-      window.dispatchEvent(new Event('sort-change'));
+    // Switch both columns to manual sort mode to prevent glitching
+    localStorage.setItem(`column-${destColumnId}-sort`, 'manual');
+    if (sourceColumnId !== destColumnId) {
+      localStorage.setItem(`column-${sourceColumnId}-sort`, 'manual');
     }
+    window.dispatchEvent(new Event('sort-change'));
 
-    // Get all tasks in the source and destination columns
-    const sourceColumnTasks = allTasks.filter(t => t.column_id === sourceColumnId).sort((a, b) => a.position - b.position);
-    const destColumnTasks = sourceColumnId === destColumnId 
-      ? sourceColumnTasks 
-      : allTasks.filter(t => t.column_id === destColumnId).sort((a, b) => a.position - b.position);
+    // Get all tasks without pre-sorting - BoardColumn handles its own sorting
+    const sourceColumnTasks = allTasks.filter(t => t.column_id === sourceColumnId);
+    const destColumnTasks = allTasks.filter(t => t.column_id === destColumnId);
 
     // Find the dragged task
     const draggedTask = allTasks.find(t => t.id === taskId);
