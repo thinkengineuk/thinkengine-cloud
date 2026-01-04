@@ -72,21 +72,19 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
 
   // Listen for storage changes to update sort mode
   useEffect(() => {
-    const handleStorageChange = () => {
+    const handleSortChange = () => {
       const newSort = getSavedSortPreference();
-      if (newSort !== sortBy) {
-        setSortBy(newSort);
-      }
+      setSortBy(newSort);
     };
     
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('sort-change', handleStorageChange);
+    window.addEventListener('storage', handleSortChange);
+    window.addEventListener('sort-change', handleSortChange);
     
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('sort-change', handleStorageChange);
+      window.removeEventListener('storage', handleSortChange);
+      window.removeEventListener('sort-change', handleSortChange);
     };
-  }, [sortBy]);
+  }, [column.id]);
 
   const sortedTasks = React.useMemo(() => {
     const tasksCopy = [...tasks];
