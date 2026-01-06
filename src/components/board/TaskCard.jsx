@@ -1,8 +1,9 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle } from "lucide-react";
 import { format, isToday, isPast, startOfDay } from "date-fns";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
@@ -78,14 +79,26 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
 
   return (
     <Card
-      onClick={onClick}
-      className={`cursor-pointer hover:shadow-lg transition-shadow duration-150 border-slate-200 ${
+      className={`group relative cursor-pointer hover:shadow-lg transition-shadow duration-150 border-slate-200 ${
         isDragging ? 'shadow-2xl rotate-2 opacity-50' : ''
       } ${isCompleted ? 'bg-slate-50 opacity-75' : ''} ${
         dueStatus === 'overdue' ? 'bg-orange-50 border-orange-200' : ''
       } ${dueStatus === 'today' ? 'bg-blue-50 border-blue-200' : ''}`}
     >
-      <CardContent className="p-4 space-y-3">
+      {!isCompleted && onToggleTaskComplete && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 h-7 w-7 text-slate-400 hover:text-green-600 hover:bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleTaskComplete(task.id);
+          }}
+        >
+          <CheckCircle className="h-4 w-4" />
+        </Button>
+      )}
+      <CardContent className="p-4 space-y-3" onClick={onClick}>
         {dueStatus && !isCompleted && (
           <div className="flex items-center gap-2 pb-2">
             {dueStatus === 'overdue' && (
