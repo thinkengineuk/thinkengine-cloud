@@ -179,6 +179,17 @@ export default function BoardPage() {
     loadBoard();
   };
 
+  const handleToggleTaskComplete = async (taskId) => {
+    const task = allTasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const completedColumn = columns.find(col => col.name.toLowerCase() === 'completed');
+    if (!completedColumn) return;
+
+    await Task.update(taskId, { status: 'completed', column_id: completedColumn.id });
+    loadBoard();
+  };
+
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
 
@@ -653,6 +664,7 @@ export default function BoardPage() {
                           onRefresh={loadBoard}
                           dragHandleProps={provided.dragHandleProps}
                           isDragging={snapshot.isDragging}
+                          onToggleTaskComplete={handleToggleTaskComplete}
                         />
                       </div>
                     )}

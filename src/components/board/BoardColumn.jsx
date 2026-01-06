@@ -43,7 +43,7 @@ const colorMap = {
   cyan: { bg: 'from-cyan-500 to-cyan-700', light: 'bg-cyan-50' },
 };
 
-export default function BoardColumn({ column, tasks, users, usersMap, onTaskClick, onRefresh, dragHandleProps, isDragging }) {
+export default function BoardColumn({ column, tasks, users, usersMap, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete }) {
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showEditColumn, setShowEditColumn] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -409,6 +409,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
                           usersMap={usersMap}
                           onClick={() => onTaskClick(task)}
                           isDragging={snapshot.isDragging}
+                          onToggleTaskComplete={onToggleTaskComplete}
                         />
                       </div>
                     )}
