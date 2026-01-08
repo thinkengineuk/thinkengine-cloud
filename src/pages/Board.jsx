@@ -138,8 +138,8 @@ export default function BoardPage() {
         }
       }
 
-      // Check if this is "Ben's Tasks" board and if access has been granted
-      if (fetchedBoard.name === "Ben's Tasks") {
+      // Check if this is "Ben Tasks" board and if access has been granted
+      if (fetchedBoard.name === "Ben Tasks") {
         const accessGranted = sessionStorage.getItem(`board_access_${boardId}`);
         setHasAccess(accessGranted === 'granted');
       } else {
@@ -332,8 +332,8 @@ export default function BoardPage() {
     );
   }
 
-  // Show 2FA screen if this is "Ben's Tasks" and user hasn't been granted access
-  if (board && board.name === "Ben's Tasks" && !hasAccess) {
+  // Show 2FA screen if this is "Ben Tasks" and user hasn't been granted access
+  if (board && board.name === "Ben Tasks" && !hasAccess) {
     return (
       <TwoFactorAuthScreen
         boardId={boardId}
