@@ -14,6 +14,7 @@ import CreateColumnDialog from "../components/board/CreateColumnDialog";
 import TaskDetailModal from "../components/board/task-detail/TaskDetailModal";
 import BoardSettingsModal from "../components/board/BoardSettingsModal";
 import TagManagementModal from "../components/board/TagManagementModal";
+import TwoFactorAuthScreen from "../components/board/TwoFactorAuthScreen";
 import {
   Select,
   SelectContent,
@@ -68,11 +69,14 @@ export default function BoardPage() {
   const [filterPriority, setFilterPriority] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(true);
 
   const loadBoard = useCallback(async () => {
     if (!boardId) {
       setError("No board ID provided");
       setLoading(false);
+      setCheckingAccess(false);
       return;
     }
 
@@ -133,10 +137,19 @@ export default function BoardPage() {
           setSelectedTask(taskToOpen);
         }
       }
+
+      // Check if this is "Ben's Tasks" board and if access has been granted
+      if (b.name === "Ben's Tasks") {
+        const accessGranted = sessionStorage.getItem(`board_access_${boardId}`);
+        setHasAccess(accessGranted === 'granted');
+      } else {
+        setHasAccess(true); // Other boards don't require 2FA
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+      setCheckingAccess(false);
     }
   }, [boardId, taskIdFromUrl, navigate]);
 
@@ -311,11 +324,24 @@ export default function BoardPage() {
     })();
   };
 
-  if (loading) {
+  if (loading || checkingAccess) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-slate-600">Loading board...</div>
       </div>
+    );
+  }
+
+  // Show 2FA screen if this is "Ben's Tasks" and user hasn't been granted access
+  if (board && board.name === "Ben's Tasks" && !hasAccess) {
+    return (
+      <TwoFactorAuthScreen
+        boardId={boardId}
+        boardName={board.name}
+        onAccessGranted={() => {
+          setHasAccess(true);
+        }}
+      />
     );
   }
 
