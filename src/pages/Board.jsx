@@ -94,9 +94,9 @@ export default function BoardPage() {
         navigate(createPageUrl("Dashboard"));
         return;
       }
-      
-      const board = boardData[0];
-      setBoard(board);
+
+      const fetchedBoard = boardData[0];
+      setBoard(fetchedBoard);
       setColumns(columnsData);
       
       // OPTIMIZATION: Build usersMap for O(1) user lookups
@@ -139,7 +139,7 @@ export default function BoardPage() {
       }
 
       // Check if this is "Ben's Tasks" board and if access has been granted
-      if (b.name === "Ben's Tasks") {
+      if (fetchedBoard.name === "Ben's Tasks") {
         const accessGranted = sessionStorage.getItem(`board_access_${boardId}`);
         setHasAccess(accessGranted === 'granted');
       } else {
