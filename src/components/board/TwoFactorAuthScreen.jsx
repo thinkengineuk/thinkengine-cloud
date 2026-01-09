@@ -59,8 +59,9 @@ export default function TwoFactorAuthScreen({ boardId, boardName, onAccessGrante
       
       if (response.data.success) {
         setMessage('Access granted! Loading board...');
-        // Store access token in sessionStorage (cleared when browser is closed)
-        sessionStorage.setItem(`board_access_${boardId}`, 'granted');
+        // Store today's date in sessionStorage - access valid until end of day
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        sessionStorage.setItem(`board_access_${boardId}`, today);
         setTimeout(() => {
           onAccessGranted();
         }, 1000);

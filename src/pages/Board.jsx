@@ -138,10 +138,11 @@ export default function BoardPage() {
         }
       }
 
-      // Check if this is "Ben Tasks" board and if access has been granted
+      // Check if this is "Ben Tasks" board and if access has been granted today
       if (fetchedBoard.name === "Ben Tasks") {
-        const accessGranted = sessionStorage.getItem(`board_access_${boardId}`);
-        setHasAccess(accessGranted === 'granted');
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const lastAccessDate = sessionStorage.getItem(`board_access_${boardId}`);
+        setHasAccess(lastAccessDate === today);
       } else {
         setHasAccess(true); // Other boards don't require 2FA
       }
