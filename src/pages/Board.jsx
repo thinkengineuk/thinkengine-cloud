@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Board as BoardEntity } from "@/entities/Board";
 import { Column } from "@/entities/Column";
@@ -6,7 +7,7 @@ import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, ArrowLeft, Settings, Filter, Tag, Search, ChevronDown, ChevronUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import BoardColumn from "../components/board/BoardColumn";
@@ -47,6 +48,7 @@ const getTagColor = (tag) => {
 
 export default function BoardPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const urlParams = new URLSearchParams(window.location.search);
   const boardId = urlParams.get('id');
   const taskIdFromUrl = urlParams.get('taskId');
@@ -156,7 +158,7 @@ export default function BoardPage() {
 
   useEffect(() => {
     loadBoard();
-  }, [loadBoard]);
+  }, [loadBoard, location.pathname]);
 
   useEffect(() => {
     let filtered = [...allTasks];
