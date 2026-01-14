@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, Mail, Lock, AlertCircle, CheckCircle } from "lucide-react";
 import { requestBoardAccessPin } from "@/functions/requestBoardAccessPin";
 import { verifyBoardAccessPin } from "@/functions/verifyBoardAccessPin";
-import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 
 export default function TwoFactorAuthScreen({ boardId, boardName, onAccessGranted }) {
   const [pinCode, setPinCode] = useState("");
@@ -63,10 +63,10 @@ export default function TwoFactorAuthScreen({ boardId, boardName, onAccessGrante
         
         // Store today's date in user's database record
         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-        const currentUser = await User.me();
+        const currentUser = await base44.auth.me();
         const existingAccessDates = currentUser.board_access_dates || {};
         
-        await User.updateMe({
+        await base44.auth.updateMe({
           board_access_dates: {
             ...existingAccessDates,
             [boardId]: today
