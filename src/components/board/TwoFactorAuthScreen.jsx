@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, Mail, Lock, AlertCircle, CheckCircle } from "lucide-react";
 import { requestBoardAccessPin } from "@/functions/requestBoardAccessPin";
 import { verifyBoardAccessPin } from "@/functions/verifyBoardAccessPin";
+import { User } from "@/entities/User";
 
 export default function TwoFactorAuthScreen({ boardId, boardName, onAccessGranted }) {
   const [pinCode, setPinCode] = useState("");
@@ -59,9 +60,19 @@ export default function TwoFactorAuthScreen({ boardId, boardName, onAccessGrante
       
       if (response.data.success) {
         setMessage('Access granted! Loading board...');
-        // Store today's date in sessionStorage - access valid until end of day
+        
+        // Store today's date in user's database record
         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-        sessionStorage.setItem(`board_access_${boardId}`, today);
+        const currentUser = await User.me();
+        const existingAccessDates = currentUser.board_access_dates || {};
+        
+        await User.updateMe({
+          board_access_dates: {
+            ...existingAccessDates,
+            [boardId]: today
+          }
+        });
+        
         setTimeout(() => {
           onAccessGranted();
         }, 1000);
