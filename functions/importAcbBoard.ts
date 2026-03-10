@@ -6,9 +6,12 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
+        console.log("Attempting to authenticate user...");
         const user = await base44.auth.me();
+        console.log("User object:", user);
 
         if (!user) {
+            console.log("User not authenticated or not authorized.");
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
