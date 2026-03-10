@@ -45,11 +45,8 @@ export default function ImportBoard() {
     setResult(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('boardId', selectedBoard);
-
-      const response = await importAcbBoard(formData);
+      const csvContent = await file.text();
+      const response = await importAcbBoard({ csvContent, boardId: selectedBoard });
       
       if (response.data.success) {
         setResult({
