@@ -64,6 +64,12 @@ export default function Layout({ children }) {
       icon: Upload,
       show: user?.role === 'admin',
     },
+    {
+      title: "Import Meistertask",
+      url: createPageUrl("ImportMeistertask"),
+      icon: FileJson,
+      show: user?.role === 'admin',
+    },
   ];
 
   // Extract board ID from URL search parameters for active styling
