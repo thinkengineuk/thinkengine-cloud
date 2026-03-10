@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import { parse } from 'npm:csv-parse@5.5.3/sync';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -6,24 +6,19 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        console.log("Attempting to authenticate user...");
         const user = await base44.auth.me();
-        console.log("User object:", user);
 
         if (!user) {
-            console.log("User not authenticated or not authorized.");
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const formData = await req.formData();
-        const file = formData.get('file');
-        const targetBoardId = formData.get('boardId');
+        const body = await req.json();
+        const { csvContent, boardId: targetBoardId } = body;
 
-        if (!file) {
-            return Response.json({ error: 'No file provided' }, { status: 400 });
+        if (!csvContent) {
+            return Response.json({ error: 'No CSV content provided' }, { status: 400 });
         }
 
-        const csvContent = await file.text();
         const records = parse(csvContent, {
             columns: true,
             skip_empty_lines: true,
@@ -151,7 +146,6 @@ Deno.serve(async (req) => {
                 // Parse and create comments
                 if (record.comments) {
                     try {
-                        // Comments format: "Author Name: Comment text|Author Name: Another comment"
                         const commentParts = record.comments.split('|').filter(c => c.trim());
                         
                         for (const commentPart of commentParts) {
@@ -161,14 +155,9 @@ Deno.serve(async (req) => {
                                 const commentText = commentPart.substring(colonIndex + 1).trim();
                                 
                                 if (commentText) {
-                                    // Try to match author to a user
-                                    const commentUser = usersByName[authorName.toLowerCase()];
-                                    const commentEmail = commentUser ? commentUser.email : null;
-                                    
                                     await base44.asServiceRole.entities.Comment.create({
                                         task_id: createdTask.id,
                                         text: commentText,
-                                        created_by: commentEmail || 'imported@system.com',
                                     });
                                     stats.commentsCreated++;
                                 }
@@ -182,7 +171,6 @@ Deno.serve(async (req) => {
                 // Parse and create checklists
                 if (record.checklists) {
                     try {
-                        // Checklists format: "Checklist Title: Item 1, Item 2|Another Checklist: Item A, Item B"
                         const checklistParts = record.checklists.split('|').filter(c => c.trim());
                         
                         for (let checklistIndex = 0; checklistIndex < checklistParts.length; checklistIndex++) {
@@ -194,7 +182,6 @@ Deno.serve(async (req) => {
                                 const itemsText = checklistPart.substring(colonIndex + 1).trim();
                                 
                                 if (checklistTitle) {
-                                    // Create checklist
                                     const checklist = await base44.asServiceRole.entities.Checklist.create({
                                         task_id: createdTask.id,
                                         title: checklistTitle,
@@ -202,7 +189,6 @@ Deno.serve(async (req) => {
                                     });
                                     stats.checklistsCreated++;
                                     
-                                    // Create checklist items
                                     const items = itemsText.split(',').map(item => item.trim()).filter(item => item);
                                     for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
                                         await base44.asServiceRole.entities.ChecklistItem.create({
@@ -220,7 +206,6 @@ Deno.serve(async (req) => {
                     }
                 }
 
-                // Small delay to avoid rate limiting
                 await delay(100);
 
             } catch (error) {
@@ -237,7 +222,7 @@ Deno.serve(async (req) => {
                 tasksCreated: stats.tasksCreated,
                 commentsCreated: stats.commentsCreated,
                 checklistsCreated: stats.checklistsCreated,
-                errors: stats.errors.slice(0, 10), // Return first 10 errors only
+                errors: stats.errors.slice(0, 10),
             },
         });
 
