@@ -753,6 +753,9 @@ export default function BoardPage() {
                           dragHandleProps={provided.dragHandleProps}
                           isDragging={snapshot.isDragging}
                           onToggleTaskComplete={handleToggleTaskComplete}
+                          selectionMode={selectionMode}
+                          selectedTaskIds={selectedTaskIds}
+                          onToggleTaskSelect={handleToggleTaskSelect}
                         />
                       </div>
                     )}
