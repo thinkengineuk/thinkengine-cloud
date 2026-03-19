@@ -85,11 +85,10 @@ export default function BoardPage() {
     try {
       // OPTIMIZATION: Fetch all data in parallel for faster page load
       // Reduces total loading time by making concurrent requests
-      const [boardData, columnsData, tasksData, allUsers] = await Promise.all([
-        BoardEntity.filter({ id: boardId }), // Renamed to BoardEntity to avoid conflict with local board variable
+      const [boardData, columnsData, tasksData] = await Promise.all([
+        BoardEntity.filter({ id: boardId }),
         Column.filter({ board_id: boardId }, "position"),
         Task.filter({ board_id: boardId }, "position"),
-        User.list()
       ]);
       
       if (boardData.length === 0) {
@@ -100,8 +99,10 @@ export default function BoardPage() {
       const fetchedBoard = boardData[0];
       setBoard(fetchedBoard);
       setColumns(columnsData);
-      
-      // OPTIMIZATION: Build usersMap for O(1) user lookups
+
+      // Fetch board members via backend function (works for all user roles)
+      const usersResponse = await getBoardUsers({ boardId });
+      const allUsers = usersResponse.data?.users || [];
       const usersByEmail = {};
       allUsers.forEach(u => {
         usersByEmail[u.email] = u;
