@@ -220,6 +220,17 @@ export default function BoardPage() {
     loadBoard();
   };
 
+  const handleToggleTaskSelect = (taskId) => {
+    setSelectedTaskIds(prev =>
+      prev.includes(taskId) ? prev.filter(id => id !== taskId) : [...prev, taskId]
+    );
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedTaskIds([]);
+  };
+
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
 
