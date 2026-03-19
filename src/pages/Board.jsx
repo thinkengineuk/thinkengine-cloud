@@ -144,7 +144,7 @@ export default function BoardPage() {
       // Check if this is "Ben Tasks" board and if access has been granted today
       if (fetchedBoard.name === "Ben Tasks") {
         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-        const currentUser = await User.me();
+        const currentUser = await base44.auth.me();
         const boardAccessDates = currentUser.board_access_dates || {};
         const lastAccessDate = boardAccessDates[boardId];
         setHasAccess(lastAccessDate === today);
