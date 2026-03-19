@@ -147,6 +147,7 @@ export default function Dashboard() {
     if (task.length > 0) {
       navigate(`${createPageUrl("Board")}?id=${task[0].board_id}&taskId=${activity.task_id}`);
     }
+
   };
 
   return (
