@@ -89,11 +89,12 @@ export default function BoardPage() {
     try {
       // OPTIMIZATION: Fetch all data in parallel for faster page load
       // Reduces total loading time by making concurrent requests
-      const [boardData, columnsData, tasksData, allUsers] = await Promise.all([
-        BoardEntity.filter({ id: boardId }), // Renamed to BoardEntity to avoid conflict with local board variable
+      const [boardData, columnsData, tasksData, allUsers, me] = await Promise.all([
+        BoardEntity.filter({ id: boardId }),
         Column.filter({ board_id: boardId }, "position"),
         Task.filter({ board_id: boardId }, "position"),
-        User.list()
+        User.list(),
+        User.me()
       ]);
       
       if (boardData.length === 0) {
@@ -104,6 +105,7 @@ export default function BoardPage() {
       const fetchedBoard = boardData[0];
       setBoard(fetchedBoard);
       setColumns(columnsData);
+      setCurrentUser(me);
       
       // OPTIMIZATION: Build usersMap for O(1) user lookups
       const usersByEmail = {};
@@ -123,8 +125,14 @@ export default function BoardPage() {
           uniqueTasks.push(task);
         }
       }
+
+      // Apply tag restrictions for non-admin users
+      const tagRestrictions = me?.board_tag_restrictions?.[boardId];
+      const filteredByRestriction = (tagRestrictions && tagRestrictions.length > 0 && me?.role !== 'admin')
+        ? uniqueTasks.filter(task => task.tags && task.tags.some(t => tagRestrictions.includes(t)))
+        : uniqueTasks;
       
-      setAllTasks(uniqueTasks);
+      setAllTasks(filteredByRestriction);
 
       const tagsSet = new Set();
       uniqueTasks.forEach(task => {
