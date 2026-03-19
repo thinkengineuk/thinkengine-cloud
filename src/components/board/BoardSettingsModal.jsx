@@ -63,6 +63,7 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
   const [allTags, setAllTags] = useState([]);
   const [tagRestrictions, setTagRestrictions] = useState({}); // { userEmail: [tag, ...] }
   const [tagInputs, setTagInputs] = useState({}); // { userEmail: inputValue }
+  const [blockedUsers, setBlockedUsers] = useState({}); // { userEmail: true/false }
 
   const loadData = useCallback(async () => {
     try {
