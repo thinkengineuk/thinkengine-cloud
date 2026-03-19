@@ -14,6 +14,7 @@ import CreateColumnDialog from "../components/board/CreateColumnDialog";
 import TaskDetailModal from "../components/board/task-detail/TaskDetailModal";
 import BoardSettingsModal from "../components/board/BoardSettingsModal";
 import TagManagementModal from "../components/board/TagManagementModal";
+import BulkTagModal from "../components/board/BulkTagModal";
 import TwoFactorAuthScreen from "../components/board/TwoFactorAuthScreen";
 import {
   Select,
