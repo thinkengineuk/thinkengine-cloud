@@ -85,14 +85,19 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
       const allUsers = await User.list();
       setUsers(allUsers);
 
-      // Load existing tag restrictions from user data
+      // Load existing tag restrictions and blocked status from user data
       const restrictions = {};
+      const blocked = {};
       allUsers.forEach(u => {
         if (u.board_tag_restrictions?.[boardId]) {
           restrictions[u.email] = u.board_tag_restrictions[boardId];
         }
+        if (u.board_blocked?.[boardId]) {
+          blocked[u.email] = true;
+        }
       });
       setTagRestrictions(restrictions);
+      setBlockedUsers(blocked);
 
       // Load all tags from tasks
       const tasksData = await Task.filter({ board_id: boardId });
