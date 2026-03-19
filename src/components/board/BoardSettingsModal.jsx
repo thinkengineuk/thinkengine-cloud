@@ -63,7 +63,7 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
 
   const loadData = useCallback(async () => {
     try {
-      const me = await User.me();
+      const me = await base44.auth.me();
       setCurrentUser(me);
 
       const boardData = await Board.filter({ id: boardId });
