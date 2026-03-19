@@ -126,11 +126,14 @@ export default function BoardPage() {
         }
       }
 
-      // Apply tag restrictions for non-admin users
+      // Apply block / tag restrictions for non-admin users
+      const isBlocked = !!me?.board_blocked?.[boardId];
       const tagRestrictions = me?.board_tag_restrictions?.[boardId];
-      const filteredByRestriction = (tagRestrictions && tagRestrictions.length > 0 && me?.role !== 'admin')
-        ? uniqueTasks.filter(task => task.tags && task.tags.some(t => tagRestrictions.includes(t)))
-        : uniqueTasks;
+      const filteredByRestriction = isBlocked
+        ? []
+        : (tagRestrictions && tagRestrictions.length > 0)
+          ? uniqueTasks.filter(task => task.tags && task.tags.some(t => tagRestrictions.includes(t)))
+          : uniqueTasks;
       
       setAllTasks(filteredByRestriction);
 
