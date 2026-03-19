@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Board } from "@/entities/Board";
 import { Task } from "@/entities/Task";
 import { ActivityLog } from "@/entities/ActivityLog";
-import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
