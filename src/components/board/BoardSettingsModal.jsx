@@ -321,6 +321,67 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
             </ScrollArea>
           </div>
 
+          {/* Tag Restrictions */}
+          <div className="space-y-4 pt-4 border-t">
+            <div className="flex items-center gap-2">
+              <Tag className="w-5 h-5 text-slate-600" />
+              <h3 className="font-semibold text-lg">Tag-Based Access Restrictions</h3>
+            </div>
+            <p className="text-sm text-slate-500">
+              Limit what tasks a user can see on this board. If tags are set for a user, they will only see tasks that have at least one of those tags. Admins always see all tasks.
+            </p>
+            <ScrollArea className="h-60 w-full rounded-md border p-4">
+              <div className="space-y-4">
+                {users.filter(u => u.role !== 'admin').map(user => {
+                  const restrictions = tagRestrictions[user.email] || [];
+                  const inputVal = tagInputs[user.email] || '';
+                  const suggestions = allTags.filter(t => t.toLowerCase().includes(inputVal.toLowerCase()) && !restrictions.includes(t));
+                  return (
+                    <div key={user.id} className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-slate-800">{user.full_name}</span>
+                        <span className="text-xs text-slate-400">{user.email}</span>
+                      </div>
+                      {restrictions.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {restrictions.map(tag => (
+                            <Badge key={tag} variant="outline" className="flex items-center gap-1 text-xs">
+                              {tag}
+                              <button onClick={() => removeTagRestriction(user.email, tag)} className="hover:opacity-70">
+                                <X className="w-3 h-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      <div className="relative">
+                        <div className="flex gap-2">
+                          <Input
+                            value={inputVal}
+                            onChange={e => setTagInputs(prev => ({ ...prev, [user.email]: e.target.value }))}
+                            onKeyDown={e => e.key === 'Enter' && addTagRestriction(user.email, inputVal)}
+                            placeholder={restrictions.length === 0 ? "No restrictions (can see all)" : "Add another tag..."}
+                            className="h-8 text-xs"
+                          />
+                          <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => addTagRestriction(user.email, inputVal)} disabled={!inputVal.trim()}>
+                            Add
+                          </Button>
+                        </div>
+                        {inputVal && suggestions.length > 0 && (
+                          <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-lg max-h-32 overflow-y-auto">
+                            {suggestions.map(tag => (
+                              <div key={tag} onClick={() => addTagRestriction(user.email, tag)} className="px-3 py-1.5 text-xs hover:bg-slate-50 cursor-pointer">{tag}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </div>
+
           {/* Actions */}
           <div className="flex justify-between items-center pt-4 border-t">
             <div className="flex gap-2">
