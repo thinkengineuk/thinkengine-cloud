@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getBoardUsers } from "@/functions/getBoardUsers";
 import { Badge } from "@/components/ui/badge";
 
 // Function to generate consistent color for a tag
