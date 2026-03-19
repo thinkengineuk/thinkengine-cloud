@@ -384,27 +384,29 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
                           ))}
                         </div>
                       )}
-                      <div className="relative">
-                        <div className="flex gap-2">
-                          <Input
-                            value={inputVal}
-                            onChange={e => setTagInputs(prev => ({ ...prev, [user.email]: e.target.value }))}
-                            onKeyDown={e => e.key === 'Enter' && addTagRestriction(user.email, inputVal)}
-                            placeholder={restrictions.length === 0 ? "No restrictions (can see all)" : "Add another tag..."}
-                            className="h-8 text-xs"
-                          />
-                          <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => addTagRestriction(user.email, inputVal)} disabled={!inputVal.trim()}>
-                            Add
-                          </Button>
-                        </div>
-                        {inputVal && suggestions.length > 0 && (
-                          <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-lg max-h-32 overflow-y-auto">
-                            {suggestions.map(tag => (
-                              <div key={tag} onClick={() => addTagRestriction(user.email, tag)} className="px-3 py-1.5 text-xs hover:bg-slate-50 cursor-pointer">{tag}</div>
-                            ))}
+                      {!isBlocked && (
+                        <div className="relative">
+                          <div className="flex gap-2">
+                            <Input
+                              value={inputVal}
+                              onChange={e => setTagInputs(prev => ({ ...prev, [user.email]: e.target.value }))}
+                              onKeyDown={e => e.key === 'Enter' && addTagRestriction(user.email, inputVal)}
+                              placeholder={restrictions.length === 0 ? "No restrictions (can see all)" : "Add another tag..."}
+                              className="h-8 text-xs"
+                            />
+                            <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => addTagRestriction(user.email, inputVal)} disabled={!inputVal.trim()}>
+                              Add
+                            </Button>
                           </div>
-                        )}
-                      </div>
+                          {inputVal && suggestions.length > 0 && (
+                            <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-lg max-h-32 overflow-y-auto">
+                              {suggestions.map(tag => (
+                                <div key={tag} onClick={() => addTagRestriction(user.email, tag)} className="px-3 py-1.5 text-xs hover:bg-slate-50 cursor-pointer">{tag}</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
