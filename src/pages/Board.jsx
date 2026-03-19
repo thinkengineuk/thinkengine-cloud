@@ -97,7 +97,14 @@ export default function BoardPage() {
       ]);
 
       const isAdminUser = me?.role === 'admin';
-      const allUsers = isAdminUser ? await User.list() : [me];
+      let allUsers = [me];
+      if (isAdminUser) {
+        try {
+          allUsers = await User.list();
+        } catch (e) {
+          allUsers = [me];
+        }
+      }
       
       if (boardData.length === 0) {
         navigate(createPageUrl("Dashboard"));
