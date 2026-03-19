@@ -114,7 +114,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           <CheckCircle className="h-4 w-4" />
         </Button>
       )}
-      <CardContent className="p-4 space-y-3" onClick={onClick}>
+      <CardContent className={`p-4 space-y-3 ${selectionMode ? 'pl-8' : ''}`} onClick={selectionMode ? (e) => { e.stopPropagation(); onToggleSelect && onToggleSelect(task.id); } : onClick}>
         {dueStatus && !isCompleted && (
           <div className="flex items-center gap-2 pb-2">
             {dueStatus === 'overdue' && (
