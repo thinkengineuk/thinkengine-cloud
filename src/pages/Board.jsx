@@ -800,6 +800,19 @@ export default function BoardPage() {
           onRefresh={loadBoard}
         />
       )}
+
+      {showBulkTagModal && (
+        <BulkTagModal
+          open={showBulkTagModal}
+          onOpenChange={setShowBulkTagModal}
+          selectedTasks={allTasks.filter(t => selectedTaskIds.includes(t.id))}
+          allTags={allTags}
+          onComplete={() => {
+            exitSelectionMode();
+            loadBoard();
+          }}
+        />
+      )}
     </div>
   );
 }
