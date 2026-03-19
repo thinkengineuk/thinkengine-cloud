@@ -83,6 +83,21 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
 
       const allUsers = await User.list();
       setUsers(allUsers);
+
+      // Load existing tag restrictions from user data
+      const restrictions = {};
+      allUsers.forEach(u => {
+        if (u.board_tag_restrictions?.[boardId]) {
+          restrictions[u.email] = u.board_tag_restrictions[boardId];
+        }
+      });
+      setTagRestrictions(restrictions);
+
+      // Load all tags from tasks
+      const tasksData = await Task.filter({ board_id: boardId });
+      const tagsSet = new Set();
+      tasksData.forEach(task => (task.tags || []).forEach(t => tagsSet.add(t)));
+      setAllTags(Array.from(tagsSet).sort());
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
