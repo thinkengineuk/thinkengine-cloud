@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Board } from "@/entities/Board";
 import { User } from "@/entities/User";
@@ -32,6 +31,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { removeDuplicateTasks } from "@/functions/removeDuplicateTasks";
+import { getBoardUsers } from "@/functions/getBoardUsers";
 
 const colors = [
   { value: 'blue', label: 'Blue', gradient: 'from-blue-400 to-blue-600' },
