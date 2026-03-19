@@ -131,23 +131,33 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
     try {
       await Board.update(boardId, formData);
 
-      // Save tag restrictions for each user
+      // Save tag restrictions and blocked status for each user
       const savePromises = users.map(async (user) => {
         const currentRestrictions = user.board_tag_restrictions || {};
         const newTags = tagRestrictions[user.email] || [];
-        
-        // Only update if changed
-        const existing = currentRestrictions[boardId] || [];
-        const changed = JSON.stringify(existing.sort()) !== JSON.stringify([...newTags].sort());
-        
-        if (changed) {
+        const existingTags = currentRestrictions[boardId] || [];
+        const tagsChanged = JSON.stringify(existingTags.sort()) !== JSON.stringify([...newTags].sort());
+
+        const currentBlocked = user.board_blocked || {};
+        const isBlocked = !!blockedUsers[user.email];
+        const blockedChanged = !!currentBlocked[boardId] !== isBlocked;
+
+        if (tagsChanged || blockedChanged) {
           const updatedRestrictions = { ...currentRestrictions };
           if (newTags.length > 0) {
             updatedRestrictions[boardId] = newTags;
           } else {
             delete updatedRestrictions[boardId];
           }
-          await User.update(user.id, { board_tag_restrictions: updatedRestrictions });
+
+          const updatedBlocked = { ...currentBlocked };
+          if (isBlocked) {
+            updatedBlocked[boardId] = true;
+          } else {
+            delete updatedBlocked[boardId];
+          }
+
+          await User.update(user.id, { board_tag_restrictions: updatedRestrictions, board_blocked: updatedBlocked });
         }
       });
       await Promise.all(savePromises);
