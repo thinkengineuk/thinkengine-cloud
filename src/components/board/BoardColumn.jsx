@@ -44,7 +44,7 @@ const colorMap = {
   cyan: { bg: 'from-cyan-500 to-cyan-700', light: 'bg-cyan-50' },
 };
 
-export default function BoardColumn({ column, tasks, users, usersMap, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete }) {
+export default function BoardColumn({ column, tasks, users, usersMap, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete, selectionMode, selectedTaskIds, onToggleTaskSelect }) {
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showEditColumn, setShowEditColumn] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
