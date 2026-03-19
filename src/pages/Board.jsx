@@ -126,9 +126,10 @@ export default function BoardPage() {
         }
       }
 
-      // Apply block / tag restrictions for non-admin users
-      const isBlocked = !!me?.board_blocked?.[boardId];
-      const tagRestrictions = me?.board_tag_restrictions?.[boardId];
+      // Apply block / tag restrictions for non-admin users only
+      const isAdmin = me?.role === 'admin';
+      const isBlocked = !isAdmin && !!me?.board_blocked?.[boardId];
+      const tagRestrictions = !isAdmin ? me?.board_tag_restrictions?.[boardId] : null;
       const filteredByRestriction = isBlocked
         ? []
         : (tagRestrictions && tagRestrictions.length > 0)
