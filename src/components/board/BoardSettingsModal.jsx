@@ -60,6 +60,9 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
   const [deleting, setDeleting] = useState(false);
   const [cleaningDuplicates, setCleaningDuplicates] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [allTags, setAllTags] = useState([]);
+  const [tagRestrictions, setTagRestrictions] = useState({}); // { userEmail: [tag, ...] }
+  const [tagInputs, setTagInputs] = useState({}); // { userEmail: inputValue }
 
   const loadData = useCallback(async () => {
     try {
