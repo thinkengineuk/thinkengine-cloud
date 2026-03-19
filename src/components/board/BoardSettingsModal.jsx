@@ -78,8 +78,9 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
         });
       }
 
-      const allUsers = await User.list();
-      setUsers(allUsers);
+      // Use backend function to fetch users (works for all roles)
+      const usersResponse = await getBoardUsers({ boardId });
+      setUsers(usersResponse.data?.users || []);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
