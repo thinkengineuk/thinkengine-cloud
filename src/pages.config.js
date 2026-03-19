@@ -52,8 +52,8 @@ import BoardSettings from './pages/BoardSettings';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import ImportBoard from './pages/ImportBoard';
-import Users from './pages/Users';
 import ImportMeistertask from './pages/ImportMeistertask';
+import Users from './pages/Users';
 import __Layout from './Layout.jsx';
 
 
@@ -63,8 +63,8 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Home": Home,
     "ImportBoard": ImportBoard,
-    "Users": Users,
     "ImportMeistertask": ImportMeistertask,
+    "Users": Users,
 }
 
 export const pagesConfig = {
