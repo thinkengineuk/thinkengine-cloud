@@ -31,11 +31,9 @@ export default function Dashboard() {
   }, []);
 
   const loadData = async () => {
-    // OPTIMIZATION: Fetch current user, all users, and all boards in parallel.
-    // This reduces total loading time by making concurrent requests instead of sequential.
-    const currentUser = await User.me();
+    const currentUser = await base44.auth.me();
     const [allUsers, allBoards] = await Promise.all([
-      currentUser.role === 'admin' ? User.list() : Promise.resolve([currentUser]),
+      currentUser.role === 'admin' ? base44.entities.User.list() : Promise.resolve([currentUser]),
       Board.list("-created_date")
     ]);
     
