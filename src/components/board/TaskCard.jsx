@@ -29,7 +29,7 @@ const getTagColor = (tag) => {
 
 // OPTIMIZATION: Memoized component to prevent unnecessary re-renders
 // Only re-renders when task or usersMap props change
-const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete }) => {
+const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete, isSelected, onToggleSelect, selectionMode }) => {
   // OPTIMIZATION: Get assigned user from passed usersMap instead of fetching
   // This avoids redundant API calls and improves performance
   const assignedUser = task.assigned_to ? usersMap[task.assigned_to] : null;
