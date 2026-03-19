@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { isToday, isPast, startOfDay, format } from "date-fns";
 import { Board } from "@/entities/Board";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const colorMap = {
   blue: { bg: 'from-blue-500 to-blue-700', light: 'bg-blue-50' },
