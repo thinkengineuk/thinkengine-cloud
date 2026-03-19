@@ -89,13 +89,15 @@ export default function BoardPage() {
     try {
       // OPTIMIZATION: Fetch all data in parallel for faster page load
       // Reduces total loading time by making concurrent requests
-      const [boardData, columnsData, tasksData, allUsers, me] = await Promise.all([
+      const [boardData, columnsData, tasksData, me] = await Promise.all([
         BoardEntity.filter({ id: boardId }),
         Column.filter({ board_id: boardId }, "position"),
         Task.filter({ board_id: boardId }, "position"),
-        User.list(),
         User.me()
       ]);
+
+      const isAdminUser = me?.role === 'admin';
+      const allUsers = isAdminUser ? await User.list() : [me];
       
       if (boardData.length === 0) {
         navigate(createPageUrl("Dashboard"));
