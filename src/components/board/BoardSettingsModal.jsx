@@ -352,13 +352,27 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
                   const restrictions = tagRestrictions[user.email] || [];
                   const inputVal = tagInputs[user.email] || '';
                   const suggestions = allTags.filter(t => t.toLowerCase().includes(inputVal.toLowerCase()) && !restrictions.includes(t));
+                  const isBlocked = !!blockedUsers[user.email];
                   return (
-                    <div key={user.id} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-slate-800">{user.full_name}</span>
-                        <span className="text-xs text-slate-400">{user.email}</span>
+                    <div key={user.id} className="space-y-2 pb-3 border-b last:border-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-slate-800">{user.full_name}</span>
+                          <span className="text-xs text-slate-400">{user.email}</span>
+                        </div>
+                        <button
+                          onClick={() => setBlockedUsers(prev => ({ ...prev, [user.email]: !prev[user.email] }))}
+                          className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full border transition-colors ${
+                            isBlocked
+                              ? 'bg-red-100 text-red-700 border-red-300'
+                              : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-red-50 hover:text-red-500'
+                          }`}
+                        >
+                          <EyeOff className="w-3 h-3" />
+                          {isBlocked ? 'Sees nothing' : 'Block all'}
+                        </button>
                       </div>
-                      {restrictions.length > 0 && (
+                      {!isBlocked && restrictions.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {restrictions.map(tag => (
                             <Badge key={tag} variant="outline" className="flex items-center gap-1 text-xs">
