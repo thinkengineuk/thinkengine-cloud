@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Board } from "@/entities/Board";
-import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 import { Column } from "@/entities/Column";
 import { Task } from "@/entities/Task";
 import { Button } from "@/components/ui/button";
