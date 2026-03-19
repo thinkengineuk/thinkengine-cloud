@@ -124,6 +124,28 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
     setSaving(true);
     try {
       await Board.update(boardId, formData);
+
+      // Save tag restrictions for each user
+      const savePromises = users.map(async (user) => {
+        const currentRestrictions = user.board_tag_restrictions || {};
+        const newTags = tagRestrictions[user.email] || [];
+        
+        // Only update if changed
+        const existing = currentRestrictions[boardId] || [];
+        const changed = JSON.stringify(existing.sort()) !== JSON.stringify([...newTags].sort());
+        
+        if (changed) {
+          const updatedRestrictions = { ...currentRestrictions };
+          if (newTags.length > 0) {
+            updatedRestrictions[boardId] = newTags;
+          } else {
+            delete updatedRestrictions[boardId];
+          }
+          await User.update(user.id, { board_tag_restrictions: updatedRestrictions });
+        }
+      });
+      await Promise.all(savePromises);
+
       onOpenChange(false);
       onRefresh();
     } catch (error) {
@@ -131,6 +153,22 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
     } finally {
       setSaving(false);
     }
+  };
+
+  const addTagRestriction = (email, tag) => {
+    if (!tag.trim()) return;
+    setTagRestrictions(prev => ({
+      ...prev,
+      [email]: [...new Set([...(prev[email] || []), tag.trim()])]
+    }));
+    setTagInputs(prev => ({ ...prev, [email]: '' }));
+  };
+
+  const removeTagRestriction = (email, tag) => {
+    setTagRestrictions(prev => ({
+      ...prev,
+      [email]: (prev[email] || []).filter(t => t !== tag)
+    }));
   };
 
   const handleDelete = async () => {
