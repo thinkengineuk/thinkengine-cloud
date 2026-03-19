@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Board } from "@/entities/Board";
 import { Task } from "@/entities/Task";
@@ -34,9 +33,9 @@ export default function Dashboard() {
   const loadData = async () => {
     // OPTIMIZATION: Fetch current user, all users, and all boards in parallel.
     // This reduces total loading time by making concurrent requests instead of sequential.
-    const [currentUser, allUsers, allBoards] = await Promise.all([
-      User.me(),
-      User.list(),
+    const currentUser = await User.me();
+    const [allUsers, allBoards] = await Promise.all([
+      currentUser.role === 'admin' ? User.list() : Promise.resolve([currentUser]),
       Board.list("-created_date")
     ]);
     
