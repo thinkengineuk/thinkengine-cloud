@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Board as BoardEntity } from "@/entities/Board";
 import { Column } from "@/entities/Column";
 import { Task } from "@/entities/Task";
-import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, ArrowLeft, Settings, Filter, Tag, Search, ChevronDown, ChevronUp } from "lucide-react";
