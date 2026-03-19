@@ -328,7 +328,7 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
               <h3 className="font-semibold text-lg">Tag-Based Access Restrictions</h3>
             </div>
             <p className="text-sm text-slate-500">
-              Limit what tasks a user can see on this board. If tags are set for a user, they will only see tasks that have at least one of those tags. Admins always see all tasks.
+              Limit what tasks a user can see on this board. If tags are set for a user, they will only see tasks that have at least one of those tags.
             </p>
             <ScrollArea className="h-60 w-full rounded-md border p-4">
               <div className="space-y-4">
