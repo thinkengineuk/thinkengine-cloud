@@ -73,6 +73,10 @@ export default function BoardPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
+  const [showBulkTagModal, setShowBulkTagModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const loadBoard = useCallback(async () => {
     if (!boardId) {
