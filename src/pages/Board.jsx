@@ -408,6 +408,40 @@ export default function BoardPage() {
             </div>
           </div>
           <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+            {selectionMode ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exitSelectionMode}
+                  className="text-slate-600"
+                >
+                  <X className="w-4 h-4 md:mr-2" />
+                  <span className="hidden md:inline">Cancel</span>
+                </Button>
+                {selectedTaskIds.length > 0 && (
+                  <Button
+                    size="sm"
+                    onClick={() => setShowBulkTagModal(true)}
+                    className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white"
+                  >
+                    <Tag className="w-4 h-4 md:mr-2" />
+                    <span className="hidden md:inline">Add Tag ({selectedTaskIds.length})</span>
+                    <span className="md:hidden">{selectedTaskIds.length}</span>
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectionMode(true)}
+                className="hidden md:flex"
+              >
+                <CheckSquare className="w-4 h-4 mr-2" />
+                Select Tasks
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => setShowTagModal(true)}
