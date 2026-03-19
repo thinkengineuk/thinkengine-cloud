@@ -332,7 +332,7 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
             </p>
             <ScrollArea className="h-60 w-full rounded-md border p-4">
               <div className="space-y-4">
-                {users.filter(u => u.role !== 'admin').map(user => {
+                {users.filter(u => u.email !== currentUser?.email).map(user => {
                   const restrictions = tagRestrictions[user.email] || [];
                   const inputVal = tagInputs[user.email] || '';
                   const suggestions = allTags.filter(t => t.toLowerCase().includes(inputVal.toLowerCase()) && !restrictions.includes(t));
