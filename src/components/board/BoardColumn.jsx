@@ -398,7 +398,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
                 )}
 
                 {sortedTasks.map((task, index) => (
-                  <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={false}>
+                  <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={selectionMode}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
@@ -408,9 +408,12 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
                         <TaskCard
                           task={task}
                           usersMap={usersMap}
-                          onClick={() => onTaskClick(task)}
+                          onClick={() => !selectionMode && onTaskClick(task)}
                           isDragging={snapshot.isDragging}
                           onToggleTaskComplete={onToggleTaskComplete}
+                          selectionMode={selectionMode}
+                          isSelected={selectedTaskIds?.includes(task.id)}
+                          onToggleSelect={onToggleTaskSelect}
                         />
                       </div>
                     )}
