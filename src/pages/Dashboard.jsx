@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import { Board } from "@/entities/Board";
 import { Task } from "@/entities/Task";
 import { ActivityLog } from "@/entities/ActivityLog";
-import { base44 } from "@/api/base44Client";
+import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,9 +32,11 @@ export default function Dashboard() {
   }, []);
 
   const loadData = async () => {
-    const currentUser = await base44.auth.me();
-    const [allUsers, allBoards] = await Promise.all([
-      currentUser.role === 'admin' ? base44.entities.User.list() : Promise.resolve([currentUser]),
+    // OPTIMIZATION: Fetch current user, all users, and all boards in parallel.
+    // This reduces total loading time by making concurrent requests instead of sequential.
+    const [currentUser, allUsers, allBoards] = await Promise.all([
+      User.me(),
+      User.list(),
       Board.list("-created_date")
     ]);
     
@@ -147,7 +150,6 @@ export default function Dashboard() {
     if (task.length > 0) {
       navigate(`${createPageUrl("Board")}?id=${task[0].board_id}&taskId=${activity.task_id}`);
     }
-
   };
 
   return (

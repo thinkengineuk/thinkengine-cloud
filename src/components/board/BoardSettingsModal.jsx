@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Board } from "@/entities/Board";
 import { User } from "@/entities/User";
 import { Column } from "@/entities/Column";
 import { Task } from "@/entities/Task";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Save, Trash2, UserPlus, Tag, X, EyeOff } from "lucide-react";
+import { Save, Trash2, UserPlus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -60,10 +60,6 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
   const [deleting, setDeleting] = useState(false);
   const [cleaningDuplicates, setCleaningDuplicates] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [allTags, setAllTags] = useState([]);
-  const [tagRestrictions, setTagRestrictions] = useState({}); // { userEmail: [tag, ...] }
-  const [tagInputs, setTagInputs] = useState({}); // { userEmail: inputValue }
-  const [blockedUsers, setBlockedUsers] = useState({}); // { userEmail: true/false }
 
   const loadData = useCallback(async () => {
     try {
@@ -84,26 +80,6 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
 
       const allUsers = await User.list();
       setUsers(allUsers);
-
-      // Load existing tag restrictions and blocked status from user data
-      const restrictions = {};
-      const blocked = {};
-      allUsers.forEach(u => {
-        if (u.board_tag_restrictions?.[boardId]) {
-          restrictions[u.email] = u.board_tag_restrictions[boardId];
-        }
-        if (u.board_blocked?.[boardId]) {
-          blocked[u.email] = true;
-        }
-      });
-      setTagRestrictions(restrictions);
-      setBlockedUsers(blocked);
-
-      // Load all tags from tasks
-      const tasksData = await Task.filter({ board_id: boardId });
-      const tagsSet = new Set();
-      tasksData.forEach(task => (task.tags || []).forEach(t => tagsSet.add(t)));
-      setAllTags(Array.from(tagsSet).sort());
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -130,38 +106,6 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
     setSaving(true);
     try {
       await Board.update(boardId, formData);
-
-      // Save tag restrictions and blocked status for each user
-      const savePromises = users.map(async (user) => {
-        const currentRestrictions = user.board_tag_restrictions || {};
-        const newTags = tagRestrictions[user.email] || [];
-        const existingTags = currentRestrictions[boardId] || [];
-        const tagsChanged = JSON.stringify(existingTags.sort()) !== JSON.stringify([...newTags].sort());
-
-        const currentBlocked = user.board_blocked || {};
-        const isBlocked = !!blockedUsers[user.email];
-        const blockedChanged = !!currentBlocked[boardId] !== isBlocked;
-
-        if (tagsChanged || blockedChanged) {
-          const updatedRestrictions = { ...currentRestrictions };
-          if (newTags.length > 0) {
-            updatedRestrictions[boardId] = newTags;
-          } else {
-            delete updatedRestrictions[boardId];
-          }
-
-          const updatedBlocked = { ...currentBlocked };
-          if (isBlocked) {
-            updatedBlocked[boardId] = true;
-          } else {
-            delete updatedBlocked[boardId];
-          }
-
-          await User.update(user.id, { board_tag_restrictions: updatedRestrictions, board_blocked: updatedBlocked });
-        }
-      });
-      await Promise.all(savePromises);
-
       onOpenChange(false);
       onRefresh();
     } catch (error) {
@@ -169,22 +113,6 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
     } finally {
       setSaving(false);
     }
-  };
-
-  const addTagRestriction = (email, tag) => {
-    if (!tag.trim()) return;
-    setTagRestrictions(prev => ({
-      ...prev,
-      [email]: [...new Set([...(prev[email] || []), tag.trim()])]
-    }));
-    setTagInputs(prev => ({ ...prev, [email]: '' }));
-  };
-
-  const removeTagRestriction = (email, tag) => {
-    setTagRestrictions(prev => ({
-      ...prev,
-      [email]: (prev[email] || []).filter(t => t !== tag)
-    }));
   };
 
   const handleDelete = async () => {
@@ -333,83 +261,6 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
                     )}
                   </div>
                 ))}
-              </div>
-            </ScrollArea>
-          </div>
-
-          {/* Tag Restrictions */}
-          <div className="space-y-4 pt-4 border-t">
-            <div className="flex items-center gap-2">
-              <Tag className="w-5 h-5 text-slate-600" />
-              <h3 className="font-semibold text-lg">Tag-Based Access Restrictions</h3>
-            </div>
-            <p className="text-sm text-slate-500">
-              Limit what tasks a user can see on this board. If tags are set for a user, they will only see tasks that have at least one of those tags.
-            </p>
-            <ScrollArea className="h-60 w-full rounded-md border p-4">
-              <div className="space-y-4">
-                {users.filter(u => u.email !== currentUser?.email).map(user => {
-                  const restrictions = tagRestrictions[user.email] || [];
-                  const inputVal = tagInputs[user.email] || '';
-                  const suggestions = allTags.filter(t => t.toLowerCase().includes(inputVal.toLowerCase()) && !restrictions.includes(t));
-                  const isBlocked = !!blockedUsers[user.email];
-                  return (
-                    <div key={user.id} className="space-y-2 pb-3 border-b last:border-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-slate-800">{user.full_name}</span>
-                          <span className="text-xs text-slate-400">{user.email}</span>
-                        </div>
-                        <button
-                          onClick={() => setBlockedUsers(prev => ({ ...prev, [user.email]: !prev[user.email] }))}
-                          className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full border transition-colors ${
-                            isBlocked
-                              ? 'bg-red-100 text-red-700 border-red-300'
-                              : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-red-50 hover:text-red-500'
-                          }`}
-                        >
-                          <EyeOff className="w-3 h-3" />
-                          {isBlocked ? 'Sees nothing' : 'Block all'}
-                        </button>
-                      </div>
-                      {!isBlocked && restrictions.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {restrictions.map(tag => (
-                            <Badge key={tag} variant="outline" className="flex items-center gap-1 text-xs">
-                              {tag}
-                              <button onClick={() => removeTagRestriction(user.email, tag)} className="hover:opacity-70">
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                      {!isBlocked && (
-                        <div className="relative">
-                          <div className="flex gap-2">
-                            <Input
-                              value={inputVal}
-                              onChange={e => setTagInputs(prev => ({ ...prev, [user.email]: e.target.value }))}
-                              onKeyDown={e => e.key === 'Enter' && addTagRestriction(user.email, inputVal)}
-                              placeholder={restrictions.length === 0 ? "No restrictions (can see all)" : "Add another tag..."}
-                              className="h-8 text-xs"
-                            />
-                            <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => addTagRestriction(user.email, inputVal)} disabled={!inputVal.trim()}>
-                              Add
-                            </Button>
-                          </div>
-                          {inputVal && suggestions.length > 0 && (
-                            <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-lg max-h-32 overflow-y-auto">
-                              {suggestions.map(tag => (
-                                <div key={tag} onClick={() => addTagRestriction(user.email, tag)} className="px-3 py-1.5 text-xs hover:bg-slate-50 cursor-pointer">{tag}</div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
               </div>
             </ScrollArea>
           </div>

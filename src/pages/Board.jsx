@@ -5,7 +5,7 @@ import { Task } from "@/entities/Task";
 import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, ArrowLeft, Settings, Filter, Tag, Search, ChevronDown, ChevronUp, CheckSquare, X } from "lucide-react";
+import { Plus, ArrowLeft, Settings, Filter, Tag, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -14,7 +14,6 @@ import CreateColumnDialog from "../components/board/CreateColumnDialog";
 import TaskDetailModal from "../components/board/task-detail/TaskDetailModal";
 import BoardSettingsModal from "../components/board/BoardSettingsModal";
 import TagManagementModal from "../components/board/TagManagementModal";
-import BulkTagModal from "../components/board/BulkTagModal";
 import TwoFactorAuthScreen from "../components/board/TwoFactorAuthScreen";
 import {
   Select,
@@ -73,10 +72,6 @@ export default function BoardPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
-  const [selectionMode, setSelectionMode] = useState(false);
-  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
-  const [showBulkTagModal, setShowBulkTagModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
 
   const loadBoard = useCallback(async () => {
     if (!boardId) {
@@ -89,15 +84,12 @@ export default function BoardPage() {
     try {
       // OPTIMIZATION: Fetch all data in parallel for faster page load
       // Reduces total loading time by making concurrent requests
-      const [boardData, columnsData, tasksData, me] = await Promise.all([
-        BoardEntity.filter({ id: boardId }),
+      const [boardData, columnsData, tasksData, allUsers] = await Promise.all([
+        BoardEntity.filter({ id: boardId }), // Renamed to BoardEntity to avoid conflict with local board variable
         Column.filter({ board_id: boardId }, "position"),
         Task.filter({ board_id: boardId }, "position"),
-        User.me()
+        User.list()
       ]);
-
-      const isAdminUser = me?.role === 'admin';
-      const allUsers = isAdminUser ? await User.list() : [me];
       
       if (boardData.length === 0) {
         navigate(createPageUrl("Dashboard"));
@@ -107,7 +99,6 @@ export default function BoardPage() {
       const fetchedBoard = boardData[0];
       setBoard(fetchedBoard);
       setColumns(columnsData);
-      setCurrentUser(me);
       
       // OPTIMIZATION: Build usersMap for O(1) user lookups
       const usersByEmail = {};
@@ -127,18 +118,8 @@ export default function BoardPage() {
           uniqueTasks.push(task);
         }
       }
-
-      // Apply block / tag restrictions for non-admin users only
-      const isAdmin = me?.role === 'admin';
-      const isBlocked = !isAdmin && !!me?.board_blocked?.[boardId];
-      const tagRestrictions = !isAdmin ? me?.board_tag_restrictions?.[boardId] : null;
-      const filteredByRestriction = isBlocked
-        ? []
-        : (tagRestrictions && tagRestrictions.length > 0)
-          ? uniqueTasks.filter(task => task.tags && task.tags.some(t => tagRestrictions.includes(t)))
-          : uniqueTasks;
       
-      setAllTasks(filteredByRestriction);
+      setAllTasks(uniqueTasks);
 
       const tagsSet = new Set();
       uniqueTasks.forEach(task => {
@@ -224,17 +205,6 @@ export default function BoardPage() {
 
     await Task.update(taskId, { status: 'completed', column_id: completedColumn.id });
     loadBoard();
-  };
-
-  const handleToggleTaskSelect = (taskId) => {
-    setSelectedTaskIds(prev =>
-      prev.includes(taskId) ? prev.filter(id => id !== taskId) : [...prev, taskId]
-    );
-  };
-
-  const exitSelectionMode = () => {
-    setSelectionMode(false);
-    setSelectedTaskIds([]);
   };
 
   const handleDragEnd = async (result) => {
@@ -414,40 +384,6 @@ export default function BoardPage() {
             </div>
           </div>
           <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-            {selectionMode ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={exitSelectionMode}
-                  className="text-slate-600"
-                >
-                  <X className="w-4 h-4 md:mr-2" />
-                  <span className="hidden md:inline">Cancel</span>
-                </Button>
-                {selectedTaskIds.length > 0 && (
-                  <Button
-                    size="sm"
-                    onClick={() => setShowBulkTagModal(true)}
-                    className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white"
-                  >
-                    <Tag className="w-4 h-4 md:mr-2" />
-                    <span className="hidden md:inline">Add Tag ({selectedTaskIds.length})</span>
-                    <span className="md:hidden">{selectedTaskIds.length}</span>
-                  </Button>
-                )}
-              </>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectionMode(true)}
-                className="hidden md:flex"
-              >
-                <CheckSquare className="w-4 h-4 mr-2" />
-                Select Tasks
-              </Button>
-            )}
             <Button
               variant="outline"
               onClick={() => setShowTagModal(true)}
@@ -759,9 +695,6 @@ export default function BoardPage() {
                           dragHandleProps={provided.dragHandleProps}
                           isDragging={snapshot.isDragging}
                           onToggleTaskComplete={handleToggleTaskComplete}
-                          selectionMode={selectionMode}
-                          selectedTaskIds={selectedTaskIds}
-                          onToggleTaskSelect={handleToggleTaskSelect}
                         />
                       </div>
                     )}
@@ -804,19 +737,6 @@ export default function BoardPage() {
           boardId={boardId}
           onClose={() => setSelectedTask(null)}
           onRefresh={loadBoard}
-        />
-      )}
-
-      {showBulkTagModal && (
-        <BulkTagModal
-          open={showBulkTagModal}
-          onOpenChange={setShowBulkTagModal}
-          selectedTasks={allTasks.filter(t => selectedTaskIds.includes(t.id))}
-          allTags={allTags}
-          onComplete={() => {
-            exitSelectionMode();
-            loadBoard();
-          }}
         />
       )}
     </div>

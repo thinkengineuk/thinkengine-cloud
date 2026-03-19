@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { isToday, isPast, startOfDay, format } from "date-fns";
 import { Board } from "@/entities/Board";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const colorMap = {
   blue: { bg: 'from-blue-500 to-blue-700', light: 'bg-blue-50' },
@@ -44,7 +43,7 @@ const colorMap = {
   cyan: { bg: 'from-cyan-500 to-cyan-700', light: 'bg-cyan-50' },
 };
 
-export default function BoardColumn({ column, tasks, users, usersMap, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete, selectionMode, selectedTaskIds, onToggleTaskSelect }) {
+export default function BoardColumn({ column, tasks, users, usersMap, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete }) {
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showEditColumn, setShowEditColumn] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -398,7 +397,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
                 )}
 
                 {sortedTasks.map((task, index) => (
-                  <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={selectionMode}>
+                  <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={false}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
@@ -408,12 +407,9 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
                         <TaskCard
                           task={task}
                           usersMap={usersMap}
-                          onClick={() => !selectionMode && onTaskClick(task)}
+                          onClick={() => onTaskClick(task)}
                           isDragging={snapshot.isDragging}
                           onToggleTaskComplete={onToggleTaskComplete}
-                          selectionMode={selectionMode}
-                          isSelected={selectedTaskIds?.includes(task.id)}
-                          onToggleSelect={onToggleTaskSelect}
                         />
                       </div>
                     )}
