@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Save, Trash2, UserPlus, Tag, X } from "lucide-react";
+import { Save, Trash2, UserPlus, Tag, X, EyeOff } from "lucide-react";
 import {
   Dialog,
   DialogContent,
