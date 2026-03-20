@@ -61,6 +61,7 @@ export default function BoardPage() {
   const [showColumnDialog, setShowColumnDialog] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showTagModal, setShowTagModal] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
