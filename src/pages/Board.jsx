@@ -143,8 +143,9 @@ export default function BoardPage() {
         }
       }
 
-      // Check if this is "Ben Tasks" board and if access has been granted today
-      if (fetchedBoard.name === "Ben Tasks") {
+      // Check if this board requires 2FA (Ben Tasks or Management)
+      const twoFaBoards = ["Ben Tasks", "Management"];
+      if (twoFaBoards.includes(fetchedBoard.name)) {
         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
         const currentUser = await base44.auth.me();
         const boardAccessDates = currentUser.board_access_dates || {};
