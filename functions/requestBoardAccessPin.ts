@@ -49,158 +49,92 @@ Deno.serve(async (req) => {
     });
 
     // Send email with pin to ben@thinkengine.co
+    const digits = pinCode.split('');
     const emailHtml = `
 <!DOCTYPE html>
 <html>
 <head>
-  <style>
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .container { 
-      max-width: 600px;
-      margin: 40px auto;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    .header { 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 40px 24px;
-      text-align: center;
-    }
-    .header h1 { 
-      color: white;
-      margin: 0;
-      font-size: 28px;
-      font-weight: 600;
-    }
-    .content { 
-      padding: 40px 32px;
-    }
-    .pin-box {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 12px;
-      padding: 32px;
-      text-align: center;
-      margin: 32px 0;
-      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
-    }
-    .pin-code {
-      font-size: 48px;
-      font-weight: 700;
-      color: white;
-      letter-spacing: 8px;
-      margin: 0;
-      font-family: 'Courier New', monospace;
-    }
-    .pin-label {
-      color: rgba(255,255,255,0.9);
-      font-size: 14px;
-      margin-top: 12px;
-      font-weight: 500;
-    }
-    .info-text {
-      color: #4a5568;
-      font-size: 16px;
-      line-height: 1.6;
-      margin: 16px 0;
-    }
-    .warning {
-      background: #fff3cd;
-      border-left: 4px solid #ffc107;
-      padding: 16px;
-      margin: 24px 0;
-      border-radius: 4px;
-    }
-    .warning-text {
-      color: #856404;
-      font-size: 14px;
-      margin: 0;
-    }
-    .footer {
-      text-align: center;
-      padding: 24px;
-      color: #718096;
-      font-size: 14px;
-      border-top: 1px solid #e2e8f0;
-    }
-    .detail-item {
-      background: #f7fafc;
-      padding: 12px 16px;
-      margin: 8px 0;
-      border-radius: 6px;
-      border-left: 3px solid #667eea;
-    }
-    .detail-label {
-      color: #718096;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .detail-value {
-      color: #2d3748;
-      font-size: 16px;
-      margin-top: 4px;
-      font-weight: 500;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🔐 Board Access Request</h1>
-    </div>
-    <div class="content">
-      <p class="info-text">
-        <strong>Access Request Alert</strong><br/>
-        Someone has requested access to the secure board. Here are the details:
-      </p>
-      
-      <div class="detail-item">
-        <div class="detail-label">Requested By</div>
-        <div class="detail-value">${user.full_name} (${user.email})</div>
-      </div>
-      
-      <div class="detail-item">
-        <div class="detail-label">Board</div>
-        <div class="detail-value">Ben's Tasks</div>
-      </div>
-      
-      <div class="detail-item">
-        <div class="detail-label">Time</div>
-        <div class="detail-value">${new Date().toLocaleString('en-GB', { 
-          dateStyle: 'full', 
-          timeStyle: 'short' 
-        })}</div>
-      </div>
+<body style="margin:0;padding:0;background-color:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f2f5;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 
-      <div class="pin-box">
-        <div class="pin-label">YOUR ACCESS CODE</div>
-        <p class="pin-code">${pinCode}</p>
-        <div class="pin-label">Valid for 10 minutes</div>
-      </div>
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
+              <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7);">TaskFlow Security</p>
+              <h1 style="margin:8px 0 0;font-size:26px;font-weight:700;color:#ffffff;">Board Access Code</h1>
+            </td>
+          </tr>
 
-      <div class="warning">
-        <p class="warning-text">
-          ⚠️ <strong>Security Notice:</strong> This code expires in 10 minutes and can only be used once. 
-          If you did not request this access, please disregard this email.
-        </p>
-      </div>
+          <!-- Body -->
+          <tr>
+            <td style="background:#ffffff;padding:40px 40px 32px;">
 
-      <p class="info-text">
-        Enter this code on the access screen to view the board content.
-      </p>
-    </div>
-    <div class="footer">
-      TaskFlow Security System • Automated Message
-    </div>
-  </div>
+              <p style="margin:0 0 6px;font-size:15px;color:#374151;">Hi ${user.full_name},</p>
+              <p style="margin:0 0 32px;font-size:15px;color:#6b7280;line-height:1.6;">Here is your one-time access code for <strong style="color:#1e3a5f;">${user.full_name === 'Ben Michaelis' ? "Ben's Tasks" : 'the secure board'}</strong>. Enter it on the access screen within 10 minutes.</p>
+
+              <!-- PIN display -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+                <tr>
+                  <td align="center">
+                    <p style="margin:0 0 16px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;">Your Access Code</p>
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        ${digits.map(d => `
+                        <td style="padding:0 4px;">
+                          <div style="width:52px;height:64px;background:#f8faff;border:2px solid #2563eb;border-radius:12px;text-align:center;line-height:64px;font-size:36px;font-weight:800;color:#1e3a5f;font-family:'Courier New',monospace;">${d}</div>
+                        </td>`).join('')}
+                      </tr>
+                    </table>
+                    <p style="margin:16px 0 0;font-size:13px;color:#9ca3af;">⏱ Expires in <strong>10 minutes</strong> &nbsp;•&nbsp; Single use only</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Details -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8faff;border-radius:10px;padding:20px 24px;margin-bottom:24px;">
+                <tr>
+                  <td style="padding:6px 0;border-bottom:1px solid #e5e7eb;">
+                    <span style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;">Requested by</span>
+                    <p style="margin:2px 0 0;font-size:14px;color:#1f2937;font-weight:500;">${user.full_name} &nbsp;<span style="color:#6b7280;font-weight:400;">(${user.email})</span></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;">
+                    <span style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;">Time</span>
+                    <p style="margin:2px 0 0;font-size:14px;color:#1f2937;font-weight:500;">${new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' })}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Warning -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;">
+                <tr>
+                  <td style="font-size:13px;color:#92400e;line-height:1.5;">
+                    <strong>⚠️ Security Notice:</strong> If you did not request this code, please ignore this email. Do not share this code with anyone.
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f8faff;border-radius:0 0 16px 16px;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
+              <p style="margin:0;font-size:12px;color:#9ca3af;">TaskFlow Security System &nbsp;•&nbsp; Automated Message</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`;
 
