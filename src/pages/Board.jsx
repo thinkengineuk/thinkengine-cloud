@@ -5,7 +5,7 @@ import { Task } from "@/entities/Task";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, ArrowLeft, Settings, Filter, Tag, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, ArrowLeft, Settings, Filter, Tag, Search, ChevronDown, ChevronUp, Copy } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
