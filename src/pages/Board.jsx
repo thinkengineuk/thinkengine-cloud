@@ -15,6 +15,7 @@ import TaskDetailModal from "../components/board/task-detail/TaskDetailModal";
 import BoardSettingsModal from "../components/board/BoardSettingsModal";
 import TagManagementModal from "../components/board/TagManagementModal";
 import TwoFactorAuthScreen from "../components/board/TwoFactorAuthScreen";
+import CopyTaggedTasksModal from "../components/board/CopyTaggedTasksModal";
 import {
   Select,
   SelectContent,
