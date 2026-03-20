@@ -401,6 +401,15 @@ export default function BoardPage() {
             </Button>
             <Button
               variant="outline"
+              onClick={() => setShowCopyModal(true)}
+              size="sm"
+              className="hidden md:flex"
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copy Tasks
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => setShowSettingsModal(true)}
               size="sm"
             >
