@@ -341,8 +341,9 @@ export default function BoardPage() {
     );
   }
 
-  // Show 2FA screen if this is "Ben Tasks" and user hasn't been granted access
-  if (board && board.name === "Ben Tasks" && !hasAccess) {
+  // Show 2FA screen if this board requires 2FA and user hasn't been granted access today
+  const twoFaBoardNames = ["Ben Tasks", "Management"];
+  if (board && twoFaBoardNames.includes(board.name) && !hasAccess) {
     return (
       <TwoFactorAuthScreen
         boardId={boardId}
