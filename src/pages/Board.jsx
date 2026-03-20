@@ -754,6 +754,15 @@ export default function BoardPage() {
           onRefresh={loadBoard}
         />
       )}
+
+      {showCopyModal && (
+        <CopyTaggedTasksModal
+          boardId={boardId}
+          allTags={allTags}
+          open={showCopyModal}
+          onOpenChange={setShowCopyModal}
+        />
+      )}
     </div>
   );
 }
