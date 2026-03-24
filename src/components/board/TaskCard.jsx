@@ -42,6 +42,9 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
 
   const isCompleted = task.status === 'completed';
 
+  // Check if any timer is currently running on this task
+  const isTimerRunning = (task.time_entries || []).some(e => !e.ended_at);
+
   const formatDate = (dateString) => {
     if (!dateString) return null;
     try {
@@ -122,6 +125,16 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
               <CheckCircle2 className="w-3 h-3" />
               Completed
             </Badge>
+          </div>
+        )}
+
+        {isTimerRunning && !isCompleted && (
+          <div className="flex items-center gap-1.5 pb-1">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+            </span>
+            <span className="text-xs font-medium text-green-600">Timer running</span>
           </div>
         )}
         
