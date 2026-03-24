@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -237,6 +236,7 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
                 <TaskDetailSidebar 
                   task={taskData}
                   allUsers={allUsers}
+                  currentUser={currentUser}
                   onUpdate={handleUpdate}
                   onAssign={handleAssign}
                   onAddWatcher={handleAddWatcher}
@@ -260,6 +260,7 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
             <TaskDetailSidebar 
               task={taskData}
               allUsers={allUsers}
+              currentUser={currentUser}
               onUpdate={handleUpdate}
               onAssign={handleAssign}
               onAddWatcher={handleAddWatcher}
