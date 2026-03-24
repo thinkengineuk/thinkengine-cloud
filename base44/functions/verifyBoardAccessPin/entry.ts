@@ -72,6 +72,15 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Log board access in activity log
+    await base44.asServiceRole.entities.ActivityLog.create({
+      task_id: boardId, // reuse task_id field to store board context
+      action_type: 'updated',
+      action_description: `${user.full_name} verified board access via 2FA`,
+      user_email: user.email,
+      metadata: { type: 'board_access', board_id: boardId }
+    });
+
     return Response.json({ 
       success: true,
       message: 'Access granted'

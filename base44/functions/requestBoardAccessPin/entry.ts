@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
             <td style="background:#ffffff;padding:40px 40px 32px;">
 
               <p style="margin:0 0 6px;font-size:15px;color:#374151;">Hi ${user.full_name},</p>
-              <p style="margin:0 0 32px;font-size:15px;color:#6b7280;line-height:1.6;">Here is your one-time access code for <strong style="color:#1e3a5f;">${user.full_name === 'Ben Michaelis' ? "Ben's Tasks" : 'the secure board'}</strong>. Enter it on the access screen within 10 minutes.</p>
+              <p style="margin:0 0 32px;font-size:15px;color:#6b7280;line-height:1.6;">Here is your one-time access code for the secure board. Enter it on the access screen within 10 minutes.</p>
 
               <!-- PIN display -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
@@ -140,14 +140,14 @@ Deno.serve(async (req) => {
 </html>`;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
-      to: 'ben@thinkengine.co',
+      to: user.email,
       subject: '🔐 Board Access Code Request',
       body: emailHtml
     });
 
     return Response.json({ 
-      success: true,
-      message: 'Access code sent to ben@thinkengine.co',
+    success: true,
+    message: `Access code sent to ${user.email}`,
       expiresIn: 600 // 10 minutes in seconds
     });
 
