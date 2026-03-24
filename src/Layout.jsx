@@ -21,14 +21,36 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
+const RECENT_BOARDS_KEY = "taskflow_recent_boards";
+const MAX_RECENT = 3;
+
+function getRecentBoardIds() {
+  try { return JSON.parse(localStorage.getItem(RECENT_BOARDS_KEY) || "[]"); }
+  catch { return []; }
+}
+
+function recordRecentBoard(boardId) {
+  const recent = getRecentBoardIds().filter(id => id !== boardId);
+  recent.unshift(boardId);
+  localStorage.setItem(RECENT_BOARDS_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
+}
+
 export default function Layout({ children }) {
   const location = useLocation();
   const [user, setUser] = React.useState(null);
   const [myProjects, setMyProjects] = React.useState([]);
+  const [recentBoardIds, setRecentBoardIds] = React.useState(getRecentBoardIds);
 
   React.useEffect(() => {
     loadUserAndProjects();
-  }, [location.pathname]); // Reload when pathname changes
+    // Track current board visit
+    const params = new URLSearchParams(location.search);
+    const boardId = params.get('id');
+    if (boardId && location.pathname.includes('Board')) {
+      recordRecentBoard(boardId);
+      setRecentBoardIds(getRecentBoardIds());
+    }
+  }, [location.pathname, location.search]);
 
   const loadUserAndProjects = async () => {
     try {
