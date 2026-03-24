@@ -1,8 +1,8 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CalendarIcon, User, Eye, Tag, AlertCircle, Trash2, Repeat, CheckCircle2 } from "lucide-react";
+import TimeTrackingSection from "./TimeTrackingSection";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -32,7 +32,7 @@ import { Board } from "@/entities/Board"; // Added Board import
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
-export default function TaskDetailSidebar({ task, allUsers, onUpdate, onAssign, onAddWatcher, onClose, onRefresh }) {
+export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdate, onAssign, onAddWatcher, onClose, onRefresh }) {
   const [newTag, setNewTag] = useState("");
   const [allBoardTags, setAllBoardTags] = useState([]);
   const [showWatchersDialog, setShowWatchersDialog] = useState(false); // Existing watcher dialog state
@@ -178,6 +178,15 @@ export default function TaskDetailSidebar({ task, allUsers, onUpdate, onAssign, 
             Reopen Task
           </Button>
         )}
+
+        {/* Time Tracking */}
+        <div className="border-b border-slate-200 pb-6">
+          <TimeTrackingSection
+            task={task}
+            currentUser={currentUser}
+            onRefresh={onRefresh}
+          />
+        </div>
 
         {/* Assigned To */}
         <div className="space-y-3">
