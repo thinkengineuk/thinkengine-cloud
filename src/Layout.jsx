@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, User, LogOut, Upload, FileJson, BarChart2 } from "lucide-react";
+import { LayoutDashboard, User, LogOut, BarChart2 } from "lucide-react";
 import { User as UserEntity } from "@/entities/User";
 import { Board } from "@/entities/Board";
 import {
