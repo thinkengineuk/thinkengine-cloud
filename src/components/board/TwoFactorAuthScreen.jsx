@@ -31,7 +31,7 @@ export default function TwoFactorAuthScreen({ boardId, boardName, onAccessGrante
       const response = await requestBoardAccessPin({ boardId });
       
       if (response.data.success) {
-        setMessage('Access code sent to ben@thinkengine.co. Please check your email.');
+        setMessage(response.data.message + '. Please check your email.');
         setCooldown(120); // 2 minutes cooldown
       } else {
         setError(response.data.error || 'Failed to send access code');
