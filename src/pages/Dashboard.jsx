@@ -238,14 +238,35 @@ export default function Dashboard() {
                   <CardTitle>Projects</CardTitle>
                   <Badge variant="secondary">{boards.length}</Badge>
                 </div>
-                <Button
-                  onClick={() => setShowCreateDialog(true)}
-                  size="sm"
-                  className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  New
-                </Button>
+                <div className="flex items-center gap-2">
+                  {user?.role === 'admin' && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Import
+                          <ChevronDown className="w-3 h-3 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => navigate(createPageUrl("ImportBoard"))}>
+                          Import Board (CSV)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate(createPageUrl("ImportMeistertask"))}>
+                          Import Meistertask
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                  <Button
+                    onClick={() => setShowCreateDialog(true)}
+                    size="sm"
+                    className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    New
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {filteredBoards.length === 0 ? (

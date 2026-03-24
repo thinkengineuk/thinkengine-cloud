@@ -159,6 +159,18 @@ export default function Layout({ children }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-slate-200 p-4">
+            {/* Users link - admin only, just above user info */}
+            {user?.role === 'admin' && (
+              <Link
+                to={createPageUrl("Users")}
+                className={`flex items-center gap-3 px-4 py-2 mb-3 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 ${
+                  location.pathname === createPageUrl("Users") ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700' : 'text-slate-700'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                Users
+              </Link>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="w-10 h-10 shadow-md">
