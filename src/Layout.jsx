@@ -59,18 +59,6 @@ export default function Layout({ children }) {
       show: true,
     },
     {
-      title: "Import Board",
-      url: createPageUrl("ImportBoard"),
-      icon: Upload,
-      show: user?.role === 'admin',
-    },
-    {
-      title: "Import Meistertask",
-      url: createPageUrl("ImportMeistertask"),
-      icon: FileJson,
-      show: user?.role === 'admin',
-    },
-    {
       title: "Productivity",
       url: "/Productivity",
       icon: BarChart2,
