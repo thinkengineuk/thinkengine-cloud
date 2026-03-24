@@ -114,7 +114,52 @@ export default function Layout({ children }) {
           </SidebarHeader>
 
           <SidebarContent className="p-3">
-            {/* My Projects - first */}
+            {/* Recent Projects - first */}
+            {(() => {
+              const recentProjects = recentBoardIds
+                .map(id => myProjects.find(p => p.id === id))
+                .filter(Boolean);
+              if (recentProjects.length === 0) return null;
+              return (
+                <SidebarGroup>
+                  <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
+                    Recent
+                  </SidebarGroupLabel>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {recentProjects.map((project) => (
+                        <SidebarMenuItem key={project.id}>
+                          <SidebarMenuButton
+                            asChild
+                            className={`hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-xl mb-1 ${
+                              activeBoardId === project.id ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 shadow-sm' : ''
+                            }`}
+                          >
+                            <Link to={`${createPageUrl("Board")}?id=${project.id}`} className="flex items-center gap-3 px-4 py-3">
+                              <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${
+                                project.color === 'blue' ? 'from-blue-400 to-blue-600' :
+                                project.color === 'purple' ? 'from-purple-400 to-purple-600' :
+                                project.color === 'green' ? 'from-green-400 to-green-600' :
+                                project.color === 'orange' ? 'from-orange-400 to-orange-600' :
+                                project.color === 'pink' ? 'from-pink-400 to-pink-600' :
+                                project.color === 'red' ? 'from-red-400 to-red-600' :
+                                project.color === 'teal' ? 'from-teal-400 to-teal-600' :
+                                project.color === 'indigo' ? 'from-indigo-400 to-indigo-600' :
+                                project.color === 'cyan' ? 'from-cyan-400 to-cyan-600' :
+                                'from-gray-400 to-gray-600'
+                              }`}></span>
+                              <span className="font-medium text-sm">{project.name}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              );
+            })()}
+
+            {/* My Projects - alphabetical */}
             {myProjects.length > 0 && (
               <SidebarGroup>
                 <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
@@ -122,7 +167,7 @@ export default function Layout({ children }) {
                 </SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {myProjects.map((project) => (
+                    {[...myProjects].sort((a, b) => a.name.localeCompare(b.name)).map((project) => (
                       <SidebarMenuItem key={project.id}>
                         <SidebarMenuButton
                           asChild
