@@ -92,6 +92,7 @@ Deno.serve(async (req) => {
                       </tr>
                     </table>
                     <p style="margin:16px 0 0;font-size:13px;color:#9ca3af;">⏱ Expires in <strong>10 minutes</strong> &nbsp;•&nbsp; Single use only</p>
+                    <p style="margin:12px 0 0;font-size:13px;color:#6b7280;">Or copy the full code: <strong style="font-family:'Courier New',monospace;letter-spacing:2px;color:#1e3a5f;">${pinCode}</strong></p>
                   </td>
                 </tr>
               </table>
