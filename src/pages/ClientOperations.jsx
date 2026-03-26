@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 const SERVICE_COLORS = {
   "SEO": "bg-blue-100 text-blue-700",
   "PPC": "bg-purple-100 text-purple-700",
+  "GEO": "bg-cyan-100 text-cyan-700",
   "Website Management": "bg-teal-100 text-teal-700",
   "Email & Automation": "bg-orange-100 text-orange-700",
   "Social Media": "bg-pink-100 text-pink-700",
@@ -21,16 +22,17 @@ const SERVICE_COLORS = {
   "Technology Management (inc Cogs)": "bg-slate-100 text-slate-700",
 };
 
-const AGREEMENT_COLORS = {
-  "Annual": "bg-green-100 text-green-700",
-  "Monthly Rolling": "bg-blue-100 text-blue-700",
-  "3 Months (Quarterly)": "bg-purple-100 text-purple-700",
-};
+function firstName(email, users) {
+  if (!email) return null;
+  const u = users.find(u => u.email === email);
+  const name = u?.full_name || email.split("@")[0];
+  return name.split(" ")[0];
+}
 
 function UserName({ email, users }) {
-  if (!email) return <span className="text-slate-400">–</span>;
-  const u = users.find(u => u.email === email);
-  return <span className="text-slate-700 text-sm">{u?.full_name?.split(" ")[0] || email.split("@")[0]}</span>;
+  const name = firstName(email, users);
+  if (!name) return <span className="text-slate-400">–</span>;
+  return <span className="text-slate-700 text-sm">{name}</span>;
 }
 
 export default function ClientOperations() {
@@ -40,6 +42,7 @@ export default function ClientOperations() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [agreementFilter, setAgreementFilter] = useState("all");
+  const [personFilter, setPersonFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
@@ -65,10 +68,13 @@ export default function ClientOperations() {
 
   const isAdmin = user?.role === "admin";
 
+  const STAFF_FIELDS = ["client_lead", "client_exec", "client_exec_2", "website_creative", "tech_lead"];
+
   const filtered = projects.filter(p => {
     const matchSearch = !search || p.name?.toLowerCase().includes(search.toLowerCase()) || p.client_name?.toLowerCase().includes(search.toLowerCase());
     const matchAgreement = agreementFilter === "all" || p.agreement_type === agreementFilter;
-    return matchSearch && matchAgreement;
+    const matchPerson = personFilter === "all" || STAFF_FIELDS.some(f => p[f] === personFilter);
+    return matchSearch && matchAgreement && matchPerson;
   });
 
   const teMarketingProjects = filtered.filter(p => p.company === "ThinkEngine Marketing");
@@ -88,7 +94,7 @@ export default function ClientOperations() {
     loadAll();
   };
 
-  const CompanyTable = ({ title, rows, company }) => (
+  const CompanyTable = ({ title, rows }) => (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
       <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-2">
         <span className="text-sm font-semibold text-slate-700">{title}</span>
@@ -103,8 +109,8 @@ export default function ClientOperations() {
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Services</th>
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-24">Client Lead</th>
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-24">Client Exec</th>
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-24">Client Exec 2</th>
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-28">Website & Creative</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-24">Exec 2</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-28">Web & Creative</th>
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-20">Tech</th>
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-20">How-To</th>
               {isAdmin && <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-20">Actions</th>}
@@ -118,9 +124,7 @@ export default function ClientOperations() {
                 <td className="px-4 py-2.5 font-medium text-slate-800">{p.name || p.client_name}</td>
                 <td className="px-4 py-2.5">
                   {p.agreement_type ? (
-                    <Badge className={`text-xs font-medium ${AGREEMENT_COLORS[p.agreement_type] || "bg-slate-100 text-slate-600"}`}>
-                      {p.agreement_type}
-                    </Badge>
+                    <Badge className="text-xs font-medium bg-slate-100 text-slate-600">{p.agreement_type}</Badge>
                   ) : <span className="text-slate-400">–</span>}
                 </td>
                 <td className="px-4 py-2.5">
@@ -185,18 +189,32 @@ export default function ClientOperations() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 items-center">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search clients..." className="pl-9" />
         </div>
+        <Select value={personFilter} onValueChange={setPersonFilter}>
+          <SelectTrigger className="w-44"><SelectValue placeholder="Filter by person" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All People</SelectItem>
+            {users.map(u => (
+              <SelectItem key={u.id} value={u.email}>
+                {u.full_name?.split(" ")[0] || u.email.split("@")[0]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={agreementFilter} onValueChange={setAgreementFilter}>
-          <SelectTrigger className="w-48"><SelectValue placeholder="All Agreement Types" /></SelectTrigger>
+          <SelectTrigger className="w-52"><SelectValue placeholder="All Agreement Types" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Agreement Types</SelectItem>
-            <SelectItem value="Annual">Annual</SelectItem>
-            <SelectItem value="Monthly Rolling">Monthly Rolling</SelectItem>
+            <SelectItem value="1 Month (Monthly Rolling)">1 Month (Monthly Rolling)</SelectItem>
             <SelectItem value="3 Months (Quarterly)">3 Months (Quarterly)</SelectItem>
+            <SelectItem value="6 Months">6 Months</SelectItem>
+            <SelectItem value="12 Months">12 Months</SelectItem>
+            <SelectItem value="24 Months">24 Months</SelectItem>
+            <SelectItem value="36 Months">36 Months</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -204,6 +222,9 @@ export default function ClientOperations() {
       {teMarketingProjects.length > 0 && <CompanyTable title="ThinkEngine Marketing" rows={teMarketingProjects} />}
       {teTechProjects.length > 0 && <CompanyTable title="ThinkEngine Tech" rows={teTechProjects} />}
       {cogsProjects.length > 0 && <CompanyTable title="Cogs" rows={cogsProjects} />}
+      {filtered.length === 0 && (
+        <div className="text-center text-slate-400 py-16 text-sm italic">No clients found</div>
+      )}
 
       {dialogOpen && (
         <ClientOperationDialog

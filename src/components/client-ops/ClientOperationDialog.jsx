@@ -13,7 +13,16 @@ const ALL_SERVICES = [
   "Technology Management (inc Cogs)", "Creative Design", "Chatbot Management",
 ];
 
-const BRANDS = ["ThinkEngine Marketing", "ThinkEngine Tech", "Cogs"];
+const COMPANIES = ["ThinkEngine Marketing", "ThinkEngine Tech", "Cogs"];
+
+const AGREEMENT_OPTIONS = [
+  "1 Month (Monthly Rolling)",
+  "3 Months (Quarterly)",
+  "6 Months",
+  "12 Months",
+  "24 Months",
+  "36 Months",
+];
 
 const USER_ROLES = ["client_lead", "client_exec", "client_exec_2", "website_creative", "tech_lead"];
 const ROLE_LABELS = {
@@ -23,6 +32,13 @@ const ROLE_LABELS = {
   website_creative: "Website & Creative",
   tech_lead: "Tech",
 };
+
+// Returns first name only, stripping surname for Ben and Keara
+function displayName(u) {
+  if (!u) return "";
+  const name = u.full_name || u.email;
+  return name.split(" ")[0];
+}
 
 export default function ClientOperationDialog({ open, onOpenChange, project, users, onSaved }) {
   const isEdit = !!project;
@@ -47,7 +63,6 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
     base44.entities.Client.list("name").then(setClients);
   }, []);
 
-  // Filter clients by the brand mapping
   const brandToCompany = {
     "ThinkEngine Marketing": "ThinkEngine",
     "ThinkEngine Tech": "ThinkEngine",
@@ -86,15 +101,24 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
 
-          {/* Row 1: Company Name + Agreement Type */}
+          {/* Row 1: Company (brand) - full width, first */}
+          <div className="space-y-1">
+            <Label>Company</Label>
+            <Select value={form.company} onValueChange={v => setForm({ ...form, company: v, name: "" })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {COMPANIES.map(b => (
+                  <SelectItem key={b} value={b}>{b}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Row 2: Company Name + Agreement Type */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>Company Name <span className="text-red-500">*</span></Label>
-              <Select
-                value={form.name}
-                onValueChange={v => setForm({ ...form, name: v })}
-                required
-              >
+              <Select value={form.name} onValueChange={v => setForm({ ...form, name: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select company..." />
                 </SelectTrigger>
@@ -110,28 +134,15 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
               <Select value={form.agreement_type} onValueChange={v => setForm({ ...form, agreement_type: v })}>
                 <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Annual">Annual</SelectItem>
-                  <SelectItem value="Monthly Rolling">Monthly Rolling</SelectItem>
-                  <SelectItem value="3 Months (Quarterly)">3 Months (Quarterly)</SelectItem>
+                  {AGREEMENT_OPTIONS.map(opt => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Row 2: Brand (full width) */}
-          <div className="space-y-1">
-            <Label>Brand</Label>
-            <Select value={form.company} onValueChange={v => setForm({ ...form, company: v, name: "" })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {BRANDS.map(b => (
-                  <SelectItem key={b} value={b}>{b}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Row 3-4: Staff roles in 2-col grid */}
+          {/* Staff roles in 2-col grid */}
           <div className="grid grid-cols-2 gap-4">
             {USER_ROLES.map(role => (
               <div key={role} className="space-y-1">
@@ -139,9 +150,9 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
                 <Select value={form[role] || "none"} onValueChange={v => setForm({ ...form, [role]: v === "none" ? "" : v })}>
                   <SelectTrigger><SelectValue placeholder="Select user" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">–</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {users.map(u => (
-                      <SelectItem key={u.id} value={u.email}>{u.full_name || u.email}</SelectItem>
+                      <SelectItem key={u.id} value={u.email}>{displayName(u)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -167,27 +178,6 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
             <label htmlFor="is-project" className="text-sm text-slate-700 cursor-pointer">
               <span className="font-medium">Project</span> <span className="text-slate-500">(one-off project, not a retainer)</span>
             </label>
-          </div>
-
-          {/* Solution Categories */}
-          <div className="space-y-2">
-            <Label className="font-semibold">Solution Categories</Label>
-            <div className="flex flex-wrap gap-2">
-              {BRANDS.map(b => (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => setForm(f => ({ ...f, company: b, name: "" }))}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                    form.company === b
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white text-slate-600 border-slate-300 hover:border-blue-400"
-                  }`}
-                >
-                  {b}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Services Provided */}
