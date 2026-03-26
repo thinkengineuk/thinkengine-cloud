@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import ClientNameCombobox from "./ClientNameCombobox";
 
 const COLORS = [
   { name: "blue", class: "bg-blue-500" },
@@ -57,7 +58,11 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
             </div>
             <div className="space-y-1">
               <Label>Client Name</Label>
-              <Input value={form.client_name} onChange={e => setForm({ ...form, client_name: e.target.value })} placeholder="e.g. Acme Corp" />
+              <ClientNameCombobox
+                value={form.client_name}
+                onChange={v => setForm({ ...form, client_name: v })}
+                company={form.company}
+              />
             </div>
           </div>
 

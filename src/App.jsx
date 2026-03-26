@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import Productivity from './pages/Productivity';
 import ClientProjects from './pages/ClientProjects';
+import Clients from './pages/Clients';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -70,6 +71,11 @@ const AuthenticatedApp = () => {
       <Route path="/ClientProjects" element={
         <LayoutWrapper currentPageName="ClientProjects">
           <ClientProjects />
+        </LayoutWrapper>
+      } />
+      <Route path="/Clients" element={
+        <LayoutWrapper currentPageName="Clients">
+          <Clients />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
