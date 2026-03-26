@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import ClientNameCombobox from "./ClientNameCombobox";
+import { STAGE_COLUMNS } from "./projectStages";
 
 const COLORS = [
   { name: "blue", class: "bg-blue-500" },
@@ -28,7 +29,7 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
     description: "",
     start_date: new Date().toISOString().slice(0, 10),
     color: "blue",
-    current_stage: "Project Commencement",
+    current_stage: "Part 1 - Client Requirements Call",
   });
   const [saving, setSaving] = useState(false);
 
@@ -37,7 +38,7 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
     setSaving(true);
     await base44.entities.ClientProject.create({
       ...form,
-      stage_started_at: { "Project Commencement": form.start_date },
+      stage_started_at: { [form.current_stage]: form.start_date },
     });
     setSaving(false);
     onOpenChange(false);
@@ -87,6 +88,20 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label>Starting Stage</Label>
+            <Select value={form.current_stage} onValueChange={v => setForm({ ...form, current_stage: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {STAGE_COLUMNS.map(stage => (
+                  <SelectItem key={stage} value={stage}>
+                    {stage.replace(/^Part \d+ - /, "Part $& ").replace(/^(Part \d+) - /, "$1 — ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-1">
