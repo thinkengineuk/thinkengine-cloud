@@ -65,7 +65,11 @@ export default function ClientProjectCard({ project, onClick }) {
         </div>
 
         <div className="flex items-center justify-between">
-          <Badge className="text-xs bg-slate-100 text-slate-600 border-slate-200">
+          <Badge className={`text-xs font-semibold ${
+            project.company === "Cogs" 
+              ? "bg-cyan-100 text-cyan-700 border-cyan-300" 
+              : "bg-blue-100 text-blue-700 border-blue-300"
+          }`}>
             {project.company}
           </Badge>
         </div>

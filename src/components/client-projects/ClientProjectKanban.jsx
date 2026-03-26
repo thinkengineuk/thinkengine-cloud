@@ -11,7 +11,7 @@ export default function ClientProjectKanban({ projects, onRefresh, isAdmin }) {
 
   return (
     <>
-      <div className="pb-6">
+      <div className="pb-6 bg-white rounded-xl p-4">
         <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}>
           {columns.map((stage, index) => {
             const stageProjects = projects.filter(p => p.current_stage === stage);
