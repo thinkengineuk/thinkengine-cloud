@@ -33,27 +33,41 @@ const ROLE_LABELS = {
   tech_lead: "Tech",
 };
 
-// Returns first name only, stripping surname for Ben and Keara
 function displayName(u) {
   if (!u) return "";
   const name = u.full_name || u.email;
   return name.split(" ")[0];
 }
 
+// Resolve a value that might be a first name or an email to an email
+function resolveToEmail(value, users) {
+  if (!value) return "";
+  // Already an email
+  if (value.includes("@")) return value;
+  // Try to match by first name (case-insensitive)
+  const match = users.find(u =>
+    (u.full_name || "").split(" ")[0].toLowerCase() === value.toLowerCase()
+  );
+  return match?.email || value;
+}
+
 export default function ClientOperationDialog({ open, onOpenChange, project, users, onSaved }) {
   const isEdit = !!project;
   const [clients, setClients] = useState([]);
+
+  const resolveStaff = (field) => resolveToEmail(project?.[field] || "", users);
+
   const [form, setForm] = useState({
     name: project?.name || "",
     company: project?.company || "ThinkEngine Marketing",
     client_type: project?.client_type || "Retained",
     agreement_type: project?.agreement_type || "",
     services: project?.services || [],
-    client_lead: project?.client_lead || "",
-    client_exec: project?.client_exec || "",
-    client_exec_2: project?.client_exec_2 || "",
-    website_creative: project?.website_creative || "",
-    tech_lead: project?.tech_lead || "",
+    client_lead: resolveStaff("client_lead"),
+    client_exec: resolveStaff("client_exec"),
+    client_exec_2: resolveStaff("client_exec_2"),
+    website_creative: resolveStaff("website_creative"),
+    tech_lead: resolveStaff("tech_lead"),
     how_to_use_link: project?.how_to_use_link || "",
     current_stage: project?.current_stage || "Part 1 - Client Requirements Call",
   });

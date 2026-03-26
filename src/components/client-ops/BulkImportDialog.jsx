@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -265,6 +265,32 @@ export default function BulkImportDialog({ open, onOpenChange, onImported }) {
   const [preview, setPreview] = useState(null);
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
+
+  useEffect(() => {
+    if (open) base44.entities.User.list().then(setAllUsers);
+  }, [open]);
+
+  // Resolve first name to email using loaded users
+  function resolveStaffToEmail(name) {
+    if (!name) return "";
+    if (name.includes("@")) return name;
+    const match = allUsers.find(u =>
+      (u.full_name || "").split(" ")[0].toLowerCase() === name.toLowerCase()
+    );
+    return match?.email || name;
+  }
+
+  function resolveRowStaff(row) {
+    return {
+      ...row,
+      client_lead: resolveStaffToEmail(row.client_lead),
+      client_exec: resolveStaffToEmail(row.client_exec),
+      client_exec_2: resolveStaffToEmail(row.client_exec_2),
+      website_creative: resolveStaffToEmail(row.website_creative),
+      tech_lead: resolveStaffToEmail(row.tech_lead),
+    };
+  }
 
   const handleParse = () => {
     const { rows, errors } = parseAll(pasteText, defaultCompany);
@@ -278,7 +304,7 @@ export default function BulkImportDialog({ open, onOpenChange, onImported }) {
     let success = 0, failed = 0;
     for (const row of preview.rows) {
       try {
-        await base44.entities.ClientProject.create(row);
+        await base44.entities.ClientProject.create(resolveRowStaff(row));
         success++;
       } catch {
         failed++;
@@ -371,18 +397,26 @@ export default function BulkImportDialog({ open, onOpenChange, onImported }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {preview.rows.map((r, i) => (
+                        {preview.rows.map((r, i) => {
+                          const resolved = resolveRowStaff(r);
+                          const nameOf = (email) => {
+                            if (!email) return "–";
+                            const u = allUsers.find(u => u.email === email);
+                            return u ? (u.full_name || "").split(" ")[0] || email : email;
+                          };
+                          return (
                           <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
                             <td className="px-3 py-1.5 font-medium">{r.name}</td>
                             <td className="px-3 py-1.5 text-slate-600">{r.agreement_type || "–"}</td>
                             <td className="px-3 py-1.5 text-slate-600">{r.services.join(", ") || "–"}</td>
-                            <td className="px-3 py-1.5 text-slate-600">{r.client_lead || "–"}</td>
-                            <td className="px-3 py-1.5 text-slate-600">{r.client_exec || "–"}</td>
-                            <td className="px-3 py-1.5 text-slate-600">{r.client_exec_2 || "–"}</td>
-                            <td className="px-3 py-1.5 text-slate-600">{r.website_creative || "–"}</td>
-                            <td className="px-3 py-1.5 text-slate-600">{r.tech_lead || "–"}</td>
+                            <td className="px-3 py-1.5 text-slate-600">{nameOf(resolved.client_lead)}</td>
+                            <td className="px-3 py-1.5 text-slate-600">{nameOf(resolved.client_exec)}</td>
+                            <td className="px-3 py-1.5 text-slate-600">{nameOf(resolved.client_exec_2)}</td>
+                            <td className="px-3 py-1.5 text-slate-600">{nameOf(resolved.website_creative)}</td>
+                            <td className="px-3 py-1.5 text-slate-600">{nameOf(resolved.tech_lead)}</td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
