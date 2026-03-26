@@ -82,7 +82,8 @@ export default function ClientOperations() {
     const matchSearch = !search || p.name?.toLowerCase().includes(search.toLowerCase()) || p.client_name?.toLowerCase().includes(search.toLowerCase());
     const matchAgreement = agreementFilter === "all" || p.agreement_type === agreementFilter;
     const matchPerson = personFilter === "all" || STAFF_FIELDS.some(f => p[f] === personFilter);
-    return matchSearch && matchAgreement && matchPerson;
+    const isRetained = p.client_type === "Retained";
+    return matchSearch && matchAgreement && matchPerson && isRetained;
   });
 
   const teMarketingProjects = filtered.filter(p => p.company === "ThinkEngine Marketing");
