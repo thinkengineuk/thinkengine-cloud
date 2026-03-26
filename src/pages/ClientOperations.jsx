@@ -26,7 +26,8 @@ function firstName(email, users) {
   if (!email) return null;
   const u = users.find(u => u.email === email);
   const name = u?.full_name || email.split("@")[0];
-  return name.split(" ")[0];
+  const first = name.split(" ")[0];
+  return first.charAt(0).toUpperCase() + first.slice(1);
 }
 
 function UserName({ email, users }) {
