@@ -45,23 +45,17 @@ export default function ClientProjectKanban({ projects, onRefresh, isAdmin }) {
       </div>
 
       {completedProjects.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">Completed Projects</h3>
-          <div className="space-y-2">
+        <div className="mt-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-xl p-4">
+          <div className="mb-3">
+            <h3 className="text-sm font-semibold text-cyan-950">Completed Projects</h3>
+          </div>
+          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(280px, 1fr))` }}>
             {completedProjects.map(p => (
-              <div
+              <ClientProjectCard
                 key={p.id}
-                className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 cursor-pointer transition-all"
+                project={p}
                 onClick={() => setSelectedProject(p)}
-              >
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900">{p.name}</p>
-                  <p className="text-sm text-slate-500">{p.client_name}</p>
-                </div>
-                <div className="text-right text-xs text-slate-500">
-                  {p.actual_end_date && <>Completed {new Date(p.actual_end_date).toLocaleDateString()}</>}
-                </div>
-              </div>
+              />
             ))}
           </div>
         </div>
