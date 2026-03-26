@@ -133,13 +133,12 @@ export default function ClientOperations() {
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-24">Exec 2</th>
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-28">Web & Creative</th>
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-20">Tech</th>
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-20">How-To</th>
               {isAdmin && <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-20">Actions</th>}
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
-              <tr><td colSpan={isAdmin ? 10 : 9} className="text-center text-slate-400 py-8 text-sm italic">No clients found</td></tr>
+              <tr><td colSpan={isAdmin ? 9 : 8} className="text-center text-slate-400 py-8 text-sm italic">No clients found</td></tr>
             ) : rows.map(p => (
               <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                 <td className="px-4 py-2.5 font-medium text-slate-800">{p.name || p.client_name}</td>
@@ -160,11 +159,6 @@ export default function ClientOperations() {
                 <td className="px-4 py-2.5"><UserName email={p.client_exec_2} users={users} /></td>
                 <td className="px-4 py-2.5"><UserName email={p.website_creative} users={users} /></td>
                 <td className="px-4 py-2.5"><UserName email={p.tech_lead} users={users} /></td>
-                <td className="px-4 py-2.5">
-                  {p.how_to_use_link ? (
-                    <a href={p.how_to_use_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs">Link</a>
-                  ) : <span className="text-slate-400">–</span>}
-                </td>
                 {isAdmin && (
                   <td className="px-4 py-2.5">
                     {confirmDeleteId === p.id ? (
