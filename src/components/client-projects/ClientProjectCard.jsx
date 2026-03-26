@@ -14,7 +14,9 @@ export default function ClientProjectCard({ project, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer overflow-hidden group"
+      className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer overflow-hidden group ${
+        project.company === "Cogs" ? "border-2 border-black" : ""
+      }`}
     >
       <div className={`h-1.5 bg-gradient-to-r ${gradientClass}`} />
       <div className="p-4 space-y-3">
@@ -65,7 +67,11 @@ export default function ClientProjectCard({ project, onClick }) {
         </div>
 
         <div className="flex items-center justify-between">
-          <Badge className="text-xs bg-slate-100 text-slate-600 border-slate-200">
+          <Badge className={`text-xs border-slate-200 ${
+            project.company === "Cogs" 
+              ? "bg-slate-100 text-black" 
+              : "bg-slate-100 text-[#1a2f5a]"
+          }`}>
             {project.company}
           </Badge>
         </div>
