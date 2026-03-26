@@ -12,6 +12,7 @@ export default function ClientProjects() {
   const [view, setView] = useState("kanban");
   const [showCreate, setShowCreate] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [companyFilter, setCompanyFilter] = useState("all");
 
   useEffect(() => {
     loadData();
@@ -93,10 +94,29 @@ export default function ClientProjects() {
           </div>
         </div>
 
+        {/* Company Filter */}
+        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-1 flex gap-1 w-fit">
+          {["all", "ThinkEngine", "Cogs"].map((opt) => (
+            <button
+              key={opt}
+              onClick={() => setCompanyFilter(opt)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                companyFilter === opt ? "bg-white text-slate-800 shadow" : "text-white hover:bg-white/20"
+              }`}
+            >
+              {opt === "all" ? "All Projects" : opt}
+            </button>
+          ))}
+        </div>
+
         {view === "kanban" ? (
-          <ClientProjectKanban projects={projects} onRefresh={loadData} isAdmin={user?.role === "admin"} />
+          <ClientProjectKanban
+            projects={projects.filter(p => companyFilter === "all" || p.company === companyFilter)}
+            onRefresh={loadData}
+            isAdmin={user?.role === "admin"}
+          />
         ) : (
-          <ClientProjectGantt projects={projects} />
+          <ClientProjectGantt projects={projects.filter(p => companyFilter === "all" || p.company === companyFilter)} />
         )}
       </div>
 
