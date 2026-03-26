@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CalendarIcon, User, Eye, Tag, AlertCircle, Trash2, Repeat, CheckCircle2 } from "lucide-react";
+import { CalendarIcon, User, Eye, Tag, AlertCircle, Trash2, Repeat, CheckCircle2, FolderKanban } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import TimeTrackingSection from "./TimeTrackingSection";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -41,7 +42,8 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [selectedWatcher, setSelectedWatcher] = useState("");
   const [showWatcherDialog, setShowWatcherDialog] = useState(false); // Potentially new watcher dialog state (singular)
-  const [boardMembers, setBoardMembers] = useState([]); // New state for board members
+  const [boardMembers, setBoardMembers] = useState([]);
+  const [clientProjects, setClientProjects] = useState([]);
 
   const usersMap = React.useMemo(() => {
     return (allUsers || []).reduce((acc, user) => {
@@ -49,6 +51,14 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
       return acc;
     }, {});
   }, [allUsers]);
+
+  React.useEffect(() => {
+    const loadClientProjects = async () => {
+      const projects = await base44.entities.ClientProject.list();
+      setClientProjects(projects);
+    };
+    loadClientProjects();
+  }, []);
 
   React.useEffect(() => {
     const loadBoardTags = async () => {
@@ -380,6 +390,35 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
             </div>
           ) : (
             <p className="text-sm text-slate-500">No tags yet</p>
+          )}
+        </div>
+
+        {/* Client Project Link */}
+        <div className="space-y-3">
+          <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <FolderKanban className="w-4 h-4" />
+            Linked Client Project
+          </Label>
+          <Select
+            value={task.client_project_id || "none"}
+            onValueChange={(v) => onUpdate({ client_project_id: v === "none" ? null : v })}
+          >
+            <SelectTrigger className="bg-white">
+              <SelectValue placeholder="Link to a project..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No project linked</SelectItem>
+              {clientProjects.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name} {p.client_name ? `— ${p.client_name}` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {task.client_project_id && (
+            <p className="text-xs text-teal-600">
+              Linked to: <span className="font-semibold">{clientProjects.find(p => p.id === task.client_project_id)?.name || "..."}</span>
+            </p>
           )}
         </div>
 

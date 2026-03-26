@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, TrendingUp, Calendar } from "lucide-react";
+import { Trash2, TrendingUp, Calendar, ExternalLink, CheckCircle2, Circle } from "lucide-react";
 import { STAGES, STAGE_COLUMNS, getStagePct, estimateEndDate, COLOR_MAP, PROGRESS_COLOR } from "./projectStages";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 export default function ClientProjectDetailModal({ project, isAdmin, onClose, onRefresh }) {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: project.name,
     client_name: project.client_name || "",
@@ -25,6 +28,24 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
   });
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [linkedTasks, setLinkedTasks] = useState([]);
+  const [boards, setBoards] = useState({});
+
+  useEffect(() => {
+    const loadLinkedTasks = async () => {
+      const tasks = await base44.entities.Task.filter({ client_project_id: project.id });
+      setLinkedTasks(tasks);
+      // Load boards for context
+      const boardIds = [...new Set(tasks.map(t => t.board_id))];
+      if (boardIds.length > 0) {
+        const allBoards = await base44.entities.Board.list();
+        const boardMap = {};
+        allBoards.forEach(b => { boardMap[b.id] = b; });
+        setBoards(boardMap);
+      }
+    };
+    loadLinkedTasks();
+  }, [project.id]);
 
   const pct = getStagePct(form.current_stage);
   const estEnd = estimateEndDate({ ...project, current_stage: form.current_stage });
@@ -116,6 +137,42 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
             })}
           </div>
           <div className="text-xs text-slate-500 mt-1">Current: <span className="font-medium text-slate-700">{form.current_stage}</span></div>
+        </div>
+
+        {/* Linked Tasks */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-wide">
+            <ExternalLink className="w-3 h-3" />
+            Linked Tasks ({linkedTasks.length})
+          </Label>
+          {linkedTasks.length === 0 ? (
+            <p className="text-sm text-slate-400 italic">No tasks linked yet. Link tasks from any board card via the task sidebar.</p>
+          ) : (
+            <div className="space-y-1 max-h-48 overflow-y-auto">
+              {linkedTasks.map(task => (
+                <div
+                  key={task.id}
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer group border border-transparent hover:border-slate-200 transition-all"
+                  onClick={() => {
+                    onClose();
+                    navigate(`${createPageUrl("Board")}?id=${task.board_id}&taskId=${task.id}`);
+                  }}
+                >
+                  {task.status === 'completed'
+                    ? <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    : <Circle className="w-4 h-4 text-slate-300 flex-shrink-0" />
+                  }
+                  <span className={`text-sm flex-1 truncate ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                    {task.title}
+                  </span>
+                  {boards[task.board_id] && (
+                    <span className="text-xs text-slate-400 flex-shrink-0">{boards[task.board_id].name}</span>
+                  )}
+                  <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-teal-500 flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {isAdmin ? (
