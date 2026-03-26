@@ -42,6 +42,7 @@ export default function ClientOperations() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [companyFilter, setCompanyFilter] = useState("all");
   const [agreementFilter, setAgreementFilter] = useState("all");
   const [personFilter, setPersonFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -81,10 +82,11 @@ export default function ClientOperations() {
 
   const filtered = projects.filter(p => {
     const matchSearch = !search || p.name?.toLowerCase().includes(search.toLowerCase()) || p.client_name?.toLowerCase().includes(search.toLowerCase());
+    const matchCompany = companyFilter === "all" || p.company === companyFilter;
     const matchAgreement = agreementFilter === "all" || p.agreement_type === agreementFilter;
     const matchPerson = personFilter === "all" || STAFF_FIELDS.some(f => p[f] === personFilter);
     const isRetained = p.client_type === "Retained";
-    return matchSearch && matchAgreement && matchPerson && isRetained;
+    return matchSearch && matchCompany && matchAgreement && matchPerson && isRetained;
   });
 
   const teMarketingProjects = filtered.filter(p => p.company === "ThinkEngine Marketing");
@@ -196,6 +198,38 @@ export default function ClientOperations() {
             </Button>
           </div>
         )}
+      </div>
+
+      {/* Company Filter Buttons */}
+      <div className="flex gap-2 mb-4">
+        <Button
+          variant={companyFilter === "all" ? "default" : "outline"}
+          onClick={() => setCompanyFilter("all")}
+          className={companyFilter === "all" ? "bg-teal-600 hover:bg-teal-700 text-white" : ""}
+        >
+          All Companies
+        </Button>
+        <Button
+          variant={companyFilter === "ThinkEngine Marketing" ? "default" : "outline"}
+          onClick={() => setCompanyFilter("ThinkEngine Marketing")}
+          className={companyFilter === "ThinkEngine Marketing" ? "bg-teal-600 hover:bg-teal-700 text-white" : ""}
+        >
+          ThinkEngine Marketing
+        </Button>
+        <Button
+          variant={companyFilter === "ThinkEngine Tech" ? "default" : "outline"}
+          onClick={() => setCompanyFilter("ThinkEngine Tech")}
+          className={companyFilter === "ThinkEngine Tech" ? "bg-teal-600 hover:bg-teal-700 text-white" : ""}
+        >
+          ThinkEngine Tech
+        </Button>
+        <Button
+          variant={companyFilter === "Cogs" ? "default" : "outline"}
+          onClick={() => setCompanyFilter("Cogs")}
+          className={companyFilter === "Cogs" ? "bg-teal-600 hover:bg-teal-700 text-white" : ""}
+        >
+          Cogs
+        </Button>
       </div>
 
       {/* Filters */}
