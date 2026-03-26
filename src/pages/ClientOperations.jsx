@@ -227,11 +227,17 @@ export default function ClientOperations() {
         </Select>
       </div>
 
-      {teMarketingProjects.length > 0 && <CompanyTable title="ThinkEngine Marketing" rows={teMarketingProjects} />}
-      {teTechProjects.length > 0 && <CompanyTable title="ThinkEngine Tech" rows={teTechProjects} />}
-      {cogsProjects.length > 0 && <CompanyTable title="Cogs" rows={cogsProjects} />}
-      {filtered.length === 0 && (
-        <div className="text-center text-slate-400 py-16 text-sm italic">No clients found</div>
+      {filtered.length === 0 ? (
+        <div className="text-center text-slate-400 py-16">
+          <p className="text-base font-medium mb-2">No client data</p>
+          <p className="text-sm">Use the "Bulk Import" button to import your client operations data.</p>
+        </div>
+      ) : (
+        <>
+          {teMarketingProjects.length > 0 && <CompanyTable title="ThinkEngine Marketing" rows={teMarketingProjects} />}
+          {teTechProjects.length > 0 && <CompanyTable title="ThinkEngine Tech" rows={teTechProjects} />}
+          {cogsProjects.length > 0 && <CompanyTable title="Cogs" rows={cogsProjects} />}
+        </>
       )}
 
       {dialogOpen && (
