@@ -29,9 +29,10 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Task } from "@/entities/Task";
-import { Board } from "@/entities/Board"; // Added Board import
+import { Board } from "@/entities/Board";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { STAGE_COLUMNS } from "@/components/client-projects/projectStages";
 
 export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdate, onAssign, onAddWatcher, onClose, onRefresh }) {
   const [newTag, setNewTag] = useState("");
@@ -401,7 +402,17 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
           </Label>
           <Select
             value={task.client_project_id || "none"}
-            onValueChange={(v) => onUpdate({ client_project_id: v === "none" ? null : v })}
+            onValueChange={(v) => {
+              if (v === "none") {
+                onUpdate({ client_project_id: null, client_project_stage: null });
+              } else {
+                const project = clientProjects.find(p => p.id === v);
+                onUpdate({
+                  client_project_id: v,
+                  client_project_stage: project?.current_stage || null
+                });
+              }
+            }}
           >
             <SelectTrigger className="bg-white">
               <SelectValue placeholder="Link to a project..." />
@@ -415,11 +426,38 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
               ))}
             </SelectContent>
           </Select>
-          {task.client_project_id && (
-            <p className="text-xs text-teal-600">
-              Linked to: <span className="font-semibold">{clientProjects.find(p => p.id === task.client_project_id)?.name || "..."}</span>
-            </p>
-          )}
+
+          {task.client_project_id && (() => {
+            const linkedProject = clientProjects.find(p => p.id === task.client_project_id);
+            return linkedProject ? (
+              <div className="space-y-2">
+                <p className="text-xs text-slate-500">
+                  Current project stage: <span className="font-semibold text-teal-600">{linkedProject.current_stage}</span>
+                </p>
+                <Label className="text-xs text-slate-600">Link task to stage:</Label>
+                <Select
+                  value={task.client_project_stage || linkedProject.current_stage}
+                  onValueChange={(v) => onUpdate({ client_project_stage: v })}
+                >
+                  <SelectTrigger className="bg-white text-xs h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STAGE_COLUMNS.map((stage) => (
+                      <SelectItem key={stage} value={stage}>
+                        <div className="flex items-center gap-2">
+                          {stage === linkedProject.current_stage && (
+                            <span className="text-xs text-teal-600 font-semibold">[Current]</span>
+                          )}
+                          {stage}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null;
+          })()}
         </div>
 
         {/* Recurring Task */}

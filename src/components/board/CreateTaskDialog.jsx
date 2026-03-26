@@ -12,6 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { User } from "@/entities/User";
 import { Board } from "@/entities/Board";
+import { base44 } from "@/api/base44Client";
+import { STAGE_COLUMNS } from "@/components/client-projects/projectStages";
+import { FolderKanban } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -42,6 +45,7 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
   const [boardMembers, setBoardMembers] = useState([]);
   const [newTag, setNewTag] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clientProjects, setClientProjects] = useState([]);
 
   useEffect(() => {
     if (open) {
@@ -52,13 +56,21 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
         due_date: null,
         tags: [],
         watchers: [],
-        priority: "medium"
+        priority: "medium",
+        client_project_id: null,
+        client_project_stage: null
       });
       setNewTag("");
       setIsSubmitting(false);
       loadUsers();
+      loadClientProjects();
     }
   }, [open]);
+
+  const loadClientProjects = async () => {
+    const projects = await base44.entities.ClientProject.list();
+    setClientProjects(projects);
+  };
 
   const loadUsers = async () => {
     const allUsers = await User.list();
@@ -227,6 +239,74 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
                 ))}
               </div>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <FolderKanban className="w-4 h-4" />
+              Linked Client Project
+            </Label>
+            <Select
+              value={formData.client_project_id || "none"}
+              onValueChange={(v) => {
+                if (v === "none") {
+                  setFormData({ ...formData, client_project_id: null, client_project_stage: null });
+                } else {
+                  const project = clientProjects.find(p => p.id === v);
+                  setFormData({
+                    ...formData,
+                    client_project_id: v,
+                    client_project_stage: project?.current_stage || null
+                  });
+                }
+              }}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Link to a project..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No project linked</SelectItem>
+                {clientProjects.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name} {p.client_name ? `— ${p.client_name}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {formData.client_project_id && (() => {
+              const linkedProject = clientProjects.find(p => p.id === formData.client_project_id);
+              return linkedProject ? (
+                <div className="space-y-1">
+                  <p className="text-xs text-slate-500">
+                    Current project stage: <span className="font-semibold text-teal-600">{linkedProject.current_stage}</span>
+                  </p>
+                  <Label className="text-xs text-slate-600">Link task to stage:</Label>
+                  <Select
+                    value={formData.client_project_stage || linkedProject.current_stage}
+                    onValueChange={(v) => setFormData({ ...formData, client_project_stage: v })}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="text-xs h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STAGE_COLUMNS.map((stage) => (
+                        <SelectItem key={stage} value={stage}>
+                          <div className="flex items-center gap-2">
+                            {stage === linkedProject.current_stage && (
+                              <span className="text-xs text-teal-600 font-semibold">[Current]</span>
+                            )}
+                            {stage}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : null;
+            })()}
           </div>
 
           <div className="space-y-2">
