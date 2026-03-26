@@ -70,6 +70,14 @@ export default function ClientOperations() {
 
   const STAFF_FIELDS = ["client_lead", "client_exec", "client_exec_2", "website_creative", "tech_lead"];
 
+  // Only show users who are actually assigned to at least one project
+  const assignedEmails = new Set(
+    projects.flatMap(p => STAFF_FIELDS.map(f => p[f]).filter(Boolean))
+  );
+  const filteredUsers = users
+    .filter(u => assignedEmails.has(u.email))
+    .sort((a, b) => (a.full_name || "").localeCompare(b.full_name || ""));
+
   const filtered = projects.filter(p => {
     const matchSearch = !search || p.name?.toLowerCase().includes(search.toLowerCase()) || p.client_name?.toLowerCase().includes(search.toLowerCase());
     const matchAgreement = agreementFilter === "all" || p.agreement_type === agreementFilter;
@@ -198,7 +206,7 @@ export default function ClientOperations() {
           <SelectTrigger className="w-44"><SelectValue placeholder="Filter by person" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All People</SelectItem>
-            {users.map(u => (
+            {filteredUsers.map(u => (
               <SelectItem key={u.id} value={u.email}>
                 {u.full_name?.split(" ")[0] || u.email.split("@")[0]}
               </SelectItem>
