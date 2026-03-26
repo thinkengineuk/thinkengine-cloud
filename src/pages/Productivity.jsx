@@ -21,15 +21,22 @@ export default function Productivity() {
     const [currentUser, setCurrentUser] = useState(null);
     const [filterBoardId, setFilterBoardId] = useState("all");
     const [loading, setLoading] = useState(true);
+    const [unauthorized, setUnauthorized] = useState(false);
 
     useEffect(() => {
         const load = async () => {
             setLoading(true);
-            const [user, allBoards] = await Promise.all([
-                base44.auth.me(),
-                Board.list(),
-            ]);
+            const user = await base44.auth.me();
             setCurrentUser(user);
+            
+            // Check if user is admin
+            if (user?.role !== "admin") {
+                setUnauthorized(true);
+                setLoading(false);
+                return;
+            }
+
+            const allBoards = await Board.list();
             const myBoards = allBoards.filter(b => b.members?.includes(user.email));
             setBoards(myBoards);
 
@@ -99,6 +106,17 @@ export default function Productivity() {
         return (
             <div className="flex items-center justify-center h-full min-h-screen">
                 <div className="w-8 h-8 border-4 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    if (unauthorized) {
+        return (
+            <div className="flex items-center justify-center h-full min-h-screen">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-slate-900 mb-2">Access Denied</h1>
+                    <p className="text-slate-500">Only admins can view the Productivity page.</p>
+                </div>
             </div>
         );
     }

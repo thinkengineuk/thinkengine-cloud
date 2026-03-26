@@ -84,7 +84,7 @@ export default function Layout({ children }) {
       title: "Productivity",
       url: "/Productivity",
       icon: BarChart2,
-      show: true,
+      show: user?.role === "admin",
     },
     {
       title: "Client Projects",
