@@ -222,8 +222,10 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
               <Select value={form.current_stage} onValueChange={v => setForm({ ...form, current_stage: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {STAGE_COLUMNS.map(s => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  {STAGE_COLUMNS.map((s, i) => (
+                    <SelectItem key={s} value={s}>
+                      {s === "Completed" ? "Completed" : `Stage ${i + 1} — ${s.replace(/^Part \d+ - /, "")}`}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
