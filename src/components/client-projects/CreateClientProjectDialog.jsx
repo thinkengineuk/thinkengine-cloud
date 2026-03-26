@@ -9,16 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import ClientNameCombobox from "./ClientNameCombobox";
 import { STAGE_COLUMNS } from "./projectStages";
 
-const COLORS = [
-  { name: "blue", class: "bg-blue-500" },
-  { name: "purple", class: "bg-purple-500" },
-  { name: "green", class: "bg-green-500" },
-  { name: "orange", class: "bg-orange-500" },
-  { name: "pink", class: "bg-pink-500" },
-  { name: "teal", class: "bg-teal-500" },
-  { name: "indigo", class: "bg-indigo-500" },
-  { name: "red", class: "bg-red-500" },
-];
+function companyColor(company) {
+  return company === "Cogs" ? "indigo" : "cyan";
+}
 
 export default function CreateClientProjectDialog({ open, onOpenChange, onCreated }) {
   const [form, setForm] = useState({
@@ -28,7 +21,7 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
     client_type: "Project",
     description: "",
     start_date: new Date().toISOString().slice(0, 10),
-    color: "blue",
+    color: companyColor("ThinkEngine Marketing"),
     current_stage: "Part 1 - Client Requirements Call",
   });
   const [saving, setSaving] = useState(false);
@@ -70,7 +63,7 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>Company</Label>
-              <Select value={form.company} onValueChange={v => setForm({ ...form, company: v })}>
+              <Select value={form.company} onValueChange={v => setForm({ ...form, company: v, color: companyColor(v) })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ThinkEngine Marketing">ThinkEngine Marketing</SelectItem>
@@ -113,20 +106,6 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
           <div className="space-y-1">
             <Label>Description</Label>
             <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Brief project scope..." />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Colour</Label>
-            <div className="flex gap-2">
-              {COLORS.map(c => (
-                <button
-                  key={c.name}
-                  type="button"
-                  onClick={() => setForm({ ...form, color: c.name })}
-                  className={`w-7 h-7 rounded-full ${c.class} transition-transform ${form.color === c.name ? "ring-2 ring-offset-2 ring-slate-500 scale-110" : ""}`}
-                />
-              ))}
-            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">

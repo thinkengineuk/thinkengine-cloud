@@ -1,14 +1,15 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, TrendingUp } from "lucide-react";
-import { getStagePct, estimateEndDate, COLOR_MAP, PROGRESS_COLOR } from "./projectStages";
+import { getStagePct, estimateEndDate, COLOR_MAP, PROGRESS_COLOR, defaultColorForCompany } from "./projectStages";
 import { format } from "date-fns";
 
 export default function ClientProjectCard({ project, onClick }) {
   const pct = getStagePct(project.current_stage);
   const estEnd = estimateEndDate(project);
-  const gradientClass = COLOR_MAP[project.color] || COLOR_MAP.blue;
-  const progressClass = PROGRESS_COLOR[project.color] || PROGRESS_COLOR.blue;
+  const effectiveColor = project.color || defaultColorForCompany(project.company);
+  const gradientClass = COLOR_MAP[effectiveColor] || COLOR_MAP.cyan;
+  const progressClass = PROGRESS_COLOR[effectiveColor] || PROGRESS_COLOR.cyan;
 
   return (
     <div

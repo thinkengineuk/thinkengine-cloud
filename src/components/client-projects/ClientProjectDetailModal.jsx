@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, TrendingUp, Calendar, ExternalLink, CheckCircle2, Circle, Pencil } from "lucide-react";
-import { STAGES, STAGE_COLUMNS, getStagePct, estimateEndDate, COLOR_MAP, PROGRESS_COLOR } from "./projectStages";
+import { STAGES, STAGE_COLUMNS, getStagePct, estimateEndDate, COLOR_MAP, PROGRESS_COLOR, defaultColorForCompany } from "./projectStages";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -51,8 +51,9 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
 
   const pct = getStagePct(form.current_stage);
   const estEnd = estimateEndDate({ ...project, current_stage: form.current_stage });
-  const gradientClass = COLOR_MAP[project.color] || COLOR_MAP.blue;
-  const progressClass = PROGRESS_COLOR[project.color] || PROGRESS_COLOR.blue;
+  const effectiveColor = project.color || defaultColorForCompany(project.company);
+  const gradientClass = COLOR_MAP[effectiveColor] || COLOR_MAP.cyan;
+  const progressClass = PROGRESS_COLOR[effectiveColor] || PROGRESS_COLOR.cyan;
 
   const handleSave = async () => {
     setSaving(true);

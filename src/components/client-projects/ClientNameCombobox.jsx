@@ -18,7 +18,9 @@ export default function ClientNameCombobox({ value, onChange, company }) {
   }, [value]);
 
   const loadClients = async () => {
-    const filter = company ? { company } : {};
+    // Client entity uses "ThinkEngine" or "Cogs" — map from the project company value
+    const clientCompany = company?.startsWith("ThinkEngine") ? "ThinkEngine" : company === "Cogs" ? "Cogs" : null;
+    const filter = clientCompany ? { company: clientCompany } : {};
     const all = await base44.entities.Client.filter(filter, "name");
     setClients(all);
   };
