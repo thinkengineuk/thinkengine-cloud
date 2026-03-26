@@ -55,15 +55,24 @@ export default function ClientOperations() {
 
   const loadAll = async () => {
     setLoading(true);
-    const [me, allProjects, allUsers] = await Promise.all([
-      base44.auth.me(),
-      base44.entities.ClientProject.list("name"),
-      base44.entities.User.list(),
-    ]);
-    setUser(me);
-    setProjects(allProjects);
-    setUsers(allUsers);
-    setLoading(false);
+    try {
+      const me = await base44.auth.me();
+      const allProjects = await base44.entities.ClientProject.list("name");
+      let allUsers = [];
+      
+      // Only admins can list all users
+      if (me?.role === "admin") {
+        allUsers = await base44.entities.User.list();
+      }
+      
+      setUser(me);
+      setProjects(allProjects);
+      setUsers(allUsers);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-slate-200 border-t-teal-600 rounded-full animate-spin" /></div>;
