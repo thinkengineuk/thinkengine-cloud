@@ -6,8 +6,9 @@ import ClientProjectDetailModal from "./ClientProjectDetailModal";
 export default function ClientProjectKanban({ projects, onRefresh, isAdmin }) {
   const [selectedProject, setSelectedProject] = useState(null);
 
-  // Filter out "Completed" for main view — show as last col
-  const columns = STAGE_COLUMNS;
+  // Active projects (exclude Completed)
+  const columns = STAGE_COLUMNS.filter(s => s !== "Completed");
+  const completedProjects = projects.filter(p => p.current_stage === "Completed");
 
   return (
     <>
@@ -42,6 +43,29 @@ export default function ClientProjectKanban({ projects, onRefresh, isAdmin }) {
           })}
         </div>
       </div>
+
+      {completedProjects.length > 0 && (
+        <div className="mt-8 pt-6 border-t border-slate-200">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">Completed Projects</h3>
+          <div className="space-y-2">
+            {completedProjects.map(p => (
+              <div
+                key={p.id}
+                className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 cursor-pointer transition-all"
+                onClick={() => setSelectedProject(p)}
+              >
+                <div className="flex-1">
+                  <p className="font-medium text-slate-900">{p.name}</p>
+                  <p className="text-sm text-slate-500">{p.client_name}</p>
+                </div>
+                <div className="text-right text-xs text-slate-500">
+                  {p.actual_end_date && <>Completed {new Date(p.actual_end_date).toLocaleDateString()}</>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {selectedProject && (
         <ClientProjectDetailModal
