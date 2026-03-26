@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, User, LogOut, BarChart2, FolderKanban, Users } from "lucide-react";
+import { LayoutDashboard, User, LogOut, BarChart2, FolderKanban, Users, Briefcase } from "lucide-react";
 import { User as UserEntity } from "@/entities/User";
 import { Board } from "@/entities/Board";
 import {
@@ -90,6 +90,12 @@ export default function Layout({ children }) {
       title: "Client Projects",
       url: "/ClientProjects",
       icon: FolderKanban,
+      show: user?.company === "ThinkEngine",
+    },
+    {
+      title: "Client Operations",
+      url: "/ClientOperations",
+      icon: Briefcase,
       show: user?.company === "ThinkEngine",
     },
     {

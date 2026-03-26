@@ -10,6 +10,7 @@ import PageNotFound from './lib/PageNotFound';
 import Productivity from './pages/Productivity';
 import ClientProjects from './pages/ClientProjects';
 import Clients from './pages/Clients';
+import ClientOperations from './pages/ClientOperations';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -76,6 +77,11 @@ const AuthenticatedApp = () => {
       <Route path="/Clients" element={
         <LayoutWrapper currentPageName="Clients">
           <Clients />
+        </LayoutWrapper>
+      } />
+      <Route path="/ClientOperations" element={
+        <LayoutWrapper currentPageName="ClientOperations">
+          <ClientOperations />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
