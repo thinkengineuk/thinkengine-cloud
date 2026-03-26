@@ -12,6 +12,7 @@ import { STAGES, STAGE_COLUMNS, getStagePct, estimateEndDate, COLOR_MAP, PROGRES
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import ClientNameCombobox from "./ClientNameCombobox";
 
 export default function ClientProjectDetailModal({ project, isAdmin, onClose, onRefresh }) {
   const navigate = useNavigate();
@@ -190,7 +191,11 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
               </div>
               <div className="space-y-1">
                 <Label>Client Name</Label>
-                <Input value={form.client_name} onChange={e => setForm({ ...form, client_name: e.target.value })} />
+                <ClientNameCombobox
+                  value={form.client_name}
+                  onChange={v => setForm({ ...form, client_name: v })}
+                  company={form.company}
+                />
               </div>
             </div>
 
