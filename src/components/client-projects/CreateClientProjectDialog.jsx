@@ -24,7 +24,7 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
   const [form, setForm] = useState({
     name: "",
     client_name: "",
-    company: "ThinkEngine",
+    company: "ThinkEngine Marketing",
     client_type: "Project",
     description: "",
     start_date: new Date().toISOString().slice(0, 10),
@@ -73,7 +73,8 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
               <Select value={form.company} onValueChange={v => setForm({ ...form, company: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ThinkEngine">ThinkEngine</SelectItem>
+                  <SelectItem value="ThinkEngine Marketing">ThinkEngine Marketing</SelectItem>
+                  <SelectItem value="ThinkEngine Tech">ThinkEngine Tech</SelectItem>
                   <SelectItem value="Cogs">Cogs</SelectItem>
                 </SelectContent>
               </Select>

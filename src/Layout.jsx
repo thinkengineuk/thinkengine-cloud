@@ -96,7 +96,7 @@ export default function Layout({ children }) {
       title: "Client Operations",
       url: "/ClientOperations",
       icon: Briefcase,
-      show: user?.company === "ThinkEngine",
+      show: user?.role === "admin" || user?.company === "ThinkEngine",
     },
     {
       title: "Clients",

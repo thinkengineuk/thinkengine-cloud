@@ -27,7 +27,7 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
   const isEdit = !!project;
   const [form, setForm] = useState({
     name: project?.name || "",
-    company: project?.company || "ThinkEngine",
+    company: project?.company || "ThinkEngine Marketing",
     client_type: project?.client_type || "Retained",
     agreement_type: project?.agreement_type || "",
     services: project?.services || [],
@@ -80,7 +80,8 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
               <Select value={form.company} onValueChange={v => setForm({ ...form, company: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ThinkEngine">ThinkEngine</SelectItem>
+                  <SelectItem value="ThinkEngine Marketing">ThinkEngine Marketing</SelectItem>
+                  <SelectItem value="ThinkEngine Tech">ThinkEngine Tech</SelectItem>
                   <SelectItem value="Cogs">Cogs</SelectItem>
                 </SelectContent>
               </Select>

@@ -69,7 +69,8 @@ export default function ClientOperations() {
     return matchSearch && matchAgreement;
   });
 
-  const teProjects = filtered.filter(p => p.company === "ThinkEngine");
+  const teMarketingProjects = filtered.filter(p => p.company === "ThinkEngine Marketing");
+  const teTechProjects = filtered.filter(p => p.company === "ThinkEngine Tech");
   const cogsProjects = filtered.filter(p => p.company === "Cogs");
 
   const handleDelete = async (id) => {
@@ -187,7 +188,8 @@ export default function ClientOperations() {
         </Select>
       </div>
 
-      {teProjects.length > 0 && <CompanyTable title="ThinkEngine" rows={teProjects} />}
+      {teMarketingProjects.length > 0 && <CompanyTable title="ThinkEngine Marketing" rows={teMarketingProjects} />}
+      {teTechProjects.length > 0 && <CompanyTable title="ThinkEngine Tech" rows={teTechProjects} />}
       {cogsProjects.length > 0 && <CompanyTable title="Cogs" rows={cogsProjects} />}
 
       {dialogOpen && (

@@ -96,7 +96,7 @@ export default function ClientProjects() {
 
         {/* Company Filter */}
         <div className="bg-white/20 backdrop-blur-sm rounded-xl p-1 flex gap-1 w-fit">
-          {["all", "ThinkEngine", "Cogs"].map((opt) => (
+          {["all", "ThinkEngine Marketing", "ThinkEngine Tech", "Cogs"].map((opt) => (
             <button
               key={opt}
               onClick={() => setCompanyFilter(opt)}
