@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Shield, User as UserIcon } from "lucide-react";
 
 export default function Users() {
@@ -33,6 +35,11 @@ export default function Users() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateCompany = async (userId, company) => {
+    await base44.entities.User.update(userId, { company });
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, company } : u));
   };
 
   const filteredUsers = users.filter(user => 
@@ -120,6 +127,22 @@ export default function Users() {
                           User
                         </Badge>
                       )}
+                    </div>
+                    <div className="mt-3">
+                      <p className="text-xs text-slate-400 mb-1">Company</p>
+                      <Select
+                        value={user.company || ""}
+                        onValueChange={v => updateCompany(user.id, v)}
+                      >
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Set company..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ThinkEngine">ThinkEngine</SelectItem>
+                          <SelectItem value="Cogs">Cogs</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     {user.created_date && (
                       <p className="text-xs text-slate-500 mt-2">
