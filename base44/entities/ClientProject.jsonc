@@ -1,0 +1,138 @@
+{
+  "name": "ClientProject",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Project / client name"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Client name"
+    },
+    "company": {
+      "type": "string",
+      "enum": [
+        "ThinkEngine Marketing",
+        "ThinkEngine Tech",
+        "Cogs"
+      ],
+      "description": "Which company section (brand) this project belongs to"
+    },
+    "client_type": {
+      "type": "string",
+      "enum": [
+        "Retained",
+        "Project"
+      ],
+      "description": "Retained or one-off project client"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief project description"
+    },
+    "current_stage": {
+      "type": "string",
+      "enum": [
+        "Part 1 - Client Requirements Call",
+        "Part 2 - SoW Sign Off / Homepage Design",
+        "Part 3 - Main Development",
+        "Part 4 - Client Testing & Refinement",
+        "Part 5 - Changes from Client Testing",
+        "Part 6 - Go Live Planning / DNS",
+        "Part 7 - Go Live & Handover",
+        "Completed"
+      ],
+      "default": "Part 1 - Client Requirements Call",
+      "description": "Current stage of the project"
+    },
+    "stage_started_at": {
+      "type": "object",
+      "description": "Map of stage name to ISO date when it started",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Project start date"
+    },
+    "estimated_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Estimated end date"
+    },
+    "actual_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Actual completion date"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Project notes"
+    },
+    "assigned_to": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails assigned to this project"
+    },
+    "color": {
+      "type": "string",
+      "description": "Project colour for display"
+    },
+    "agreement_type": {
+      "type": "string",
+      "enum": [
+        "Annual",
+        "Monthly Rolling",
+        "3 Months (Quarterly)"
+      ],
+      "description": "Client agreement type"
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Services provided to this client"
+    },
+    "client_lead": {
+      "type": "string",
+      "description": "User email of the Client Lead"
+    },
+    "client_exec": {
+      "type": "string",
+      "description": "User email of the Client Exec"
+    },
+    "client_exec_2": {
+      "type": "string",
+      "description": "User email of the second Client Exec"
+    },
+    "website_creative": {
+      "type": "string",
+      "description": "User email of the Website & Creative lead"
+    },
+    "tech_lead": {
+      "type": "string",
+      "description": "User email of the Tech lead"
+    },
+    "how_to_use_link": {
+      "type": "string",
+      "description": "Google Drive How-To-Use link for the client"
+    },
+    "is_archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this project is archived and hidden from view"
+    }
+  },
+  "required": [
+    "name",
+    "current_stage",
+    "company",
+    "client_type"
+  ]
+}
