@@ -72,5 +72,5 @@ export const PROGRESS_COLOR = {
 
 // Returns the default color based on company
 export function defaultColorForCompany(company) {
-  return company === "Cogs" ? "black" : "midnight";
+  return company === "Cogs" ? "aqua" : "blue";
 }

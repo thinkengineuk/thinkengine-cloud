@@ -10,7 +10,7 @@ import ClientNameCombobox from "./ClientNameCombobox";
 import { STAGE_COLUMNS } from "./projectStages";
 
 function companyColor(company) {
-  return company === "Cogs" ? "black" : "midnight";
+  return company === "Cogs" ? "aqua" : "blue";
 }
 
 export default function CreateClientProjectDialog({ open, onOpenChange, onCreated }) {
