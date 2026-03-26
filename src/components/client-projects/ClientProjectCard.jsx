@@ -26,15 +26,7 @@ export default function ClientProjectCard({ project, onClick }) {
               <p className="text-xs text-slate-500 mt-0.5">{project.client_name}</p>
             )}
           </div>
-          <Badge
-            className={`text-xs flex-shrink-0 ${
-              project.client_type === "Retained"
-                ? "bg-purple-100 text-purple-700 border-purple-200"
-                : "bg-blue-100 text-blue-700 border-blue-200"
-            }`}
-          >
-            {project.client_type}
-          </Badge>
+
         </div>
 
         {/* Progress bar */}
