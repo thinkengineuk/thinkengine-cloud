@@ -84,7 +84,7 @@ export default function ClientOperations() {
   const handleDelete = async (id) => {
     await base44.entities.ClientProject.delete(id);
     setConfirmDeleteId(null);
-    toast({ title: "Client operation deleted" });
+    toast({ title: "Client operation deleted", duration: 2000 });
     loadAll();
   };
 
