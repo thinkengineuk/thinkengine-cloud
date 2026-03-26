@@ -1,5 +1,4 @@
 export const STAGES = [
-  { key: "Project Commencement", label: "Project Commencement", pct: 0 },
   { key: "Part 1 - Client Requirements Call", label: "Part 1 — Client Requirements Call", pct: 14 },
   { key: "Part 2 - SoW Sign Off / Homepage Design", label: "Part 2 — SoW Sign Off / Homepage Design", pct: 28 },
   { key: "Part 3 - Main Development", label: "Part 3 — Main Development", pct: 42 },
