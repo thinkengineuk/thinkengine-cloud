@@ -33,7 +33,6 @@ export function estimateEndDate(project) {
 }
 
 export const STAGE_COLUMNS = [
-  "Project Commencement",
   "Part 1 - Client Requirements Call",
   "Part 2 - SoW Sign Off / Homepage Design",
   "Part 3 - Main Development",
