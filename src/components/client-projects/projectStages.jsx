@@ -52,8 +52,6 @@ export const COLOR_MAP = {
   teal: "from-teal-400 to-teal-600",
   indigo: "from-indigo-600 to-indigo-800",
   red: "from-red-400 to-red-600",
-  midnight: "from-[#0f1f3d] to-[#1a2f5a]",
-  aqua: "from-[#5ecfea] to-[#3ab8d8]",
 };
 
 export const PROGRESS_COLOR = {
@@ -66,11 +64,9 @@ export const PROGRESS_COLOR = {
   teal: "bg-teal-500",
   indigo: "bg-indigo-700",
   red: "bg-red-500",
-  midnight: "bg-[#1a2f5a]",
-  aqua: "bg-[#5ecfea]",
 };
 
 // Returns the default color based on company
 export function defaultColorForCompany(company) {
-  return company === "Cogs" ? "aqua" : "midnight";
+  return company === "Cogs" ? "indigo" : "cyan";
 }
