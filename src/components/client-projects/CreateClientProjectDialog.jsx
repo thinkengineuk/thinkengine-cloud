@@ -95,9 +95,9 @@ export default function CreateClientProjectDialog({ open, onOpenChange, onCreate
             <Select value={form.current_stage} onValueChange={v => setForm({ ...form, current_stage: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {STAGE_COLUMNS.map(stage => (
+                {STAGE_COLUMNS.map((stage, i) => (
                   <SelectItem key={stage} value={stage}>
-                    {stage.replace(/^Part \d+ - /, "Part $& ").replace(/^(Part \d+) - /, "$1 — ")}
+                    {stage === "Completed" ? "Completed" : `Stage ${i + 1} — ${stage.replace(/^Part \d+ - /, "")}`}
                   </SelectItem>
                 ))}
               </SelectContent>
