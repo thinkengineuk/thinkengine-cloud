@@ -23,6 +23,7 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
     client_type: project.client_type,
     description: project.description || "",
     current_stage: project.current_stage,
+    start_date: project.start_date || "",
     estimated_end_date: project.estimated_end_date || "",
     actual_end_date: project.actual_end_date || "",
     notes: project.notes || "",
@@ -235,6 +236,11 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label>Start Date</Label>
+              <Input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
