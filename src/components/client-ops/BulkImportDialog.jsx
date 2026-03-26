@@ -303,12 +303,14 @@ export default function BulkImportDialog({ open, onOpenChange, onImported }) {
     setImporting(true);
     let success = 0, failed = 0;
     
-    // Only import to Client Operations (no automatic ClientProject creation)
-    // ClientProject records must be created manually through the Add Client dialog
+    // Only create Client master records, not ClientProject records
+    // ClientProject records (projects) must be created manually
     for (const row of preview.rows) {
       try {
-        // Store the data but don't create ClientProject - this is just operational data
-        await base44.entities.ClientProject.create(resolveRowStaff(row));
+        await base44.entities.Client.create({
+          name: row.name,
+          company: defaultCompany === "ThinkEngine Marketing" || defaultCompany === "ThinkEngine Tech" ? "ThinkEngine" : "Cogs"
+        });
         success++;
       } catch {
         failed++;
