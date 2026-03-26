@@ -6,16 +6,17 @@ import ClientProjectDetailModal from "./ClientProjectDetailModal";
 export default function ClientProjectKanban({ projects, onRefresh, isAdmin }) {
   const [selectedProject, setSelectedProject] = useState(null);
 
-  // Active projects (exclude Completed)
+  // Active projects (exclude Completed and archived)
   const columns = STAGE_COLUMNS.filter(s => s !== "Completed");
   const completedProjects = projects.filter(p => p.current_stage === "Completed");
+  const activeProjects = projects.filter(p => !p.is_archived);
 
   return (
     <>
       <div className="pb-6 bg-white rounded-xl p-4">
         <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}>
           {columns.map((stage, index) => {
-            const stageProjects = projects.filter(p => p.current_stage === stage);
+            const stageProjects = activeProjects.filter(p => p.current_stage === stage);
             return (
               <div key={stage} className="min-w-0">
                 <div className="bg-slate-100 rounded-xl p-3 mb-3 h-16 flex flex-col justify-center">
