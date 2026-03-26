@@ -17,7 +17,7 @@ export default function ClientProjectKanban({ projects, onRefresh, isAdmin }) {
             const stageProjects = projects.filter(p => p.current_stage === stage);
             return (
               <div key={stage} className="min-w-0">
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 mb-3">
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 mb-3 h-16 flex flex-col justify-center">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     {index > 0 && index < columns.length - 1 && (
                       <span className="bg-white/30 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">{index}</span>
