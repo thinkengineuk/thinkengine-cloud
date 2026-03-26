@@ -51,11 +51,12 @@ export default function ClientProjectKanban({ projects, onRefresh, isAdmin }) {
           </div>
           <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(280px, 1fr))` }}>
             {completedProjects.map(p => (
-              <ClientProjectCard
-                key={p.id}
-                project={p}
-                onClick={() => setSelectedProject(p)}
-              />
+              <div key={p.id} className="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedProject(p)}>
+                <ClientProjectCard
+                  project={p}
+                  onClick={() => setSelectedProject(p)}
+                />
+              </div>
             ))}
           </div>
         </div>
