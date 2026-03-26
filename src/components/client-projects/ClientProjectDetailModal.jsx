@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, TrendingUp, Calendar, ExternalLink, CheckCircle2, Circle } from "lucide-react";
+import { Trash2, TrendingUp, Calendar, ExternalLink, CheckCircle2, Circle, Pencil } from "lucide-react";
 import { STAGES, STAGE_COLUMNS, getStagePct, estimateEndDate, COLOR_MAP, PROGRESS_COLOR } from "./projectStages";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +28,7 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
   });
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [linkedTasks, setLinkedTasks] = useState([]);
   const [boards, setBoards] = useState({});
 
@@ -78,12 +79,17 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className={`h-2 -mx-6 -mt-6 mb-4 bg-gradient-to-r ${gradientClass} rounded-t-lg`} />
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
+          <DialogTitle className="flex items-center gap-3 flex-wrap">
             <span>{project.name}</span>
             <Badge className={project.client_type === "Retained" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}>
               {project.client_type}
             </Badge>
             <Badge className="bg-slate-100 text-slate-600">{project.company}</Badge>
+            {isAdmin && !editing && (
+              <Button size="sm" variant="outline" className="ml-auto" onClick={() => setEditing(true)}>
+                <Pencil className="w-3 h-3 mr-1" /> Edit
+              </Button>
+            )}
           </DialogTitle>
         </DialogHeader>
 
@@ -175,7 +181,7 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
           )}
         </div>
 
-        {isAdmin ? (
+        {isAdmin && editing ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
@@ -256,8 +262,8 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
                 </div>
               )}
               <div className="flex gap-2">
-                <Button variant="outline" onClick={onClose}>Close</Button>
-                <Button onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
+                <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
+                <Button onClick={async () => { await handleSave(); setEditing(false); }} disabled={saving} className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
                   {saving ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
@@ -270,6 +276,7 @@ export default function ClientProjectDetailModal({ project, isAdmin, onClose, on
             <Button variant="outline" onClick={onClose} className="mt-4">Close</Button>
           </div>
         )}
+
       </DialogContent>
     </Dialog>
   );
