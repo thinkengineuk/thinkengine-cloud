@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const ALL_SERVICES = [
-  "SEO", "PPC", "Website Management", "Email & Automation",
-  "Social Media", "Creative Design", "Chatbot Management",
-  "Strategy, Consulting & Advisory", "Technology Management (inc Cogs)",
+  "SEO", "PPC", "GEO", "Website Management", "Email & Automation",
+  "Social Media", "Strategy, Consulting & Advisory",
+  "Technology Management (inc Cogs)", "Creative Design", "Chatbot Management",
 ];
+
+const BRANDS = ["ThinkEngine Marketing", "ThinkEngine Tech", "Cogs"];
 
 const USER_ROLES = ["client_lead", "client_exec", "client_exec_2", "website_creative", "tech_lead"];
 const ROLE_LABELS = {
@@ -25,6 +26,7 @@ const ROLE_LABELS = {
 
 export default function ClientOperationDialog({ open, onOpenChange, project, users, onSaved }) {
   const isEdit = !!project;
+  const [clients, setClients] = useState([]);
   const [form, setForm] = useState({
     name: project?.name || "",
     company: project?.company || "ThinkEngine Marketing",
@@ -36,9 +38,22 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
     client_exec_2: project?.client_exec_2 || "",
     website_creative: project?.website_creative || "",
     tech_lead: project?.tech_lead || "",
+    how_to_use_link: project?.how_to_use_link || "",
     current_stage: project?.current_stage || "Part 1 - Client Requirements Call",
   });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    base44.entities.Client.list("name").then(setClients);
+  }, []);
+
+  // Filter clients by the brand mapping
+  const brandToCompany = {
+    "ThinkEngine Marketing": "ThinkEngine",
+    "ThinkEngine Tech": "ThinkEngine",
+    "Cogs": "Cogs",
+  };
+  const filteredClients = clients.filter(c => c.company === brandToCompany[form.company]);
 
   const toggleService = (s) => {
     setForm(f => ({
@@ -67,22 +82,26 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Client Operation" : "Add Client Operation"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Client Operations" : "Add Client Operations"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+
+          {/* Row 1: Company Name + Agreement Type */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1 col-span-2">
-              <Label>Company Name</Label>
-              <Input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Acme Ltd" />
-            </div>
             <div className="space-y-1">
-              <Label>ThinkEngine / Cogs</Label>
-              <Select value={form.company} onValueChange={v => setForm({ ...form, company: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Label>Company Name <span className="text-red-500">*</span></Label>
+              <Select
+                value={form.name}
+                onValueChange={v => setForm({ ...form, name: v })}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select company..." />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ThinkEngine Marketing">ThinkEngine Marketing</SelectItem>
-                  <SelectItem value="ThinkEngine Tech">ThinkEngine Tech</SelectItem>
-                  <SelectItem value="Cogs">Cogs</SelectItem>
+                  {filteredClients.map(c => (
+                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -99,32 +118,26 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Services</Label>
-            <div className="flex flex-wrap gap-2">
-              {ALL_SERVICES.map(s => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => toggleService(s)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
-                    form.services.includes(s)
-                      ? "bg-teal-600 text-white border-teal-600"
-                      : "bg-white text-slate-600 border-slate-300 hover:border-teal-400"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+          {/* Row 2: Brand (full width) */}
+          <div className="space-y-1">
+            <Label>Brand</Label>
+            <Select value={form.company} onValueChange={v => setForm({ ...form, company: v, name: "" })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {BRANDS.map(b => (
+                  <SelectItem key={b} value={b}>{b}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
+          {/* Row 3-4: Staff roles in 2-col grid */}
           <div className="grid grid-cols-2 gap-4">
             {USER_ROLES.map(role => (
               <div key={role} className="space-y-1">
                 <Label>{ROLE_LABELS[role]}</Label>
                 <Select value={form[role] || "none"} onValueChange={v => setForm({ ...form, [role]: v === "none" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="–" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Select user" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">–</SelectItem>
                     {users.map(u => (
@@ -134,12 +147,70 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
                 </Select>
               </div>
             ))}
+            <div className="space-y-1">
+              <Label>How-To-Use Link (Google Drive)</Label>
+              <Input
+                value={form.how_to_use_link}
+                onChange={e => setForm({ ...form, how_to_use_link: e.target.value })}
+                placeholder="https://drive.google.com/drive/folders/..."
+              />
+            </div>
+          </div>
+
+          {/* Project checkbox */}
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="is-project"
+              checked={form.client_type === "Project"}
+              onCheckedChange={checked => setForm({ ...form, client_type: checked ? "Project" : "Retained" })}
+            />
+            <label htmlFor="is-project" className="text-sm text-slate-700 cursor-pointer">
+              <span className="font-medium">Project</span> <span className="text-slate-500">(one-off project, not a retainer)</span>
+            </label>
+          </div>
+
+          {/* Solution Categories */}
+          <div className="space-y-2">
+            <Label className="font-semibold">Solution Categories</Label>
+            <div className="flex flex-wrap gap-2">
+              {BRANDS.map(b => (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, company: b, name: "" }))}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                    form.company === b
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-slate-600 border-slate-300 hover:border-blue-400"
+                  }`}
+                >
+                  {b}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Services Provided */}
+          <div className="space-y-2">
+            <Label className="font-semibold">Services Provided</Label>
+            <div className="border border-slate-200 rounded-lg max-h-48 overflow-y-auto p-3 space-y-2">
+              {ALL_SERVICES.map(s => (
+                <div key={s} className="flex items-center gap-2">
+                  <Checkbox
+                    id={`svc-${s}`}
+                    checked={form.services.includes(s)}
+                    onCheckedChange={() => toggleService(s)}
+                  />
+                  <label htmlFor={`svc-${s}`} className="text-sm text-slate-700 cursor-pointer">{s}</label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white">
-              {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Client"}
+            <Button type="submit" disabled={saving || !form.name} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Client Operations"}
             </Button>
           </div>
         </form>

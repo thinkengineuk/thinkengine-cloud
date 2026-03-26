@@ -3,9 +3,10 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, X, Check, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, Search, Upload } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ClientOperationDialog from "@/components/client-ops/ClientOperationDialog";
+import BulkImportDialog from "@/components/client-ops/BulkImportDialog";
 import { useToast } from "@/components/ui/use-toast";
 
 const SERVICE_COLORS = {
@@ -42,6 +43,7 @@ export default function ClientOperations() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => { loadAll(); }, []);
@@ -104,12 +106,13 @@ export default function ClientOperations() {
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-24">Client Exec 2</th>
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-28">Website & Creative</th>
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-20">Tech</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-20">How-To</th>
               {isAdmin && <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-20">Actions</th>}
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
-              <tr><td colSpan={isAdmin ? 9 : 8} className="text-center text-slate-400 py-8 text-sm italic">No clients found</td></tr>
+              <tr><td colSpan={isAdmin ? 10 : 9} className="text-center text-slate-400 py-8 text-sm italic">No clients found</td></tr>
             ) : rows.map(p => (
               <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                 <td className="px-4 py-2.5 font-medium text-slate-800">{p.name || p.client_name}</td>
@@ -132,6 +135,11 @@ export default function ClientOperations() {
                 <td className="px-4 py-2.5"><UserName email={p.client_exec_2} users={users} /></td>
                 <td className="px-4 py-2.5"><UserName email={p.website_creative} users={users} /></td>
                 <td className="px-4 py-2.5"><UserName email={p.tech_lead} users={users} /></td>
+                <td className="px-4 py-2.5">
+                  {p.how_to_use_link ? (
+                    <a href={p.how_to_use_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs">Link</a>
+                  ) : <span className="text-slate-400">–</span>}
+                </td>
                 {isAdmin && (
                   <td className="px-4 py-2.5">
                     {confirmDeleteId === p.id ? (
@@ -165,9 +173,14 @@ export default function ClientOperations() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Client Operations</h1>
         {isAdmin && (
-          <Button onClick={() => { setEditing(null); setDialogOpen(true); }} className="bg-teal-600 hover:bg-teal-700 text-white">
-            <Plus className="w-4 h-4 mr-1" /> Add Client Operation
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setBulkImportOpen(true)}>
+              <Upload className="w-4 h-4 mr-1" /> Bulk Import
+            </Button>
+            <Button onClick={() => { setEditing(null); setDialogOpen(true); }} className="bg-teal-600 hover:bg-teal-700 text-white">
+              <Plus className="w-4 h-4 mr-1" /> Add Client
+            </Button>
+          </div>
         )}
       </div>
 
@@ -199,6 +212,14 @@ export default function ClientOperations() {
           project={editing}
           users={users}
           onSaved={handleSaved}
+        />
+      )}
+
+      {bulkImportOpen && (
+        <BulkImportDialog
+          open={bulkImportOpen}
+          onOpenChange={setBulkImportOpen}
+          onImported={() => { setBulkImportOpen(false); loadAll(); }}
         />
       )}
     </div>
