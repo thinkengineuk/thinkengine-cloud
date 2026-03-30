@@ -124,7 +124,7 @@ export default function TwoFactorAuthScreen({ boardId, boardName, onAccessGrante
               <p className="font-medium mb-1">How it works:</p>
               <ol className="list-decimal list-inside space-y-1 text-blue-800">
                 <li>Click "Request Access Code" below</li>
-                <li>A 6-digit code will be sent to ben@thinkengine.co</li>
+                <li>A 6-digit code will be sent to your email address</li>
                 <li>Enter the code to gain access</li>
               </ol>
             </div>
