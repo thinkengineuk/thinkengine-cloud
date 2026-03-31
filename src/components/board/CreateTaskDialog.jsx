@@ -10,9 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { User } from "@/entities/User";
 import { Board } from "@/entities/Board";
 import { base44 } from "@/api/base44Client";
+import { listAllUsers } from "@/functions/listAllUsers";
 import { STAGE_COLUMNS } from "@/components/client-projects/projectStages";
 import { FolderKanban } from "lucide-react";
 import {
@@ -73,7 +73,8 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
   };
 
   const loadUsers = async () => {
-    const allUsers = await User.list();
+    const response = await listAllUsers({});
+    const allUsers = response.data?.users || [];
     setUsers(allUsers);
     
     // Get board members from URL
@@ -84,7 +85,6 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
       const boardData = await Board.filter({ id: boardId });
       if (boardData.length > 0) {
         const board = boardData[0];
-        // Filter users to only show board members
         const members = allUsers.filter(user => 
           board.members?.includes(user.email)
         );
