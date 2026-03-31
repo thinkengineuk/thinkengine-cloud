@@ -31,7 +31,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { removeDuplicateTasks } from "@/functions/removeDuplicateTasks";
-import { getAllUsers } from "@/functions/getAllUsers";
+import { listAllUsers } from "@/functions/listAllUsers";
 
 const colors = [
   { value: 'blue', label: 'Blue', gradient: 'from-blue-400 to-blue-600' },
@@ -79,8 +79,8 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
         });
       }
 
-      // Use admin backend function to fetch all users for member management
-      const usersResponse = await getAllUsers({});
+      // Use backend function to fetch all users for member management
+      const usersResponse = await listAllUsers({});
       setUsers(usersResponse.data?.users || []);
     } catch (error) {
       console.error("Error loading data:", error);

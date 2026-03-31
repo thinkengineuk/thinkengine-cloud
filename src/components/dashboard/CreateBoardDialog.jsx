@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -11,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { User } from "@/entities/User"; // Assuming User entity exists
+import { base44 } from "@/api/base44Client";
+import { listAllUsers } from "@/functions/listAllUsers";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const colors = [
@@ -55,15 +55,13 @@ export default function CreateBoardDialog({ open, onOpenChange, onSubmit }) {
   // Function to load users and set the current user
   const loadUsers = async () => {
     try {
-      const allUsers = await User.list(); // Fetch all users
-      const me = await User.me(); // Fetch current user
-      setUsers(allUsers);
+      const me = await base44.auth.me();
+      const response = await listAllUsers({});
+      setUsers(response.data?.users || []);
       setCurrentUser(me);
-      // Automatically add current user's email to the board members
       setFormData(prev => ({...prev, members: [me.email]}));
     } catch (error) {
       console.error("Failed to load users:", error);
-      // Optionally handle error in UI
     }
   };
 
