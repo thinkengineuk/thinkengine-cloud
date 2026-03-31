@@ -246,38 +246,37 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
                   <DialogTitle>Add Watchers</DialogTitle>
                 </DialogHeader>
                 <ScrollArea className="h-64">
-                  <div className="space-y-2">
-                    {boardMembers // Filtered to board members
-                      .filter(u => !(task.watchers || []).includes(u.email))
-                      .map((user) => (
-                        <div
-                          key={user.id}
-                          className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer"
-                          onClick={() => {
-                            // This currently calls onAddWatcher directly, not handleAddWatcherClick
-                            onAddWatcher(user.email);
-                            setShowWatchersDialog(false);
-                          }}
-                        >
-                          <Avatar className="w-8 h-8">
-                            {user.profile_picture_url ? (
-                              <AvatarImage src={user.profile_picture_url} />
-                            ) : (
-                              <AvatarFallback className="text-xs">{user.full_name ? user.full_name[0] : '?'}</AvatarFallback>
-                            )}
-                          </Avatar>
-                          <span className="text-sm">{user.full_name}</span>
-                        </div>
-                      ))}
-                  </div>
-                </ScrollArea>
+                           <div className="space-y-2">
+                             {(allUsers || [])
+                               .filter(u => !(task.watchers || []).includes(u.email))
+                               .map((user) => (
+                                <div
+                                  key={user.id}
+                                  className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer"
+                                  onClick={() => {
+                                    onAddWatcher(user.email);
+                                    setShowWatchersDialog(false);
+                                  }}
+                                >
+                                  <Avatar className="w-8 h-8">
+                                    {user.profile_picture_url ? (
+                                      <AvatarImage src={user.profile_picture_url} />
+                                    ) : (
+                                      <AvatarFallback className="text-xs">{user.full_name ? user.full_name[0] : '?'}</AvatarFallback>
+                                    )}
+                                  </Avatar>
+                                  <span className="text-sm">{user.full_name}</span>
+                                </div>
+                              ))}
+                           </div>
+                        </ScrollArea>
               </DialogContent>
             </Dialog>
           </div>
           {task.watchers && task.watchers.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {task.watchers.map((email) => {
-                const user = boardMembers.find(u => u.email === email); // Find user from boardMembers
+                const user = (allUsers || []).find(u => u.email === email);
                 return user ? (
                   <div key={email} className="flex items-center gap-1 bg-slate-100 rounded-full pl-1 pr-2 py-1">
                     <Avatar className="w-5 h-5">

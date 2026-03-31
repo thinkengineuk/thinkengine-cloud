@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye } from "lucide-react";
 import { format, isToday, isPast, startOfDay } from "date-fns";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
@@ -197,6 +197,12 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </div>
 
           <div className="flex items-center gap-1.5">
+            {task.watchers && task.watchers.length > 0 && (
+              <div className="flex items-center gap-0.5 text-slate-400">
+                <Eye className="w-3.5 h-3.5" />
+                <span className="text-xs">{task.watchers.length}</span>
+              </div>
+            )}
             {assignedUser && (
               <Avatar className="w-7 h-7">
                 {assignedUser.profile_picture_url ? (
