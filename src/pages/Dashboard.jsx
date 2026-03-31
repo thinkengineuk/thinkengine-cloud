@@ -6,7 +6,18 @@ import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, CheckSquare, MessageSquare, FolderKanban, Upload, ChevronDown } from "lucide-react";
+import { Plus, Search, CheckSquare, MessageSquare, FolderKanban, Upload, ChevronDown, Trash2 } from "lucide-react";
+import { deleteBoard } from "@/functions/deleteBoard";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import CreateBoardDialog from "../components/dashboard/CreateBoardDialog";
@@ -26,6 +37,8 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [usersMap, setUsersMap] = useState({});
+  const [boardToDelete, setBoardToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -93,6 +106,19 @@ export default function Dashboard() {
     );
     
     setRecentActivity(filteredActivity);
+  };
+
+  const handleDeleteBoard = async () => {
+    if (!boardToDelete || deleting) return;
+    setDeleting(true);
+    try {
+      await deleteBoard({ boardId: boardToDelete.id });
+    } catch (e) {
+      console.warn('Delete board:', e.message);
+    }
+    setBoardToDelete(null);
+    setDeleting(false);
+    loadData();
   };
 
   const handleCreateBoard = async (boardData) => {
@@ -296,34 +322,43 @@ export default function Dashboard() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05 }}
-                        onClick={() => navigate(`${createPageUrl("Board")}?id=${board.id}`)}
-                        className="group cursor-pointer"
+                        className="group cursor-pointer relative"
                       >
-                        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-                          <div className={`h-2 bg-gradient-to-r ${
-                            board.color === 'blue' ? 'from-blue-400 to-blue-600' :
-                            board.color === 'purple' ? 'from-purple-400 to-purple-600' :
-                            board.color === 'green' ? 'from-green-400 to-green-600' :
-                            board.color === 'orange' ? 'from-orange-400 to-orange-600' :
-                            board.color === 'pink' ? 'from-pink-400 to-pink-600' :
-                            board.color === 'red' ? 'from-red-400 to-red-600' :
-                            board.color === 'teal' ? 'from-teal-400 to-teal-600' :
-                            board.color === 'indigo' ? 'from-indigo-400 to-indigo-600' :
-                            board.color === 'cyan' ? 'from-cyan-400 to-cyan-600' :
-                            'from-blue-400 to-blue-600'
-                          }`} />
-                          <CardContent className="p-4">
-                            <h3 className="font-semibold text-slate-900 group-hover:text-teal-600 transition-colors mb-1">
-                              {board.name}
-                            </h3>
-                            <p className="text-sm text-slate-600 line-clamp-2">
-                              {board.description || "No description"}
-                            </p>
-                            <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-                              <span>{board.members?.length || 0} member{board.members?.length !== 1 ? 's' : ''}</span>
-                            </div>
-                          </CardContent>
-                        </Card>
+                        {user?.role === 'admin' && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setBoardToDelete(board); }}
+                            className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-white rounded-lg shadow hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <div onClick={() => navigate(`${createPageUrl("Board")}?id=${board.id}`)}>
+                          <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+                            <div className={`h-2 bg-gradient-to-r ${
+                              board.color === 'blue' ? 'from-blue-400 to-blue-600' :
+                              board.color === 'purple' ? 'from-purple-400 to-purple-600' :
+                              board.color === 'green' ? 'from-green-400 to-green-600' :
+                              board.color === 'orange' ? 'from-orange-400 to-orange-600' :
+                              board.color === 'pink' ? 'from-pink-400 to-pink-600' :
+                              board.color === 'red' ? 'from-red-400 to-red-600' :
+                              board.color === 'teal' ? 'from-teal-400 to-teal-600' :
+                              board.color === 'indigo' ? 'from-indigo-400 to-indigo-600' :
+                              board.color === 'cyan' ? 'from-cyan-400 to-cyan-600' :
+                              'from-blue-400 to-blue-600'
+                            }`} />
+                            <CardContent className="p-4">
+                              <h3 className="font-semibold text-slate-900 group-hover:text-teal-600 transition-colors mb-1">
+                                {board.name}
+                              </h3>
+                              <p className="text-sm text-slate-600 line-clamp-2">
+                                {board.description || "No description"}
+                              </p>
+                              <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                                <span>{board.members?.length || 0} member{board.members?.length !== 1 ? 's' : ''}</span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
                       </motion.div>
                     ))}
                   </div>
@@ -391,6 +426,27 @@ export default function Dashboard() {
         onOpenChange={setShowCreateDialog}
         onSubmit={handleCreateBoard}
       />
+
+      <AlertDialog open={!!boardToDelete} onOpenChange={(o) => !o && setBoardToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete "{boardToDelete?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the board and all its columns, tasks, and data. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteBoard}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleting ? 'Deleting...' : 'Delete Board'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
