@@ -120,7 +120,6 @@ export default function BoardPage() {
           uniqueTasks.push(task);
         }
       }
-      setAllTasks(uniqueTasks.map(t => ({ ...t, attachmentPreview: previewMap[t.id] || null })));
 
       const [commentsData, attachmentsData, checklistsData] = await Promise.all([
         Comment.list(),
@@ -139,6 +138,7 @@ export default function BoardPage() {
       });
       checklistsData.forEach(ch => { if (countsMap[ch.task_id]) countsMap[ch.task_id].checklists++; });
       setTaskCountsMap(countsMap);
+      setAllTasks(uniqueTasks.map(t => ({ ...t, attachmentPreview: previewMap[t.id] || null })));
 
       const loggedInUser = await base44.auth.me();
       setCurrentUser(loggedInUser);
