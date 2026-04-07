@@ -29,19 +29,27 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
 
+  const loadingRef = useRef(false);
   const loadComments = useCallback(async () => {
-    const taskComments = await Comment.filter({ task_id: taskId }, "-created_date");
-    setComments(taskComments);
-    // Load attachments for all comments
-    const allAttachments = await Attachment.filter({ task_id: taskId });
-    const byComment = {};
-    allAttachments.forEach(att => {
-      if (att.comment_id) {
-        if (!byComment[att.comment_id]) byComment[att.comment_id] = [];
-        byComment[att.comment_id].push(att);
-      }
-    });
-    setCommentAttachments(byComment);
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+    try {
+      const [taskComments, allAttachments] = await Promise.all([
+        Comment.filter({ task_id: taskId }, "-created_date"),
+        Attachment.filter({ task_id: taskId }),
+      ]);
+      setComments(taskComments);
+      const byComment = {};
+      allAttachments.forEach(att => {
+        if (att.comment_id) {
+          if (!byComment[att.comment_id]) byComment[att.comment_id] = [];
+          byComment[att.comment_id].push(att);
+        }
+      });
+      setCommentAttachments(byComment);
+    } finally {
+      loadingRef.current = false;
+    }
   }, [taskId]);
 
   useEffect(() => {
