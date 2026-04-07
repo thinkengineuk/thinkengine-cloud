@@ -153,6 +153,9 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         }
       }
 
+      // Save the comment first
+      await Comment.create({ task_id: taskId, text: newComment.trim(), mentions });
+
       const taskData = task || {};
       const taskUrl = `${window.location.origin}/Board?id=${taskData.board_id}&taskId=${taskData.id || taskId}`;
 
