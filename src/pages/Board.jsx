@@ -684,7 +684,7 @@ export default function BoardPage() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-x-auto overflow-y-hidden p-3 md:p-6">
+      <div className="board-scroll-area flex-1 overflow-y-hidden p-3 md:p-6">
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="board" direction="horizontal" type="column">
             {(provided) => (
