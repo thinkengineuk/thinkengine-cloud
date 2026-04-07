@@ -699,6 +699,7 @@ export default function BoardPage() {
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
+                        className="h-full"
                       >
                         <BoardColumn
                           column={column}
