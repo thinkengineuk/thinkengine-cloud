@@ -64,53 +64,39 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
     const boardDetails = await Board.filter({ id: taskData.board_id });
     const board = boardDetails[0];
     
-    const htmlBody = `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
-    .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%); padding: 32px 24px; text-align: center; }
-    .logo { font-size: 28px; font-weight: bold; color: #ffffff; margin: 0; }
-    .content { padding: 32px 24px; }
-    .title { font-size: 24px; font-weight: 600; color: #1e293b; margin: 0 0 24px 0; }
-    .greeting { font-size: 16px; color: #475569; margin: 0 0 24px 0; }
-    .notification { font-size: 16px; color: #334155; line-height: 1.6; margin: 0 0 24px 0; }
-    .task-link { color: #0891b2; text-decoration: none; font-weight: 600; }
-    .task-link:hover { text-decoration: underline; }
-    .task-info { background-color: #f8fafc; padding: 20px; margin: 24px 0; border-radius: 8px; border: 1px solid #e2e8f0; }
-    .task-title { font-size: 18px; font-weight: 600; color: #1e293b; margin: 0 0 8px 0; }
-    .task-board { color: #64748b; font-size: 14px; }
-    .button { display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%); color: #ffffff !important; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-weight: 600; margin: 24px 0; font-size: 16px; }
-    .button:hover { opacity: 0.9; }
-    .footer { padding: 24px; text-align: center; color: #94a3b8; font-size: 14px; border-top: 1px solid #e2e8f0; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 class="logo">TaskFlow</h1>
-    </div>
-    <div class="content">
-      <h2 class="title">You've been assigned to a task</h2>
-      <p class="greeting">Hello ${assignedUser?.full_name || 'there'},</p>
-      <p class="notification">
-        <strong>${currentUser?.full_name}</strong> assigned you to the task 
-        <a href="${taskUrl}" class="task-link">${taskData.title}</a> 
-        in the <strong>${board?.name}</strong> project.
-      </p>
-      <div class="task-info">
-        <div class="task-title">${taskData.title}</div>
-        <div class="task-board">Project: ${board?.name}</div>
-        ${taskData.due_date ? `<div style="color: #64748b; font-size: 14px; margin-top: 8px;">Due: ${format(new Date(taskData.due_date), 'MMMM d, yyyy')}</div>` : ''}
-      </div>
-      <a href="${taskUrl}" class="button">View Task</a>
-    </div>
-    <div class="footer">
-      This is an automated notification from TaskFlow Task Management
-    </div>
-  </div>
+    const htmlBody = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>You've been assigned to a task</title></head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+        <tr>
+          <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:10px 10px 0 0;padding:28px 32px;text-align:center;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">TASKFLOW</div>
+            <div style="font-size:22px;font-weight:700;color:#ffffff;">You've been assigned to a task</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#ffffff;padding:32px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">
+            <p style="font-size:15px;color:#1e293b;margin:0 0 12px 0;">Hi ${assignedUser?.full_name || 'there'},</p>
+            <div style="font-size:15px;color:#475569;line-height:1.6;margin-bottom:20px;">
+              <strong>${currentUser?.full_name}</strong> assigned you to the task <strong>${taskData.title}</strong> in the <strong>${board?.name}</strong> project.
+              ${taskData.due_date ? `<br/><br/>Due: <strong>${format(new Date(taskData.due_date), 'MMMM d, yyyy')}</strong>` : ''}
+            </div>
+            <div style="text-align:center;margin:28px 0 8px 0;">
+              <a href="${taskUrl}" style="display:inline-block;background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:#ffffff;text-decoration:none;padding:13px 32px;border-radius:7px;font-weight:600;font-size:15px;">View Task &amp; Reply &#8594;</a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:18px 32px;text-align:center;">
+            <div style="font-size:12px;color:#94a3b8;">TaskFlow Task Management &middot; Automated Message</div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>`;
 
@@ -141,49 +127,38 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
       const boardDetails = await Board.filter({ id: taskData.board_id });
       const board = boardDetails[0];
       
-      const htmlBody = `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
-    .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%); padding: 32px 24px; text-align: center; }
-    .logo { font-size: 28px; font-weight: bold; color: #ffffff; margin: 0; }
-    .content { padding: 32px 24px; }
-    .title { font-size: 24px; font-weight: 600; color: #1e293b; margin: 0 0 24px 0; }
-    .greeting { font-size: 16px; color: #475569; margin: 0 0 24px 0; }
-    .notification { font-size: 16px; color: #334155; line-height: 1.6; margin: 0 0 24px 0; }
-    .task-link { color: #0891b2; text-decoration: none; font-weight: 600; }
-    .task-link:hover { text-decoration: underline; }
-    .info-box { background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 16px; margin: 24px 0; border-radius: 4px; color: #065f46; }
-    .button { display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%); color: #ffffff !important; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-weight: 600; margin: 24px 0; font-size: 16px; }
-    .button:hover { opacity: 0.9; }
-    .footer { padding: 24px; text-align: center; color: #94a3b8; font-size: 14px; border-top: 1px solid #e2e8f0; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 class="logo">TaskFlow</h1>
-    </div>
-    <div class="content">
-      <h2 class="title">You're now watching a task</h2>
-      <p class="greeting">Hello ${watcherUser?.full_name || 'there'},</p>
-      <p class="notification">
-        <strong>${currentUser?.full_name}</strong> added you as a watcher to the task 
-        <a href="${taskUrl}" class="task-link">${taskData.title}</a> 
-        in the <strong>${board?.name}</strong> project.
-      </p>
-      <div class="info-box">
-        You'll receive updates whenever this task is modified or commented on.
-      </div>
-      <a href="${taskUrl}" class="button">View Task</a>
-    </div>
-    <div class="footer">
-      This is an automated notification from TaskFlow Task Management
-    </div>
-  </div>
+      const htmlBody = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>You're now watching a task</title></head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+        <tr>
+          <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:10px 10px 0 0;padding:28px 32px;text-align:center;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">TASKFLOW</div>
+            <div style="font-size:22px;font-weight:700;color:#ffffff;">You're now watching a task</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#ffffff;padding:32px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">
+            <p style="font-size:15px;color:#1e293b;margin:0 0 12px 0;">Hi ${watcherUser?.full_name || 'there'},</p>
+            <div style="font-size:15px;color:#475569;line-height:1.6;margin-bottom:20px;">
+              <strong>${currentUser?.full_name}</strong> added you as a watcher to the task <strong>${taskData.title}</strong> in the <strong>${board?.name}</strong> project.<br/><br/>You'll receive updates whenever this task is modified or commented on.
+            </div>
+            <div style="text-align:center;margin:28px 0 8px 0;">
+              <a href="${taskUrl}" style="display:inline-block;background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:#ffffff;text-decoration:none;padding:13px 32px;border-radius:7px;font-weight:600;font-size:15px;">View Task &amp; Reply &#8594;</a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:18px 32px;text-align:center;">
+            <div style="font-size:12px;color:#94a3b8;">TaskFlow Task Management &middot; Automated Message</div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>`;
 
