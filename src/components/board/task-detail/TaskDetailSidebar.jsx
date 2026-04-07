@@ -36,6 +36,15 @@ import { STAGE_COLUMNS } from "@/components/client-projects/projectStages";
 
 export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdate, onAssign, onAddWatcher, onClose, onRefresh }) {
   const [newTag, setNewTag] = useState("");
+  const [dueDateOpen, setDueDateOpen] = useState(false);
+  const [timeValue, setTimeValue] = useState(() => {
+    if (!task?.due_date) return "";
+    const d = new Date(task.due_date);
+    if (isNaN(d.getTime())) return "";
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    return (h === '00' && m === '00') ? "" : `${h}:${m}`;
+  });
   const [allBoardTags, setAllBoardTags] = useState([]);
   const [showWatchersDialog, setShowWatchersDialog] = useState(false); // Existing watcher dialog state
   const [showTagDialog, setShowTagDialog] = useState(false);
@@ -281,15 +290,61 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
            <CalendarIcon className="w-4 h-4" />
            Due Date
           </Label>
-          <Popover>
+          <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
            <PopoverTrigger asChild>
              <Button variant="outline" className="w-full justify-start bg-white text-sm">
                <CalendarIcon className="mr-2 h-4 w-4" />
-               {task.due_date ? format(new Date(task.due_date), 'PPP') : 'Set due date'}
+               {task.due_date
+                 ? (() => {
+                     const d = new Date(task.due_date);
+                     const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
+                     return hasTime ? format(d, 'PPP, HH:mm') : format(d, 'PPP');
+                   })()
+                 : 'Set due date'}
              </Button>
            </PopoverTrigger>
            <PopoverContent className="w-auto p-0" align="start">
-             <CalendarComponent mode="single" selected={taskDueDate} onSelect={(date) => onUpdate({ due_date: date })} initialFocus />
+             <CalendarComponent
+               mode="single"
+               selected={taskDueDate}
+               onSelect={(date) => {
+                 if (!date) { onUpdate({ due_date: null }); return; }
+                 if (timeValue) {
+                   const [h, m] = timeValue.split(':').map(Number);
+                   date.setHours(h, m, 0, 0);
+                 }
+                 onUpdate({ due_date: date });
+               }}
+               initialFocus
+             />
+             <div className="border-t border-slate-200 p-3 flex items-center gap-2">
+               <CalendarIcon className="w-4 h-4 text-slate-400" />
+               <span className="text-sm text-slate-600">Time:</span>
+               <input
+                 type="time"
+                 value={timeValue}
+                 onChange={(e) => {
+                   setTimeValue(e.target.value);
+                   if (taskDueDate) {
+                     const updated = new Date(taskDueDate);
+                     if (e.target.value) {
+                       const [h, m] = e.target.value.split(':').map(Number);
+                       updated.setHours(h, m, 0, 0);
+                     } else {
+                       updated.setHours(0, 0, 0, 0);
+                     }
+                     onUpdate({ due_date: updated });
+                   }
+                 }}
+                 className="flex-1 border border-slate-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-slate-300"
+               />
+               {(task.due_date || timeValue) && (
+                 <button
+                   onClick={() => { setTimeValue(""); onUpdate({ due_date: null }); setDueDateOpen(false); }}
+                   className="text-xs text-slate-400 hover:text-red-500"
+                 >Clear</button>
+               )}
+             </div>
            </PopoverContent>
           </Popover>
           </div>
