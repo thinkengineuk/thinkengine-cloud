@@ -102,6 +102,19 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         </Button>
       )}
       <CardContent className="p-4 space-y-3" onClick={onClick}>
+        {assignedUser && (
+          <div className="flex justify-end">
+            <Avatar className="w-8 h-8 ring-2 ring-white shadow-sm">
+              {assignedUser.profile_picture_url ? (
+                <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
+              ) : (
+                <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white font-semibold">
+                  {assignedUser.full_name?.[0]?.toUpperCase()}
+                </AvatarFallback>
+              )}
+            </Avatar>
+          </div>
+        )}
         {dueStatus && !isCompleted && (
           <div className="flex items-center gap-2 pb-2">
             {dueStatus === 'overdue' && (
