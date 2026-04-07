@@ -32,17 +32,6 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
   }, [taskId]);
 
   useEffect(() => {
-    const init = async () => {
-      if (!currentUserProp) {
-        const me = await User.me();
-        setCurrentUser(me);
-      }
-      if (!allUsers || allUsers.length === 0) {
-        const fetchedUsers = await User.list();
-        setUsers(fetchedUsers);
-      }
-    };
-    init();
     loadComments();
   }, [loadComments]);
 
@@ -141,7 +130,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
   };
 
   const handleSubmit = async () => {
-    if (!newComment.trim() || submitting) return;
+    if (!newComment.trim() || submitting || !currentUser) return;
     
     setSubmitting(true);
     try {
@@ -170,7 +159,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
       });
       // Add current comment
       conversationItems.push({
-        authorName: currentUser.full_name,
+        authorName: currentUser?.full_name || 'Unknown',
         timestamp: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         text: newComment,
       });
