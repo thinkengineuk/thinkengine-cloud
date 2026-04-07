@@ -7,10 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Task } from "@/entities/Task";
 import { User as UserEntity } from "@/entities/User";
 import { Column } from "@/entities/Column";
-import { Board } from "@/entities/Board"; // Added import for Board
+import { Board } from "@/entities/Board";
 import { SendEmail } from "@/integrations/Core";
 import { ActivityLog } from "@/entities/ActivityLog";
-import { format } from "date-fns"; // Added import for date-fns format
+import { format } from "date-fns";
+import { listAllAppUsers } from "@/functions/listAllAppUsers";
 
 import TaskDetailHeader from "./TaskDetailHeader";
 import TaskDetailSidebar from "./TaskDetailSidebar";
@@ -27,8 +28,13 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const users = await UserEntity.list();
-      setAllUsers(users);
+      try {
+        const { users } = await listAllAppUsers();
+        setAllUsers(users || []);
+      } catch {
+        const users = await UserEntity.list();
+        setAllUsers(users);
+      }
       const me = await UserEntity.me();
       setCurrentUser(me);
     };
