@@ -240,7 +240,9 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
   const formatTimestamp = (dateString) => {
     if (!dateString) return '';
     try {
-      const date = new Date(dateString);
+      // Ensure UTC parsing by appending Z if no timezone info present
+      const normalized = dateString.endsWith('Z') || dateString.includes('+') ? dateString : dateString + 'Z';
+      const date = new Date(normalized);
       const now = new Date();
       const diffInHours = (now - date) / (1000 * 60 * 60);
       
