@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { listAllAppUsers } from "@/functions/listAllAppUsers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -58,20 +59,11 @@ export default function ClientOperations() {
     setLoading(true);
     try {
       const me = await base44.auth.me();
-      console.log("[ClientOps] Current user:", me?.email, "role:", me?.role);
       const allProjects = await base44.entities.ClientProject.list("name");
-      console.log("[ClientOps] Total projects loaded:", allProjects.length);
-      console.log("[ClientOps] Projects sample:", allProjects.slice(0, 3).map(p => ({ name: p.name, is_archived: p.is_archived, company: p.company })));
-      let allUsers = [];
-      
-      // Only admins can list all users
-      if (me?.role === "admin") {
-        allUsers = await base44.entities.User.list();
-      }
-      
+      const { users: allUsers } = await listAllAppUsers();
       setUser(me);
       setProjects(allProjects);
-      setUsers(allUsers);
+      setUsers(allUsers || []);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -93,7 +85,6 @@ export default function ClientOperations() {
     .filter(u => assignedEmails.has(u.email))
     .sort((a, b) => (a.full_name || "").localeCompare(b.full_name || ""));
 
-  console.log("[ClientOps] archivedFilter:", archivedFilter, "| total projects:", projects.length);
   const filtered = projects.filter(p => {
     const matchSearch = !search || p.name?.toLowerCase().includes(search.toLowerCase()) || p.client_name?.toLowerCase().includes(search.toLowerCase());
     const matchCompany = companyFilter === "all" || p.company === companyFilter;
@@ -102,7 +93,6 @@ export default function ClientOperations() {
     const matchArchived = archivedFilter === "all" || (archivedFilter === "active" ? !p.is_archived : p.is_archived);
     return matchSearch && matchCompany && matchAgreement && matchPerson && matchArchived;
   });
-  console.log("[ClientOps] Filtered count:", filtered.length);
 
   const teMarketingProjects = filtered.filter(p => p.company === "ThinkEngine Marketing");
   const teTechProjects = filtered.filter(p => p.company === "ThinkEngine Tech");
