@@ -146,6 +146,15 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
       });
     } else if (sortBy === 'manual') {
       return tasksCopy.sort((a, b) => (a.position || 0) - (b.position || 0));
+    } else if (sortBy === 'team_order') {
+      const teamOrder = ['josh', 'tom', 'emma', 'karl', 'keara', 'chloe', 'ben'];
+      const getTeamIndex = (task) => {
+        const user = usersMap[task.assigned_to];
+        const firstName = user?.full_name?.split(' ')[0]?.toLowerCase() || '';
+        const idx = teamOrder.indexOf(firstName);
+        return idx === -1 ? 999 : idx;
+      };
+      return tasksCopy.sort((a, b) => getTeamIndex(a) - getTeamIndex(b));
     }
     
     return tasksCopy;
@@ -239,6 +248,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
       case 'title': return 'Title';
       case 'created': return 'Created';
       case 'manual': return 'Manual Order';
+      case 'team_order': return 'Team Order';
       default: return 'Sort';
     }
   };
@@ -283,6 +293,9 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
                         Recently Created
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setSortBy('team_order')} className={sortBy === 'team_order' ? 'bg-slate-100' : ''}>
+                        Team Order
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setSortBy('manual')} className={sortBy === 'manual' ? 'bg-slate-100' : ''}>
                         Manual Order
                       </DropdownMenuItem>
