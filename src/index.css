@@ -30,28 +30,20 @@
   overflow-y: hidden;
 }
 
-/* Per-column vertical scrollbar */
-.column-scroll-area::-webkit-scrollbar {
-  width: 8px;
-  display: block !important;
-}
 
-.column-scroll-area::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* :root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
 
-.column-scroll-area::-webkit-scrollbar-thumb {
-  background: rgba(100,116,139,0.4);
-  border-radius: 4px;
-}
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
 
-.column-scroll-area::-webkit-scrollbar-thumb:hover {
-  background: rgba(100,116,139,0.7);
-}
-
-.column-scroll-area {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(100,116,139,0.4) transparent;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -95,17 +87,17 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* @media (prefers-color-scheme: light) {
-   :root {
-     color: #213547;
-     background-color: #ffffff;
-   }
-   a:hover {
-     color: #747bff;
-   }
-   button {
-     background-color: #f9f9f9;
-   }
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
 } */
 
 
@@ -186,8 +178,7 @@ button:focus-visible {
 
 @layer base {
   * {
-    @apply border-border;
-    outline-color: hsl(var(--ring) / 0.5);
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;

@@ -346,7 +346,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className={`flex-1 p-4 space-y-3 overflow-y-auto column-scroll-area ${
+                className={`flex-1 p-4 space-y-3 overflow-y-auto ${
                   snapshot.isDraggingOver ? colors.light : ''
                 }`}
               >
