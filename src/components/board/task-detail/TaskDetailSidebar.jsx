@@ -214,11 +214,19 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
             <User className="w-4 h-4" />
             Assigned To
           </Label>
-          <Select value={task.assigned_to || ""} onValueChange={onAssign}>
+          <Select value={task.assigned_to || "unassigned"} onValueChange={(v) => onAssign(v === "unassigned" ? null : v)}>
             <SelectTrigger className="bg-white">
               <SelectValue placeholder="Select assignee" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="unassigned">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center">
+                    <User className="w-3 h-3 text-slate-500" />
+                  </div>
+                  <span className="text-sm text-slate-500">Unassigned</span>
+                </div>
+              </SelectItem>
               {(allUsers || []).map((user) => (
                 <SelectItem key={user.id} value={user.email}>
                   <div className="flex items-center gap-2">
