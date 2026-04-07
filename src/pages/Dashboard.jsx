@@ -66,10 +66,9 @@ export default function Dashboard() {
     });
     setBoardsMap(bMap);
 
-    // OPTIMIZATION: Fetch user's active tasks, ALL tasks (for activity filtering), and recent activities in parallel.
-    const [currentUserActiveTasks, allSystemTasks, allActivityLogs] = await Promise.all([
+    // Fetch user's active tasks and recent activity in parallel (no full task scan to avoid rate limits)
+    const [currentUserActiveTasks, allActivityLogs] = await Promise.all([
       Task.filter({ assigned_to: currentUser.email, status: 'active' }, "-created_date"),
-      Task.filter({}, "-created_date"), // Fetch all tasks to determine relevantTaskIds for activity filtering
       ActivityLog.list("-created_date", 10)
     ]);
     
@@ -80,10 +79,9 @@ export default function Dashboard() {
       const bPriority = priorityOrder[b.priority] || 2;
       
       if (aPriority !== bPriority) {
-        return bPriority - aPriority; // Higher priority first
+        return bPriority - aPriority;
       }
       
-      // If same priority, sort by due date
       if (a.due_date && b.due_date) {
         return new Date(a.due_date) - new Date(b.due_date);
       }
@@ -92,20 +90,8 @@ export default function Dashboard() {
     
     setTasks(sortedTasks);
 
-    // Filter relevant activity based on all tasks where the user is assigned, watching, or created
-    const relevantTaskIds = allSystemTasks
-      .filter(t => 
-        t.assigned_to === currentUser.email || 
-        t.watchers?.includes(currentUser.email) ||
-        t.created_by === currentUser.email
-      )
-      .map(t => t.id);
-    
-    const filteredActivity = allActivityLogs.filter(activity => 
-      relevantTaskIds.includes(activity.task_id)
-    );
-    
-    setRecentActivity(filteredActivity);
+    // Show all recent activity (no filtering needed — rate-limit friendly)
+    setRecentActivity(allActivityLogs);
   };
 
   const handleDeleteBoard = async () => {
