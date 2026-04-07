@@ -12,24 +12,7 @@ import { Column } from "@/entities/Column";
 import { SendEmail } from "@/integrations/Core";
 import { ActivityLog } from "@/entities/ActivityLog";
 import { User } from "@/entities/User";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { isToday, isPast, startOfDay, format } from "date-fns";
+import { buildAssignedEmail } from "@/utils/emailTemplates";
 import { Board } from "@/entities/Board";
 
 const colorMap = {
@@ -188,67 +171,24 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
     if (taskData.assigned_to) {
       const assignedUser = await User.filter({ email: taskData.assigned_to });
       const taskUrl = `${window.location.origin}/Board?id=${column.board_id}&taskId=${createdTask.id}`;
-      
       const boardDetails = await Board.filter({ id: column.board_id });
       const board = boardDetails[0];
-      
-      const htmlBody = `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
-    .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%); padding: 32px 24px; text-align: center; }
-    .logo { font-size: 28px; font-weight: bold; color: #ffffff; margin: 0; }
-    .content { padding: 32px 24px; }
-    .title { font-size: 24px; font-weight: 600; color: #1e293b; margin: 0 0 24px 0; }
-    .greeting { font-size: 16px; color: #475569; margin: 0 0 24px 0; }
-    .notification { font-size: 16px; color: #334155; line-height: 1.6; margin: 0 0 24px 0; }
-    .task-link { color: #0891b2; text-decoration: none; font-weight: 600; }
-    .task-link:hover { text-decoration: underline; }
-    .task-info { background-color: #f8fafc; padding: 20px; margin: 24px 0; border-radius: 8px; border: 1px solid #e2e8f0; }
-    .task-title { font-size: 18px; font-weight: 600; color: #1e293b; margin: 0 0 8px 0; }
-    .task-board { color: #64748b; font-size: 14px; }
-    .button { display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%); color: #ffffff !important; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-weight: 600; margin: 24px 0; font-size: 16px; }
-    .button:hover { opacity: 0.9; }
-    .footer { padding: 24px; text-align: center; color: #94a3b8; font-size: 14px; border-top: 1px solid #e2e8f0; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 class="logo">TaskFlow</h1>
-    </div>
-    <div class="content">
-      <h2 class="title">New Task Assigned</h2>
-      <p class="greeting">Hello ${assignedUser[0]?.full_name || 'there'},</p>
-      <p class="notification">
-        <strong>${currentUser.full_name}</strong> assigned you to a new task 
-        <a href="${taskUrl}" class="task-link">${taskData.title}</a> 
-        in the <strong>${board?.name}</strong> project.
-      </p>
-      <div class="task-info">
-        <div class="task-title">${taskData.title}</div>
-        <div class="task-board">Project: ${board?.name}</div>
-        ${taskData.due_date ? `<div style="color: #64748b; font-size: 14px; margin-top: 8px;">Due: ${format(new Date(taskData.due_date), 'MMMM d, yyyy')}</div>` : ''}
-        ${taskData.description ? `<div style="color: #475569; font-size: 14px; margin-top: 12px;">${taskData.description}</div>` : ''}
-      </div>
-      <a href="${taskUrl}" class="button">View Task</a>
-    </div>
-    <div class="footer">
-      This is an automated notification from TaskFlow Task Management
-    </div>
-  </div>
-</body>
-</html>`;
+
+      const htmlBody = buildAssignedEmail({
+        recipientName: assignedUser[0]?.full_name,
+        assignerName: currentUser.full_name,
+        taskTitle: taskData.title,
+        boardName: board?.name,
+        dueDate: taskData.due_date,
+        taskUrl,
+      });
 
       await SendEmail({
         to: taskData.assigned_to,
         subject: `New task assigned: "${taskData.title}"`,
         body: htmlBody,
       });
-      
+
       await ActivityLog.create({
         task_id: createdTask.id,
         action_type: 'assigned',

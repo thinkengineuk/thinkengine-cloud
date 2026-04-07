@@ -3,15 +3,15 @@
  * Light-themed, clean design consistent across all notification types.
  */
 
-export function generateEmailHtml({ 
+export function generateEmailHtml({
   preheader = '',
   subject = '',
   greeting = '',
   introHtml = '',
-  conversationItems = [], // array of { authorName, timestamp, text }
+  conversationItems = [],
   ctaUrl = '',
-  ctaLabel = 'View Task & Reply →',
-  footerNote = 'TaskFlow Task Management · Automated Message'
+  ctaLabel = 'View Task & Reply',
+  footerNote = 'TaskFlow Task Management - Automated Message'
 }) {
   const conversationHtml = conversationItems.length > 0 ? `
     <div style="margin: 24px 0 0 0;">
@@ -77,4 +77,47 @@ export function generateEmailHtml({
   </table>
 </body>
 </html>`;
+}
+
+/**
+ * Build assignment notification email HTML.
+ */
+export function buildAssignedEmail({ recipientName, assignerName, taskTitle, boardName, dueDate, taskUrl }) {
+  const dueDateStr = dueDate
+    ? new Date(dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+  return generateEmailHtml({
+    subject: "You've been assigned to a task",
+    greeting: `Hi ${recipientName || 'there'},`,
+    introHtml: `<strong>${assignerName}</strong> assigned you to the task <strong>${taskTitle}</strong> in the <strong>${boardName}</strong> project.${dueDateStr ? `<br/><br/>Due: <strong>${dueDateStr}</strong>` : ''}`,
+    ctaUrl: taskUrl,
+    ctaLabel: 'View Task',
+  });
+}
+
+/**
+ * Build watcher notification email HTML.
+ */
+export function buildWatcherEmail({ recipientName, adderName, taskTitle, boardName, taskUrl }) {
+  return generateEmailHtml({
+    subject: "You're now watching a task",
+    greeting: `Hi ${recipientName || 'there'},`,
+    introHtml: `<strong>${adderName}</strong> added you as a watcher to the task <strong>${taskTitle}</strong> in the <strong>${boardName}</strong> project.<br/><br/>You'll be notified of updates to this task.`,
+    ctaUrl: taskUrl,
+    ctaLabel: 'View Task',
+  });
+}
+
+/**
+ * Build mention notification email HTML.
+ */
+export function buildMentionEmail({ recipientName, mentionerName, taskTitle, taskUrl, conversationItems }) {
+  return generateEmailHtml({
+    subject: 'You were mentioned in a comment',
+    greeting: `Hi ${recipientName || 'there'},`,
+    introHtml: `<strong>${mentionerName}</strong> mentioned you in a comment on the task <strong>${taskTitle}</strong>.`,
+    conversationItems: conversationItems || [],
+    ctaUrl: taskUrl,
+    ctaLabel: 'View Task & Reply',
+  });
 }

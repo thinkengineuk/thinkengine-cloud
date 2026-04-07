@@ -9,8 +9,7 @@ import { User as UserEntity } from "@/entities/User";
 import { Column } from "@/entities/Column";
 import { Board } from "@/entities/Board";
 import { SendEmail } from "@/integrations/Core";
-import { ActivityLog } from "@/entities/ActivityLog";
-import { format } from "date-fns";
+import { buildAssignedEmail, buildWatcherEmail } from "@/utils/emailTemplates";
 import { listAllAppUsers } from "@/functions/listAllAppUsers";
 
 import TaskDetailHeader from "./TaskDetailHeader";
@@ -61,49 +60,23 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
 
   const handleAssign = async (email) => {
     await handleUpdate({ assigned_to: email });
-    
+
+    // Don't email yourself
+    if (email === currentUser?.email) return;
+
     const assignedUser = allUsers.find(u => u.email === email);
     const taskUrl = `${window.location.origin}/Board?id=${taskData.board_id}&taskId=${taskData.id}`;
-    
-    // Get board details
     const boardDetails = await Board.filter({ id: taskData.board_id });
     const board = boardDetails[0];
-    
-    const htmlBody = `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>You've been assigned to a task</title></head>
-<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
-        <tr>
-          <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:10px 10px 0 0;padding:28px 32px;text-align:center;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">TASKFLOW</div>
-            <div style="font-size:22px;font-weight:700;color:#ffffff;">You've been assigned to a task</div>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#ffffff;padding:32px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">
-            <p style="font-size:15px;color:#1e293b;margin:0 0 12px 0;">Hi ${assignedUser?.full_name || 'there'},</p>
-            <div style="font-size:15px;color:#475569;line-height:1.6;margin-bottom:20px;">
-              <strong>${currentUser?.full_name}</strong> assigned you to the task <strong>${taskData.title}</strong> in the <strong>${board?.name}</strong> project.
-              ${taskData.due_date ? `<br/><br/>Due: <strong>${format(new Date(taskData.due_date), 'MMMM d, yyyy')}</strong>` : ''}
-            </div>
-            <div style="text-align:center;margin:28px 0 8px 0;">
-              <a href="${taskUrl}" style="display:inline-block;background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:#ffffff;text-decoration:none;padding:13px 32px;border-radius:7px;font-weight:600;font-size:15px;">View Task &amp; Reply &#8594;</a>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:18px 32px;text-align:center;">
-            <div style="font-size:12px;color:#94a3b8;">TaskFlow Task Management &middot; Automated Message</div>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+
+    const htmlBody = buildAssignedEmail({
+      recipientName: assignedUser?.full_name,
+      assignerName: currentUser?.full_name,
+      taskTitle: taskData.title,
+      boardName: board?.name,
+      dueDate: taskData.due_date,
+      taskUrl,
+    });
 
     await SendEmail({
       to: email,
@@ -125,60 +98,34 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
       const updatedWatchers = [...currentWatchers, watcherEmail];
       await handleUpdate({ watchers: updatedWatchers });
 
-      const watcherUser = allUsers.find(u => u.email === watcherEmail);
-      const taskUrl = `${window.location.origin}/Board?id=${taskData.board_id}&taskId=${taskData.id}`;
-      
-      // Get board details
-      const boardDetails = await Board.filter({ id: taskData.board_id });
-      const board = boardDetails[0];
-      
-      const htmlBody = `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>You're now watching a task</title></head>
-<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
-        <tr>
-          <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:10px 10px 0 0;padding:28px 32px;text-align:center;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">TASKFLOW</div>
-            <div style="font-size:22px;font-weight:700;color:#ffffff;">You're now watching a task</div>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#ffffff;padding:32px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">
-            <p style="font-size:15px;color:#1e293b;margin:0 0 12px 0;">Hi ${watcherUser?.full_name || 'there'},</p>
-            <div style="font-size:15px;color:#475569;line-height:1.6;margin-bottom:20px;">
-              <strong>${currentUser?.full_name}</strong> added you as a watcher to the task <strong>${taskData.title}</strong> in the <strong>${board?.name}</strong> project.<br/><br/>You'll receive updates whenever this task is modified or commented on.
-            </div>
-            <div style="text-align:center;margin:28px 0 8px 0;">
-              <a href="${taskUrl}" style="display:inline-block;background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:#ffffff;text-decoration:none;padding:13px 32px;border-radius:7px;font-weight:600;font-size:15px;">View Task &amp; Reply &#8594;</a>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:18px 32px;text-align:center;">
-            <div style="font-size:12px;color:#94a3b8;">TaskFlow Task Management &middot; Automated Message</div>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+      // Don't email yourself
+      if (watcherEmail !== currentUser?.email) {
+        const watcherUser = allUsers.find(u => u.email === watcherEmail);
+        const taskUrl = `${window.location.origin}/Board?id=${taskData.board_id}&taskId=${taskData.id}`;
+        const boardDetails = await Board.filter({ id: taskData.board_id });
+        const board = boardDetails[0];
 
-      await SendEmail({
-        to: watcherEmail,
-        subject: `You're now watching "${taskData.title}"`,
-        body: htmlBody,
-      });
+        const htmlBody = buildWatcherEmail({
+          recipientName: watcherUser?.full_name,
+          adderName: currentUser?.full_name,
+          taskTitle: taskData.title,
+          boardName: board?.name,
+          taskUrl,
+        });
 
-      await ActivityLog.create({
-        task_id: taskData.id,
-        action_type: 'updated',
-        action_description: `${currentUser?.full_name} added ${watcherUser?.full_name} as a watcher`,
-        user_email: currentUser?.email,
-      });
+        await SendEmail({
+          to: watcherEmail,
+          subject: `You're now watching "${taskData.title}"`,
+          body: htmlBody,
+        });
+
+        await ActivityLog.create({
+          task_id: taskData.id,
+          action_type: 'updated',
+          action_description: `${currentUser?.full_name} added ${watcherUser?.full_name} as a watcher`,
+          user_email: currentUser?.email,
+        });
+      }
     }
   };
 
