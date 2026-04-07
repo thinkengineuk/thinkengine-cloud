@@ -17,9 +17,15 @@ export default function TimeTrackingSection({ task, currentUser, onRefresh }) {
     const [editingEstimate, setEditingEstimate] = useState(false);
     const [estimateHours, setEstimateHours] = useState("");
     const [estimateMinutes, setEstimateMinutes] = useState("");
-    const [elapsed, setElapsed] = useState(0); // live elapsed seconds for active timer
+    const [elapsed, setElapsed] = useState(0);
+    const [localTimeEntries, setLocalTimeEntries] = useState(task.time_entries || []);
 
-    const timeEntries = task.time_entries || [];
+    // Sync local entries when parent task prop changes
+    useEffect(() => {
+        setLocalTimeEntries(task.time_entries || []);
+    }, [task.time_entries]);
+
+    const timeEntries = localTimeEntries;
 
     // Check if current user has an active timer on this task
     const activeEntry = timeEntries.find(
@@ -53,7 +59,11 @@ export default function TimeTrackingSection({ task, currentUser, onRefresh }) {
     const handleToggle = async () => {
         setLoading(true);
         try {
-            await toggleTaskTimer({ taskId: task.id });
+            const res = await toggleTaskTimer({ taskId: task.id });
+            // Immediately update local state so UI reflects change without waiting for parent refresh
+            if (res?.data?.task?.time_entries) {
+                setLocalTimeEntries(res.data.task.time_entries);
+            }
             onRefresh();
         } finally {
             setLoading(false);
