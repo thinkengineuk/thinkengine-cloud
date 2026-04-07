@@ -56,12 +56,12 @@ export default function TaskChecklists({ taskId }) {
 
   const loadChecklists = useCallback(async () => {
     const taskChecklists = await Checklist.filter({ task_id: taskId }, "position");
-    const checklistsWithItems = await Promise.all(
-      taskChecklists.map(async (checklist) => {
-        const items = await ChecklistItem.filter({ checklist_id: checklist.id }, "position");
-        return { ...checklist, items };
-      })
-    );
+    // Fetch items sequentially to avoid rate limit from parallel bursts
+    const checklistsWithItems = [];
+    for (const checklist of taskChecklists) {
+      const items = await ChecklistItem.filter({ checklist_id: checklist.id }, "position");
+      checklistsWithItems.push({ ...checklist, items });
+    }
     setChecklists(checklistsWithItems);
   }, [taskId]);
 

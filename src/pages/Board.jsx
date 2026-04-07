@@ -92,15 +92,12 @@ export default function BoardPage() {
     try {
       // OPTIMIZATION: Fetch all data in parallel for faster page load
       // Reduces total loading time by making concurrent requests
-      const [boardData, columnsData, tasksData, allComments, allAttachments, allChecklists] = await Promise.all([
+      const [boardData, columnsData, tasksData] = await Promise.all([
         BoardEntity.filter({ id: boardId }),
         Column.filter({ board_id: boardId }, "position"),
         Task.filter({ board_id: boardId }, "position"),
-        Comment.list(),
-        Attachment.list(),
-        Checklist.list(),
       ]);
-      
+
       if (boardData.length === 0) {
         navigate(createPageUrl("Dashboard"));
         return;
@@ -134,15 +131,6 @@ export default function BoardPage() {
       setAllTasks(uniqueTasks);
 
       const tagsSet = new Set();
-      uniqueTasks.forEach(task => {
-        if (task.tags) {
-          task.tags.forEach(tag => {
-            tagsSet.add(tag);
-          });
-        }
-      });
-      
-      setAllTags(Array.from(tagsSet).sort());
 
       if (taskIdFromUrl) {
         const taskToOpen = uniqueTasks.find(t => t.id === taskIdFromUrl);
