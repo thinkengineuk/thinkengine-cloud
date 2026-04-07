@@ -1,0 +1,35 @@
+{
+  "name": "Attachment",
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "Task this attachment belongs to"
+    },
+    "comment_id": {
+      "type": "string",
+      "description": "ID of the comment this attachment belongs to (optional)"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL of the uploaded file"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original file name"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type of file"
+    }
+  },
+  "required": [
+    "task_id",
+    "file_url",
+    "file_name"
+  ]
+}

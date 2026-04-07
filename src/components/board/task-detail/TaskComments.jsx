@@ -2,11 +2,12 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Comment } from "@/entities/Comment";
 import { User } from "@/entities/User";
 import { ActivityLog } from "@/entities/ActivityLog";
+import { Attachment } from "@/entities/Attachment";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Send, Pencil, Trash2, X, Check } from "lucide-react";
+import { MessageSquare, Send, Pencil, Trash2, X, Check, Paperclip, FileIcon, ExternalLink } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { buildMentionEmail } from "@/utils/emailTemplates";
 
@@ -18,17 +19,25 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
   const [submitting, setSubmitting] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editText, setEditText] = useState("");
-  
-  // Mention autocomplete state
-  const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
-  const [mentionSearch, setMentionSearch] = useState("");
-  const [mentionSuggestions, setMentionSuggestions] = useState([]);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [commentAttachments, setCommentAttachments] = useState({});
+  const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
 
   const loadComments = useCallback(async () => {
     const taskComments = await Comment.filter({ task_id: taskId }, "-created_date");
     setComments(taskComments);
+    // Load attachments for all comments
+    const allAttachments = await Attachment.filter({ task_id: taskId });
+    const byComment = {};
+    allAttachments.forEach(att => {
+      if (att.comment_id) {
+        if (!byComment[att.comment_id]) byComment[att.comment_id] = [];
+        byComment[att.comment_id].push(att);
+      }
+    });
+    setCommentAttachments(byComment);
   }, [taskId]);
 
   useEffect(() => {
@@ -143,8 +152,24 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         }
       }
 
+      setUploading(true);
       // Save the comment first
-      await Comment.create({ task_id: taskId, text: newComment.trim(), mentions });
+      const createdComment = await Comment.create({ task_id: taskId, text: newComment.trim(), mentions });
+
+      // Upload any attached files
+      for (const file of selectedFiles) {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        await Attachment.create({
+          task_id: taskId,
+          comment_id: createdComment.id,
+          file_url,
+          file_name: file.name,
+          file_size: file.size,
+          file_type: file.type,
+        });
+      }
+      setSelectedFiles([]);
+      setUploading(false);
 
       const taskData = task || {};
       const taskUrl = `${window.location.origin}/Board?id=${taskData.board_id}&taskId=${taskData.id || taskId}`;
@@ -191,8 +216,10 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
       setNewComment("");
       setShowMentionSuggestions(false);
       loadComments();
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Error adding comment:", error);
+      setUploading(false);
     } finally {
       setSubmitting(false);
     }
@@ -258,6 +285,20 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     }
   };
 
+  const linkifyText = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, i) =>
+      urlRegex.test(part) ? (
+        <a key={i} href={part} target="_blank" rel="noopener noreferrer"
+          className="text-blue-600 underline hover:text-blue-800 break-all inline-flex items-center gap-0.5"
+          onClick={(e) => e.stopPropagation()}>
+          {part}<ExternalLink className="w-3 h-3 inline flex-shrink-0" />
+        </a>
+      ) : part
+    );
+  };
+
   const formatCommentText = (text) => {
     const lines = text.split('\n');
     const formattedElements = [];
@@ -278,7 +319,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
       if (isDateHeader) {
         formattedElements.push(
           <div key={index} className="font-semibold text-slate-900 mt-4 mb-2 first:mt-0">
-            {trimmed}
+            {linkifyText(trimmed)}
           </div>
         );
       } else if (trimmed.startsWith('-') || trimmed.startsWith('•') || trimmed.startsWith('*')) {
@@ -286,12 +327,12 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         formattedElements.push(
           <div key={index} className="flex gap-2 mb-1.5 items-start">
             <span className="text-slate-600 mt-0.5 flex-shrink-0">•</span>
-            <span className="flex-1 leading-relaxed">{content}</span>
+            <span className="flex-1 leading-relaxed">{linkifyText(content)}</span>
           </div>
         );
       } else {
         formattedElements.push(
-          <p key={index} className="mb-1.5 leading-relaxed">{trimmed}</p>
+          <p key={index} className="mb-1.5 leading-relaxed">{linkifyText(trimmed)}</p>
         );
       }
     });
@@ -347,18 +388,43 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
           </div>
         )}
         
+        {selectedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {selectedFiles.map((file, i) => (
+              <div key={i} className="flex items-center gap-1 bg-slate-100 rounded-md px-2 py-1 text-xs text-slate-700">
+                <FileIcon className="w-3 h-3" />
+                <span className="max-w-[120px] truncate">{file.name}</span>
+                <button onClick={() => setSelectedFiles(prev => prev.filter((_, j) => j !== i))} className="text-slate-400 hover:text-red-500 ml-1">
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="flex justify-between items-center">
-          <span className="text-xs text-slate-500">
-            Tip: Use @ to mention team members
-          </span>
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => setSelectedFiles(prev => [...prev, ...Array.from(e.target.files)])}
+            />
+            <Button variant="ghost" size="sm" className="h-8 text-xs px-2 text-slate-500" onClick={() => fileInputRef.current?.click()}>
+              <Paperclip className="w-3.5 h-3.5 mr-1" />
+              Attach
+            </Button>
+            <span className="text-xs text-slate-500 hidden sm:inline">Type @ to mention</span>
+          </div>
           <Button
             onClick={handleSubmit}
-            disabled={!newComment.trim() || submitting}
+            disabled={(!newComment.trim() && selectedFiles.length === 0) || submitting || uploading}
             size="sm"
             className="bg-slate-900 hover:bg-slate-800"
           >
             <Send className="w-4 h-4 mr-2" />
-            {submitting ? 'Posting...' : 'Comment'}
+            {uploading ? 'Uploading...' : submitting ? 'Posting...' : 'Comment'}
           </Button>
         </div>
       </div>
@@ -456,6 +522,24 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
                     </div>
                   )}
                   
+                  {commentAttachments[comment.id]?.length > 0 && !isEditing && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {commentAttachments[comment.id].map((att) => (
+                        <a
+                          key={att.id}
+                          href={att.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 transition-colors"
+                        >
+                          <Paperclip className="w-3 h-3 flex-shrink-0" />
+                          <span className="max-w-[160px] truncate">{att.file_name}</span>
+                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
                   {comment.mentions && comment.mentions.length > 0 && !isEditing && (
                     <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
                       <span>Mentioned:</span>
