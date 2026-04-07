@@ -203,6 +203,11 @@ export default function BoardPage() {
     loadBoard();
   };
 
+  const handleMoveTask = async (taskId, targetColumnId) => {
+    await Task.update(taskId, { column_id: targetColumnId, position: 0 });
+    loadBoard();
+  };
+
   const handleToggleTaskComplete = async (taskId) => {
     const task = allTasks.find(t => t.id === taskId);
     if (!task) return;
@@ -713,6 +718,8 @@ export default function BoardPage() {
                           dragHandleProps={provided.dragHandleProps}
                           isDragging={snapshot.isDragging}
                           onToggleTaskComplete={handleToggleTaskComplete}
+                          allBoardColumns={columns}
+                          onMoveTask={handleMoveTask}
                         />
                       </div>
                     )}

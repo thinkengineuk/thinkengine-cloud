@@ -3,9 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreVertical } from "lucide-react";
 import { format, isToday, isPast, startOfDay } from "date-fns";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 const getTagColor = (tag) => {
   const colors = [
@@ -29,7 +29,7 @@ const getTagColor = (tag) => {
 
 // OPTIMIZATION: Memoized component to prevent unnecessary re-renders
 // Only re-renders when task or usersMap props change
-const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete }) => {
+const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete, allColumns, onMoveTask }) => {
   // OPTIMIZATION: Get assigned user from passed usersMap instead of fetching
   // This avoids redundant API calls and improves performance
   const assignedUser = task.assigned_to ? usersMap[task.assigned_to] : null;
@@ -88,6 +88,43 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         dueStatus === 'overdue' ? 'bg-orange-50 border-orange-200' : ''
       } ${dueStatus === 'today' ? 'bg-blue-50 border-blue-200' : ''}`}
     >
+      {allColumns && allColumns.length > 0 && onMoveTask && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 left-2 h-7 w-7 text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                Move to...
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {allColumns.map((col) => (
+                    <DropdownMenuItem
+                      key={col.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMoveTask(task.id, col.id);
+                      }}
+                    >
+                      {col.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+
       {!isCompleted && onToggleTaskComplete && (
         <Button
           variant="ghost"

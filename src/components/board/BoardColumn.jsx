@@ -29,7 +29,11 @@ const colorMap = {
   cyan: { bg: 'from-cyan-500 to-cyan-700', light: 'bg-cyan-50' },
 };
 
-export default function BoardColumn({ column, tasks, users, usersMap, currentUser, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete }) {
+export default function BoardColumn({ column, tasks, users, usersMap, currentUser, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete, allBoardColumns, onMoveTask }) {
+  const otherColumns = React.useMemo(() => {
+    if (!allBoardColumns) return [];
+    return allBoardColumns.filter(c => c.id !== column.id);
+  }, [allBoardColumns, column.id]);
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showEditColumn, setShowEditColumn] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -371,6 +375,8 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
                           onClick={() => onTaskClick(task)}
                           isDragging={snapshot.isDragging}
                           onToggleTaskComplete={onToggleTaskComplete}
+                          allColumns={otherColumns}
+                          onMoveTask={onMoveTask}
                         />
                       </div>
                     )}
