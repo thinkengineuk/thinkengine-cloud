@@ -170,9 +170,10 @@ export default function Layout({ children }) {
                                 project.color === 'teal' ? 'from-teal-400 to-teal-600' :
                                 project.color === 'indigo' ? 'from-indigo-400 to-indigo-600' :
                                 project.color === 'cyan' ? 'from-cyan-400 to-cyan-600' :
-                                'from-gray-400 to-gray-600'
-                              }`}></span>
-                              <span className="font-medium text-sm">{project.name}</span>
+                                project.color === 'black' ? 'from-slate-700 to-slate-900' :
+                                    'from-gray-400 to-gray-600'
+                                }`}></span>
+                                <span className="font-medium text-sm">{project.name}</span>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -210,9 +211,10 @@ export default function Layout({ children }) {
                               project.color === 'teal' ? 'from-teal-400 to-teal-600' :
                               project.color === 'indigo' ? 'from-indigo-400 to-indigo-600' :
                               project.color === 'cyan' ? 'from-cyan-400 to-cyan-600' :
-                              'from-gray-400 to-gray-600'
-                            }`}></span>
-                            <span className="font-medium text-sm">{project.name}</span>
+                              project.color === 'black' ? 'from-slate-700 to-slate-900' :
+                                'from-gray-400 to-gray-600'
+                              }`}></span>
+                              <span className="font-medium text-sm">{project.name}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

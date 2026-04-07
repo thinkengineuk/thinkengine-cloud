@@ -24,6 +24,7 @@ const colors = [
   { value: 'teal', label: 'Teal', gradient: 'from-teal-400 to-teal-600' },
   { value: 'indigo', label: 'Indigo', gradient: 'from-indigo-400 to-indigo-600' },
   { value: 'cyan', label: 'Cyan', gradient: 'from-cyan-400 to-cyan-600' },
+  { value: 'black', label: 'Black', gradient: 'from-slate-700 to-slate-900' },
 ];
 
 export default function CreateBoardDialog({ open, onOpenChange, onSubmit }) {

@@ -27,6 +27,7 @@ const colorMap = {
   teal: { bg: 'from-teal-500 to-teal-700', light: 'bg-teal-50' },
   indigo: { bg: 'from-indigo-500 to-indigo-700', light: 'bg-indigo-50' },
   cyan: { bg: 'from-cyan-500 to-cyan-700', light: 'bg-cyan-50' },
+  black: { bg: 'from-slate-700 to-slate-900', light: 'bg-slate-50' },
 };
 
 export default function BoardColumn({ column, tasks, users, usersMap, currentUser, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete, allBoardColumns, onMoveTask, taskCountsMap }) {
