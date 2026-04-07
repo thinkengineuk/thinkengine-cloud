@@ -90,8 +90,6 @@ export default function BoardPage() {
     }
 
     try {
-      // OPTIMIZATION: Fetch all data in parallel for faster page load
-      // Reduces total loading time by making concurrent requests
       const [boardData, columnsData, tasksData] = await Promise.all([
         BoardEntity.filter({ id: boardId }),
         Column.filter({ board_id: boardId }, "position"),
@@ -107,30 +105,23 @@ export default function BoardPage() {
       setBoard(fetchedBoard);
       setColumns(columnsData);
 
-      // Fetch board members via backend function (works for all user roles)
       const usersResponse = await getBoardUsers({ boardId });
       const allUsers = usersResponse.data?.users || [];
       const usersByEmail = {};
-      allUsers.forEach(u => {
-        usersByEmail[u.email] = u;
-      });
+      allUsers.forEach(u => { usersByEmail[u.email] = u; });
       setUsersMap(usersByEmail);
       setUsers(allUsers);
       
-      // Deduplicate tasks by ID
       const uniqueTasks = [];
       const seenIds = new Set();
-      
       for (const task of tasksData) {
         if (!seenIds.has(task.id)) {
           seenIds.add(task.id);
           uniqueTasks.push(task);
         }
       }
-      
       setAllTasks(uniqueTasks);
 
-      // Fetch counts for comments, attachments, checklists and build the map
       const [commentsData, attachmentsData, checklistsData] = await Promise.all([
         Comment.list(),
         Attachment.list(),
@@ -143,38 +134,38 @@ export default function BoardPage() {
       checklistsData.forEach(ch => { if (countsMap[ch.task_id]) countsMap[ch.task_id].checklists++; });
       setTaskCountsMap(countsMap);
 
-      const tagsSet = new Set();
-
-      if (taskIdFromUrl) {
-        const taskToOpen = uniqueTasks.find(t => t.id === taskIdFromUrl);
-        if (taskToOpen) {
-          setSelectedTask(taskToOpen);
-        }
-      }
-
-      // Check if this board requires 2FA (Ben Tasks or Management)
-      const twoFaBoards = ["Ben Tasks", "Management"];
       const loggedInUser = await base44.auth.me();
       setCurrentUser(loggedInUser);
+      const twoFaBoards = ["Ben Tasks", "Management"];
       if (twoFaBoards.includes(fetchedBoard.name)) {
-        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const today = new Date().toISOString().slice(0, 10);
         const boardAccessDates = loggedInUser.board_access_dates || {};
         const lastAccessDate = boardAccessDates[boardId];
         setHasAccess(lastAccessDate === today);
       } else {
-        setHasAccess(true); // Other boards don't require 2FA
+        setHasAccess(true);
       }
+
+      // Open task from URL only on initial load
+      return uniqueTasks;
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
       setCheckingAccess(false);
     }
-  }, [boardId, taskIdFromUrl, navigate]);
+  }, [boardId, navigate]);
 
+  // Only reload on pathname change (not search params) to avoid re-opening task on close
   useEffect(() => {
-    loadBoard();
-  }, [loadBoard, location.pathname, location.search]);
+    loadBoard().then(uniqueTasks => {
+      // Open task from URL only on initial load
+      if (uniqueTasks && taskIdFromUrl) {
+        const taskToOpen = uniqueTasks.find(t => t.id === taskIdFromUrl);
+        if (taskToOpen) setSelectedTask(taskToOpen);
+      }
+    });
+  }, [loadBoard, location.pathname]);
 
   useEffect(() => {
     let filtered = [...allTasks];
@@ -769,7 +760,10 @@ export default function BoardPage() {
         <TaskDetailModal
           task={selectedTask}
           boardId={boardId}
-          onClose={() => setSelectedTask(null)}
+          onClose={() => {
+            setSelectedTask(null);
+            navigate(`/Board?id=${boardId}`, { replace: true });
+          }}
           onRefresh={loadBoard}
           allColumns={columns}
           onMoveTask={handleMoveTask}

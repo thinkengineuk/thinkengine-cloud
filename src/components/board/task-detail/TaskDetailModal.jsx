@@ -26,16 +26,7 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh, all
     setTaskData(task);
   }, [task]);
 
-  // Update URL when task opens, restore when closed
-  useEffect(() => {
-    if (!task?.id || !boardId) return;
-    const originalUrl = window.location.href;
-    const taskUrl = `${window.location.origin}/Board?id=${boardId}&taskId=${task.id}`;
-    window.history.replaceState(null, '', taskUrl);
-    return () => {
-      window.history.replaceState(null, '', originalUrl);
-    };
-  }, [task?.id, boardId]);
+
 
   useEffect(() => {
     const fetchData = async () => {
