@@ -164,7 +164,7 @@ export default function BoardPage() {
 
   useEffect(() => {
     loadBoard();
-  }, [loadBoard, location.pathname]);
+  }, [loadBoard, location.pathname, location.search]);
 
   useEffect(() => {
     let filtered = [...allTasks];
