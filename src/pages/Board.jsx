@@ -266,24 +266,21 @@ export default function BoardPage() {
     }
     window.dispatchEvent(new Event('sort-change'));
 
-    // Get all tasks without pre-sorting - BoardColumn handles its own sorting
-    const sourceColumnTasks = allTasks.filter(t => t.column_id === sourceColumnId);
-    const destColumnTasks = allTasks.filter(t => t.column_id === destColumnId);
+    // Get tasks in each column, sorted by current position to ensure consistency
+    const sourceColumnTasks = allTasks
+      .filter(t => t.column_id === sourceColumnId)
+      .sort((a, b) => (a.position || 0) - (b.position || 0));
+    const destColumnTasks = allTasks
+      .filter(t => t.column_id === destColumnId)
+      .sort((a, b) => (a.position || 0) - (b.position || 0));
 
     // Find the dragged task
     const draggedTask = allTasks.find(t => t.id === taskId);
     if (!draggedTask) return;
 
-    // Remove dragged task from source
+    // Remove dragged task from source and rebuild destination
     const newSourceTasks = sourceColumnTasks.filter(t => t.id !== taskId);
-    
-    // Add to destination at the right position
-    let newDestTasks = [...destColumnTasks];
-    if (sourceColumnId === destColumnId) {
-      newDestTasks = newSourceTasks;
-    } else {
-      newDestTasks = newDestTasks.filter(t => t.id !== taskId);
-    }
+    let newDestTasks = destColumnTasks.filter(t => t.id !== taskId);
     newDestTasks.splice(destination.index, 0, draggedTask);
 
     // Check if moving to/from completed column
@@ -323,24 +320,18 @@ export default function BoardPage() {
     // Optimistically update UI
     const updatedAllTasks = allTasks.map(task => {
       const update = tasksToUpdate.find(u => u.id === task.id);
-      if (update) {
-        return { ...task, ...update.updates };
-      }
-      return task;
+      return update ? { ...task, ...update.updates } : task;
     });
-    
     setAllTasks(updatedAllTasks);
 
-    // Batch update database
+    // Persist to database and reload to sync
     (async () => {
       try {
-        const dbUpdates = tasksToUpdate.map(({ id, updates }) => 
-          Task.update(id, updates)
-        );
-        await Promise.all(dbUpdates);
+        await Promise.all(tasksToUpdate.map(({ id, updates }) => Task.update(id, updates)));
       } catch (error) {
         console.error('Error updating tasks:', error);
-        loadBoard();
+      } finally {
+        await loadBoard();
       }
     })();
   };
