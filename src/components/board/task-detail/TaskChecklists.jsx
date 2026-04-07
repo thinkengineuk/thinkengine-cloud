@@ -267,7 +267,10 @@ export default function TaskChecklists({ taskId }) {
                                                 value={editItemText}
                                                 onChange={(e) => setEditItemText(e.target.value)}
                                                 onKeyDown={(e) => {
-                                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                                  if (e.key === 'Enter' && e.shiftKey) {
+                                                    e.preventDefault();
+                                                    setEditItemText(editItemText + '\n');
+                                                  } else if (e.key === 'Enter' && !e.shiftKey) {
                                                     e.preventDefault();
                                                     handleSaveEdit();
                                                   }
@@ -383,7 +386,10 @@ function ChecklistItemInput({ checklistId, onAdd }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
+          if (e.key === 'Enter' && e.shiftKey) {
+            e.preventDefault();
+            setText(text + '\n');
+          } else if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleAdd();
           }
