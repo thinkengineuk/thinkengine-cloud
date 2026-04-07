@@ -290,17 +290,21 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
   };
 
   const linkifyText = (text) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
     const parts = text.split(urlRegex);
-    return parts.map((part, i) =>
-      urlRegex.test(part) ? (
-        <a key={i} href={part} target="_blank" rel="noopener noreferrer"
-          className="text-blue-600 underline hover:text-blue-800 break-all inline-flex items-center gap-0.5"
-          onClick={(e) => e.stopPropagation()}>
-          {part}<ExternalLink className="w-3 h-3 inline flex-shrink-0" />
-        </a>
-      ) : part
-    );
+    return parts.map((part, i) => {
+      if (/^https?:\/\//.test(part) || /^www\./.test(part)) {
+        const href = part.startsWith('www.') ? `https://${part}` : part;
+        return (
+          <a key={i} href={href} target="_blank" rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800 break-all inline-flex items-center gap-0.5"
+            onClick={(e) => e.stopPropagation()}>
+            {part}<ExternalLink className="w-3 h-3 inline flex-shrink-0" />
+          </a>
+        );
+      }
+      return part;
+    });
   };
 
   const formatCommentText = (text) => {
