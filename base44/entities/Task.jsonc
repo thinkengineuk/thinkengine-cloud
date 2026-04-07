@@ -83,6 +83,7 @@
         "weekly",
         "monthly",
         "3_monthly",
+        "6_monthly",
         "yearly"
       ],
       "description": "How often the task recurs"

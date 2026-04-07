@@ -11,6 +11,7 @@ import { base44 } from "@/api/base44Client";
 const RECURRENCE_OPTIONS = [
   { value: "monthly", label: "Monthly" },
   { value: "3_monthly", label: "Every 3 Months (Quarterly)" },
+  { value: "6_monthly", label: "Every 6 Months" },
   { value: "yearly", label: "Yearly" },
 ];
 

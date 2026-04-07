@@ -29,7 +29,9 @@ const colorMap = {
   cyan: { bg: 'from-cyan-500 to-cyan-700', light: 'bg-cyan-50' },
 };
 
-export default function BoardColumn({ column, tasks, users, usersMap, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete }) {
+const TEAM_ORDER_ALLOWED = ['chloe'];
+
+export default function BoardColumn({ column, tasks, users, usersMap, currentUser, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete }) {
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showEditColumn, setShowEditColumn] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -293,9 +295,11 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
                         Recently Created
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setSortBy('team_order')} className={sortBy === 'team_order' ? 'bg-slate-100' : ''}>
-                        Team Order
-                      </DropdownMenuItem>
+                      {TEAM_ORDER_ALLOWED.includes(currentUser?.full_name?.split(' ')[0]?.toLowerCase()) && (
+                        <DropdownMenuItem onClick={() => setSortBy('team_order')} className={sortBy === 'team_order' ? 'bg-slate-100' : ''}>
+                          Team Order
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem onClick={() => setSortBy('manual')} className={sortBy === 'manual' ? 'bg-slate-100' : ''}>
                         Manual Order
                       </DropdownMenuItem>

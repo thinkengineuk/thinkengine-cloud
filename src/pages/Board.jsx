@@ -55,6 +55,7 @@ export default function BoardPage() {
   const taskIdFromUrl = urlParams.get('taskId');
 
   const [board, setBoard] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [columns, setColumns] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [allTasks, setAllTasks] = useState([]);
@@ -145,10 +146,11 @@ export default function BoardPage() {
 
       // Check if this board requires 2FA (Ben Tasks or Management)
       const twoFaBoards = ["Ben Tasks", "Management"];
+      const loggedInUser = await base44.auth.me();
+      setCurrentUser(loggedInUser);
       if (twoFaBoards.includes(fetchedBoard.name)) {
         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-        const currentUser = await base44.auth.me();
-        const boardAccessDates = currentUser.board_access_dates || {};
+        const boardAccessDates = loggedInUser.board_access_dates || {};
         const lastAccessDate = boardAccessDates[boardId];
         setHasAccess(lastAccessDate === today);
       } else {
@@ -705,6 +707,7 @@ export default function BoardPage() {
                           tasks={tasks.filter(t => t.column_id === column.id)}
                           users={users}
                           usersMap={usersMap}
+                          currentUser={currentUser}
                           onTaskClick={setSelectedTask}
                           onRefresh={loadBoard}
                           dragHandleProps={provided.dragHandleProps}

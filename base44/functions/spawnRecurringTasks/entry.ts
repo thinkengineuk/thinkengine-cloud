@@ -12,7 +12,7 @@ function getIntervalMonths(pattern) {
   switch (pattern) {
     case 'monthly': return 1;
     case '3_monthly': return 3;
-    case 'yearly': return 12;
+    case '6_monthly': return 6;
     default: return 1;
   }
 }
