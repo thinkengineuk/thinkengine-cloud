@@ -29,11 +29,10 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { users } = await listAllAppUsers();
-        setAllUsers(users || []);
+        const response = await listAllAppUsers();
+        setAllUsers(response.data?.users || []);
       } catch {
-        const users = await UserEntity.list();
-        setAllUsers(users);
+        // ignore
       }
       const me = await UserEntity.me();
       setCurrentUser(me);
