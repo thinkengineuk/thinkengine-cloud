@@ -175,6 +175,25 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </div>
         )}
         
+        {counts?.firstImageUrl && (
+          <div className="-mx-4 -mt-3 mb-1 overflow-hidden rounded-t-none rounded-b-none" style={{marginTop: '-4px'}}>
+            {counts.firstIsVideo ? (
+              <video
+                src={counts.firstImageUrl}
+                className="w-full max-h-40 object-cover"
+                muted
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <img
+                src={counts.firstImageUrl}
+                alt="attachment preview"
+                className="w-full max-h-40 object-cover"
+              />
+            )}
+          </div>
+        )}
         <div className="space-y-2">
           <h4 className={`font-semibold line-clamp-2 ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
             {task.title}
