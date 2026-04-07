@@ -125,8 +125,12 @@ export default function TaskAttachments({ task, onRefresh }) {
                 className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg group cursor-pointer"
                 onClick={() => setViewingAttachment(attachment)}
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-slate-100 rounded flex items-center justify-center text-slate-600">
-                  {getFileIcon(attachment.file_type)}
+                <div className="flex-shrink-0 w-10 h-10 bg-slate-100 rounded overflow-hidden flex items-center justify-center text-slate-600">
+                  {attachment.file_type?.startsWith('image/') ? (
+                    <img src={attachment.file_url} alt={attachment.file_name} className="w-full h-full object-cover" />
+                  ) : (
+                    getFileIcon(attachment.file_type)
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-900 truncate">
