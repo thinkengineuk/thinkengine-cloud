@@ -1,0 +1,30 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "Task this comment belongs to"
+    },
+    "text": {
+      "type": "string",
+      "description": "Comment text"
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of mentioned user emails"
+    },
+    "position": {
+      "type": "number",
+      "description": "Custom order position for comments",
+      "default": 0
+    }
+  },
+  "required": [
+    "task_id",
+    "text"
+  ]
+}

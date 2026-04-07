@@ -7,7 +7,8 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Send, Pencil, Trash2, X, Check, Paperclip, FileIcon, ExternalLink } from "lucide-react";
+import { MessageSquare, Send, Pencil, Trash2, X, Check, Paperclip, FileIcon, ExternalLink, GripVertical } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format, formatDistanceToNow } from "date-fns";
 import { buildMentionEmail } from "@/utils/emailTemplates";
 
@@ -35,7 +36,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     loadingRef.current = true;
     try {
       const [taskComments, allAttachments] = await Promise.all([
-        Comment.filter({ task_id: taskId }, "-created_date"),
+        Comment.filter({ task_id: taskId }, "position"),
         Attachment.filter({ task_id: taskId }),
       ]);
       setComments(taskComments);
@@ -452,130 +453,46 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
             <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-30" />
             <p className="text-sm">No comments yet</p>
           </div>
-        ) : (
-          comments.map((comment) => {
-            const author = getCommentAuthor(comment);
-            const isOwnComment = comment.created_by === currentUser?.email;
-            const isEditing = editingCommentId === comment.id;
-            
-            return (
-              <div key={comment.id} className="flex gap-3">
-                <Avatar className="w-9 h-9 flex-shrink-0">
-                  {author?.profile_picture_url ? (
-                    <AvatarImage src={author.profile_picture_url} alt={author.full_name} />
-                  ) : (
-                    <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-400 text-white text-sm">
-                      {author?.full_name?.[0]?.toUpperCase() || comment.created_by?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-sm text-slate-900">
-                        {author?.full_name || comment.created_by || 'Unknown User'}
-                      </span>
-                      <span className="text-xs text-slate-500">
-                        {formatTimestamp(comment.created_date)}
-                        {comment.updated_date && comment.updated_date !== comment.created_date && (
-                          <span className="ml-1">(edited)</span>
-                        )}
-                      </span>
-                    </div>
-                    
-                    {isOwnComment && !isEditing && (
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => handleEditComment(comment)}
-                        >
-                          <Pencil className="w-3.5 h-3.5 text-slate-500" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => handleDeleteComment(comment.id)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {isEditing ? (
-                    <div className="space-y-2">
-                      <Textarea
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        className="min-h-[100px] resize-none text-sm"
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleSaveEdit(comment.id)}
-                          className="bg-slate-900 hover:bg-slate-800"
-                        >
-                          <Check className="w-4 h-4 mr-1" />
-                          Save
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleCancelEdit}
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-700 border border-slate-100">
-                      {formatCommentText(comment.text)}
-                    </div>
-                  )}
-                  
-                  {commentAttachments[comment.id]?.length > 0 && !isEditing && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {commentAttachments[comment.id].map((att) => (
-                        <a
-                          key={att.id}
-                          href={att.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 transition-colors"
-                        >
-                          <Paperclip className="w-3 h-3 flex-shrink-0" />
-                          <span className="max-w-[160px] truncate">{att.file_name}</span>
-                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                        </a>
-                      ))}
-                    </div>
-                  )}
-
-                  {comment.mentions && comment.mentions.length > 0 && !isEditing && (
-                    <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
-                      <span>Mentioned:</span>
-                      {comment.mentions.map((email, idx) => {
-                        const mentionedUser = users.find(u => u.email === email);
-                        return (
-                          <span key={idx} className="font-medium">
-                            {mentionedUser?.full_name || email}
-                            {idx < comment.mentions.length - 1 && ','}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
+        {comment.mentions && comment.mentions.length > 0 && !isEditing && (
+          <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
+            <span>Mentioned:</span>
+            {comment.mentions.map((email, idx) => {
+              const mentionedUser = users.find(u => u.email === email);
+              return (
+                <span key={idx} className="font-medium">
+                  {mentionedUser?.full_name || email}
+                  {idx < comment.mentions.length - 1 && ','}
+                </span>
+              );
+            })}
+          </div>
+        )}
+        </div>
+        </div>
+        )}
+        </Draggable>
+        );
+        })}
+        {provided.placeholder}
+        </div>
+        )}
+        </Droppable>
+        </DragDropContext>
         )}
       </div>
     </div>
   );
+
+  const handleCommentDragEnd = async (result) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
+    if (source.index === destination.index) return;
+
+    const reordered = Array.from(comments);
+    const [moved] = reordered.splice(source.index, 1);
+    reordered.splice(destination.index, 0, moved);
+
+    setComments(reordered);
+    await Promise.all(reordered.map((c, idx) => Comment.update(c.id, { position: idx })));
+  };
 }
