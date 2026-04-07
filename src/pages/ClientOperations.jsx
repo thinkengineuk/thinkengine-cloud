@@ -94,8 +94,7 @@ export default function ClientOperations() {
     const matchCompany = companyFilter === "all" || p.company === companyFilter;
     const matchAgreement = agreementFilter === "all" || p.agreement_type === agreementFilter;
     const matchPerson = personFilter === "all" || STAFF_FIELDS.some(f => p[f] === personFilter);
-    const isRetained = p.client_type === "Retained";
-    return matchSearch && matchCompany && matchAgreement && matchPerson && isRetained;
+    return matchSearch && matchCompany && matchAgreement && matchPerson;
   });
 
   const teMarketingProjects = filtered.filter(p => p.company === "ThinkEngine Marketing");
