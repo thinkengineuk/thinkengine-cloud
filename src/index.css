@@ -4,27 +4,30 @@
 
 /* Permanent horizontal scrollbar for board columns area */
 .board-scroll-area::-webkit-scrollbar {
-  height: 10px;
+  height: 12px;
+  display: block !important;
 }
 
 .board-scroll-area::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.1);
+  background: rgba(0,0,0,0.2);
   border-radius: 10px;
 }
 
 .board-scroll-area::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.6);
   border-radius: 10px;
+  min-width: 40px;
 }
 
 .board-scroll-area::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.9);
 }
 
 .board-scroll-area {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.5) rgba(0,0,0,0.1);
+  scrollbar-color: rgba(255,255,255,0.6) rgba(0,0,0,0.2);
   overflow-x: scroll !important;
+  overflow-y: hidden;
 }
 
 
