@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 import { parse } from 'npm:csv-parse@5.5.3/sync';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -13,7 +13,13 @@ Deno.serve(async (req) => {
         }
 
         const body = await req.json();
-        const { csvContent, boardId: targetBoardId } = body;
+        let { csvContent, csvUrl, boardId: targetBoardId } = body;
+
+        // If URL provided, fetch the CSV
+        if (!csvContent && csvUrl) {
+            const resp = await fetch(csvUrl);
+            csvContent = await resp.text();
+        }
 
         if (!csvContent) {
             return Response.json({ error: 'No CSV content provided' }, { status: 400 });
@@ -49,168 +55,134 @@ Deno.serve(async (req) => {
             columnsByName[col.name.toLowerCase()] = col;
         });
 
-        const stats = {
-            tasksCreated: 0,
-            commentsCreated: 0,
-            checklistsCreated: 0,
-            errors: [],
-        };
+        const stats = { tasksCreated: 0, commentsCreated: 0, checklistsCreated: 0, errors: [] };
 
-        // Create unique columns
-        const uniqueSections = new Set();
-        records.forEach(record => {
-            const sectionName = record.section || 'Imported';
-            uniqueSections.add(sectionName);
-        });
-
-        for (const sectionName of uniqueSections) {
+        // Step 1: Create unique columns in bulk (sequentially but only new ones)
+        const uniqueSections = [...new Set(records.map(r => r.section || 'Imported'))];
+        for (let i = 0; i < uniqueSections.length; i++) {
+            const sectionName = uniqueSections[i];
             if (!columnsByName[sectionName.toLowerCase()]) {
-                try {
-                    const newColumn = await base44.asServiceRole.entities.Column.create({
-                        board_id: board.id,
-                        name: sectionName,
-                        position: Object.keys(columnsByName).length,
-                        color: 'blue',
-                    });
-                    columnsByName[sectionName.toLowerCase()] = newColumn;
-                } catch (error) {
-                    stats.errors.push(`Column creation failed: ${error.message}`);
+                const newColumn = await base44.asServiceRole.entities.Column.create({
+                    board_id: board.id,
+                    name: sectionName,
+                    position: Object.keys(columnsByName).length + i,
+                    color: 'blue',
+                });
+                columnsByName[sectionName.toLowerCase()] = newColumn;
+                await delay(200);
+            }
+        }
+
+        // Step 2: Build task objects
+        const validRecords = [];
+        const taskObjects = [];
+        for (let i = 0; i < records.length; i++) {
+            const record = records[i];
+            const sectionName = record.section || 'Imported';
+            const column = columnsByName[sectionName.toLowerCase()];
+            if (!column || !record.name || !record.name.trim()) continue;
+
+            const assigneeUser = record.assignee ? usersByName[record.assignee.toLowerCase()] : null;
+            const tags = record.tags ? record.tags.split(';').map(t => t.trim()).filter(t => t) : [];
+            const status = record.status === '2' ? 'completed' : 'active';
+            let priority = 'medium';
+            if (tags.some(t => t.toUpperCase() === 'HIGH')) priority = 'high';
+            else if (tags.some(t => t.toUpperCase() === 'LOW')) priority = 'low';
+            let dueDate = null;
+            if (record.due_date) {
+                const parsed = new Date(record.due_date);
+                if (!isNaN(parsed.getTime())) dueDate = parsed.toISOString().split('T')[0];
+            }
+
+            validRecords.push(record);
+            taskObjects.push({
+                board_id: board.id,
+                column_id: column.id,
+                title: record.name.trim(),
+                description: record.notes || '',
+                assigned_to: assigneeUser ? assigneeUser.email : null,
+                due_date: dueDate,
+                tags,
+                priority,
+                status,
+                position: i,
+            });
+        }
+
+        // Step 3: Bulk create tasks in batches of 20
+        const createdTasks = [];
+        const batchSize = 20;
+        for (let i = 0; i < taskObjects.length; i += batchSize) {
+            const batch = taskObjects.slice(i, i + batchSize);
+            const created = await base44.asServiceRole.entities.Task.bulkCreate(batch);
+            createdTasks.push(...created);
+            stats.tasksCreated += created.length;
+            await delay(500);
+        }
+
+        // Step 4: Parse comments and checklists, build bulk arrays
+        const allComments = [];
+        const allChecklists = [];
+        const allChecklistItems = []; // will be filled after checklists are created
+        const checklistItemsByChecklistIndex = [];
+
+        for (let i = 0; i < createdTasks.length; i++) {
+            const task = createdTasks[i];
+            const record = validRecords[i];
+
+            // Parse comments
+            if (record.comments) {
+                const commentRegex = /([A-Za-z][^(;]+)\s*\(([^)]+)\):\s*((?:(?!;\s*[A-Za-z][^(;]+\s*\([^)]+\):)[\s\S])*)/g;
+                let match;
+                while ((match = commentRegex.exec(record.comments)) !== null) {
+                    const authorName = match[1].trim();
+                    const cleanText = match[3].replace(/<person_id>[^<]*<\/person_id>\s*/g, '').trim();
+                    if (cleanText) {
+                        allComments.push({ task_id: task.id, text: `${authorName}: ${cleanText}` });
+                    }
+                }
+            }
+
+            // Parse checklists
+            if (record.checklists) {
+                const blocks = record.checklists.split(/(?=Checklist\s*\d*\s*:)/i).filter(b => b.trim());
+                for (let ci = 0; ci < blocks.length; ci++) {
+                    const block = blocks[ci];
+                    const colonIdx = block.indexOf(':');
+                    const title = colonIdx > 0 ? block.substring(0, colonIdx).trim() : 'Checklist';
+                    const itemsText = colonIdx > 0 ? block.substring(colonIdx + 1) : block;
+                    const rawItems = itemsText.split(/\[\s*[x ]?\s*\]/).map(s => s.trim()).filter(s => s && s.length > 1);
+                    if (rawItems.length > 0) {
+                        checklistItemsByChecklistIndex.push({ items: rawItems });
+                        allChecklists.push({ task_id: task.id, title, position: ci });
+                    }
                 }
             }
         }
 
-        // Process tasks one by one to handle comments and checklists
-        for (let i = 0; i < records.length; i++) {
-            const record = records[i];
+        // Step 5: Bulk create comments in batches
+        for (let i = 0; i < allComments.length; i += batchSize) {
+            const batch = allComments.slice(i, i + batchSize);
+            await base44.asServiceRole.entities.Comment.bulkCreate(batch);
+            stats.commentsCreated += batch.length;
+            await delay(500);
+        }
 
-            try {
-                const sectionName = record.section || 'Imported';
-                const column = columnsByName[sectionName.toLowerCase()];
-                
-                if (!column) {
-                    stats.errors.push(`No column for "${sectionName}" - skipped "${record.name}"`);
-                    continue;
-                }
-
-                // Match assignee
-                let assignedTo = null;
-                if (record.assignee) {
-                    const assigneeUser = usersByName[record.assignee.toLowerCase()];
-                    if (assigneeUser) {
-                        assignedTo = assigneeUser.email;
-                    }
-                }
-
-                // Parse tags
-                const tags = record.tags ? record.tags.split(';').map(t => t.trim()).filter(t => t) : [];
-
-                // Parse status
-                const status = record.status === '2' ? 'completed' : 'active';
-
-                // Parse priority
-                let priority = 'medium';
-                if (tags.some(t => t.toUpperCase() === 'HIGH')) {
-                    priority = 'high';
-                } else if (tags.some(t => t.toUpperCase() === 'LOW')) {
-                    priority = 'low';
-                }
-
-                // Parse due date
-                let dueDate = null;
-                if (record.due_date) {
-                    try {
-                        const parsed = new Date(record.due_date);
-                        if (!isNaN(parsed.getTime())) {
-                            dueDate = parsed.toISOString().split('T')[0];
-                        }
-                    } catch (e) {
-                        // Skip invalid dates
-                    }
-                }
-
-                // Create task
-                const createdTask = await base44.asServiceRole.entities.Task.create({
-                    board_id: board.id,
-                    column_id: column.id,
-                    title: record.name || 'Untitled Task',
-                    description: record.notes || '',
-                    assigned_to: assignedTo,
-                    due_date: dueDate,
-                    tags: tags,
-                    priority: priority,
-                    status: status,
-                    position: i,
-                });
-                stats.tasksCreated++;
-
-                // Parse and create comments
-                if (record.comments) {
-                    try {
-                        const commentParts = record.comments.split('|').filter(c => c.trim());
-                        
-                        for (const commentPart of commentParts) {
-                            const colonIndex = commentPart.indexOf(':');
-                            if (colonIndex > 0) {
-                                const authorName = commentPart.substring(0, colonIndex).trim();
-                                const commentText = commentPart.substring(colonIndex + 1).trim();
-                                
-                                if (commentText) {
-                                    await base44.asServiceRole.entities.Comment.create({
-                                        task_id: createdTask.id,
-                                        text: commentText,
-                                    });
-                                    stats.commentsCreated++;
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        stats.errors.push(`Failed to import comments for "${record.name}": ${error.message}`);
-                    }
-                }
-
-                // Parse and create checklists
-                if (record.checklists) {
-                    try {
-                        const checklistParts = record.checklists.split('|').filter(c => c.trim());
-                        
-                        for (let checklistIndex = 0; checklistIndex < checklistParts.length; checklistIndex++) {
-                            const checklistPart = checklistParts[checklistIndex];
-                            const colonIndex = checklistPart.indexOf(':');
-                            
-                            if (colonIndex > 0) {
-                                const checklistTitle = checklistPart.substring(0, colonIndex).trim();
-                                const itemsText = checklistPart.substring(colonIndex + 1).trim();
-                                
-                                if (checklistTitle) {
-                                    const checklist = await base44.asServiceRole.entities.Checklist.create({
-                                        task_id: createdTask.id,
-                                        title: checklistTitle,
-                                        position: checklistIndex,
-                                    });
-                                    stats.checklistsCreated++;
-                                    
-                                    const items = itemsText.split(',').map(item => item.trim()).filter(item => item);
-                                    for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
-                                        await base44.asServiceRole.entities.ChecklistItem.create({
-                                            checklist_id: checklist.id,
-                                            text: items[itemIndex],
-                                            completed: false,
-                                            position: itemIndex,
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        stats.errors.push(`Failed to import checklists for "${record.name}": ${error.message}`);
-                    }
-                }
-
-                await delay(100);
-
-            } catch (error) {
-                stats.errors.push(`Failed to import task "${record.name}": ${error.message}`);
+        // Step 6: Bulk create checklists then their items
+        for (let i = 0; i < allChecklists.length; i += batchSize) {
+            const batch = allChecklists.slice(i, i + batchSize);
+            const created = await base44.asServiceRole.entities.Checklist.bulkCreate(batch);
+            stats.checklistsCreated += created.length;
+            // Create items for this batch
+            const itemsBatch = [];
+            for (let j = 0; j < created.length; j++) {
+                const { items } = checklistItemsByChecklistIndex[i + j];
+                items.forEach((text, idx) => itemsBatch.push({ checklist_id: created[j].id, text, completed: false, position: idx }));
             }
+            if (itemsBatch.length > 0) {
+                await base44.asServiceRole.entities.ChecklistItem.bulkCreate(itemsBatch);
+            }
+            await delay(500);
         }
 
         console.log('Import completed:', stats);
