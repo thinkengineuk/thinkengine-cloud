@@ -1,0 +1,153 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "board_id": {
+      "type": "string",
+      "description": "Board this task belongs to"
+    },
+    "column_id": {
+      "type": "string",
+      "description": "Column this task is in"
+    },
+    "title": {
+      "type": "string",
+      "description": "Task title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Task description"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "User email assigned to this task"
+    },
+    "watchers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails watching this task"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Task due date"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Task tags"
+    },
+    "tag_colors": {
+      "type": "object",
+      "description": "Custom colors for tags (key: tag name, value: color name)"
+    },
+    "position": {
+      "type": "number",
+      "description": "Position in column"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed"
+      ],
+      "default": "active"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the task was marked as completed"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this task is recurring"
+    },
+    "recurrence_pattern": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly"
+      ],
+      "description": "How often the task recurs"
+    },
+    "recurrence_start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the recurrence starts"
+    },
+    "parent_recurring_task_id": {
+      "type": "string",
+      "description": "If this task was created from a recurring task, the ID of the parent"
+    },
+    "estimated_minutes": {
+      "type": "number",
+      "description": "Estimated time for task completion in minutes"
+    },
+    "actual_minutes": {
+      "type": "number",
+      "description": "Total actual time spent on the task in minutes",
+      "default": 0
+    },
+    "time_entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string"
+          },
+          "ended_at": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "number"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "started_at",
+          "user_id"
+        ]
+      },
+      "description": "Array of individual time tracking sessions",
+      "default": []
+    },
+    "client_project_id": {
+      "type": "string",
+      "description": "ID of the ClientProject this task is linked to"
+    },
+    "client_project_stage": {
+      "type": "string",
+      "description": "The specific stage of the client project this task is linked to"
+    }
+  },
+  "required": [
+    "board_id",
+    "column_id",
+    "title"
+  ]
+}
