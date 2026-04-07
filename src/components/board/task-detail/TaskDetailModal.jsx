@@ -9,6 +9,7 @@ import { User as UserEntity } from "@/entities/User";
 import { Column } from "@/entities/Column";
 import { Board } from "@/entities/Board";
 import { SendEmail } from "@/integrations/Core";
+import { ActivityLog } from "@/entities/ActivityLog";
 import { buildAssignedEmail, buildWatcherEmail } from "@/utils/emailTemplates";
 import { listAllAppUsers } from "@/functions/listAllAppUsers";
 
