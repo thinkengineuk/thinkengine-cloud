@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Trash2, Copy, ExternalLink, MoreVertical } from "lucide-react";
 import { Task } from "@/entities/Task";
@@ -26,6 +27,7 @@ import {
 export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onRefresh }) {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { toast } = useToast();
 
   const handleDelete = async () => {
     if (deleting) return;
@@ -82,7 +84,7 @@ export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onR
   const handleCopyLink = () => {
     const taskUrl = `${window.location.origin}/Board?id=${boardId}&taskId=${task.id}`;
     navigator.clipboard.writeText(taskUrl);
-    alert('Link copied to clipboard!');
+    toast({ title: "Link copied!", description: "Task link copied to clipboard." });
   };
 
   return (
