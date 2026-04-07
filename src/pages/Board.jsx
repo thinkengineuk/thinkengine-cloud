@@ -120,7 +120,7 @@ export default function BoardPage() {
           uniqueTasks.push(task);
         }
       }
-      setAllTasks(uniqueTasks);
+      setAllTasks(uniqueTasks.map(t => ({ ...t, attachmentPreview: previewMap[t.id] || null })));
 
       const [commentsData, attachmentsData, checklistsData] = await Promise.all([
         Comment.list(),
@@ -128,9 +128,15 @@ export default function BoardPage() {
         Checklist.list(),
       ]);
       const countsMap = {};
+      const previewMap = {};
       uniqueTasks.forEach(t => { countsMap[t.id] = { comments: 0, attachments: 0, checklists: 0 }; });
       commentsData.forEach(c => { if (countsMap[c.task_id]) countsMap[c.task_id].comments++; });
-      attachmentsData.forEach(a => { if (countsMap[a.task_id]) countsMap[a.task_id].attachments++; });
+      attachmentsData.forEach(a => {
+        if (countsMap[a.task_id]) countsMap[a.task_id].attachments++;
+        if (!previewMap[a.task_id] && a.file_type && (a.file_type.startsWith('image/') || a.file_type.startsWith('video/'))) {
+          previewMap[a.task_id] = { url: a.file_url, type: a.file_type };
+        }
+      });
       checklistsData.forEach(ch => { if (countsMap[ch.task_id]) countsMap[ch.task_id].checklists++; });
       setTaskCountsMap(countsMap);
 
