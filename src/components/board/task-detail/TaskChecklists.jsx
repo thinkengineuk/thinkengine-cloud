@@ -3,6 +3,7 @@ import { Checklist } from "@/entities/Checklist";
 import { ChecklistItem } from "@/entities/ChecklistItem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckSquare, Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -20,11 +21,9 @@ import {
 // Function to detect and linkify URLs in text
 const LinkifiedText = ({ text }) => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const parts = text.split(urlRegex);
-  
   return (
-    <span>
-      {parts.map((part, index) => {
+    <span style={{ whiteSpace: 'pre-wrap' }}>
+      {text.split(urlRegex).map((part, index) => {
         if (urlRegex.test(part)) {
           return (
             <a
@@ -263,16 +262,24 @@ export default function TaskChecklists({ taskId }) {
                                             className="mt-1"
                                           />
                                           {editingItem === item.id ? (
-                                            <div className="flex-1 flex gap-2">
-                                              <Input
+                                            <div className="flex-1 flex flex-col gap-2">
+                                              <Textarea
                                                 value={editItemText}
                                                 onChange={(e) => setEditItemText(e.target.value)}
-                                                onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault();
+                                                    handleSaveEdit();
+                                                  }
+                                                }}
                                                 autoFocus
-                                                className="flex-1"
+                                                className="flex-1 min-h-[60px] resize-none"
+                                                placeholder="Edit item... (Shift+Enter for new line)"
                                               />
-                                              <Button size="sm" onClick={handleSaveEdit}>Save</Button>
-                                              <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>Cancel</Button>
+                                              <div className="flex gap-2">
+                                                <Button size="sm" onClick={handleSaveEdit}>Save</Button>
+                                                <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>Cancel</Button>
+                                              </div>
                                             </div>
                                           ) : (
                                             <>
@@ -371,17 +378,24 @@ function ChecklistItemInput({ checklistId, onAdd }) {
   }
 
   return (
-    <div className="flex gap-2">
-      <Input
+    <div className="flex flex-col gap-2">
+      <Textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
-        placeholder="Add item..."
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleAdd();
+          }
+        }}
+        placeholder="Add item... (Shift+Enter for new line)"
         autoFocus
-        className="flex-1"
+        className="flex-1 min-h-[60px] resize-none"
       />
-      <Button size="sm" onClick={handleAdd}>Add</Button>
-      <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>Cancel</Button>
+      <div className="flex gap-2">
+        <Button size="sm" onClick={handleAdd}>Add</Button>
+        <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>Cancel</Button>
+      </div>
     </div>
   );
 }
