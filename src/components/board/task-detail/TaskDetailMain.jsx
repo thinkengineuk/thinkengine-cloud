@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import ReactMarkdown from 'react-markdown';
 
 import TaskChecklists from "./TaskChecklists";
-import TaskSubtasks from "./TaskSubtasks";
 import TaskAttachments from "./TaskAttachments";
 import TaskComments from "./TaskComments";
 import TaskActivity from "./TaskActivity";
@@ -159,10 +157,6 @@ export default function TaskDetailMain({ task, allUsers, currentUser, onUpdate, 
       <Separator />
 
       <TaskChecklists taskId={task.id} onRefresh={onRefresh} />
-
-      <Separator />
-
-      <TaskSubtasks task={task} onRefresh={onRefresh} />
 
       <Separator />
 
