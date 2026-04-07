@@ -69,34 +69,49 @@ Deno.serve(async (req) => {
       return Response.json({ message: 'No task data' });
     }
 
-    // Only proceed if column_id changed
-    if (!(changed_fields || []).includes('column_id')) {
-      return Response.json({ message: 'column_id not changed, skipping' });
+    const changedFields = changed_fields || [];
+    const columnChanged = changedFields.includes('column_id');
+    const statusChangedToCompleted = changedFields.includes('status') && task.status === 'completed' && old_data?.status !== 'completed';
+
+    // Determine if this is a completion event via column move
+    let isCompletedByColumnMove = false;
+    if (columnChanged) {
+      const columns = await base44.asServiceRole.entities.Column.filter({ id: task.column_id });
+      if (columns && columns.length > 0) {
+        isCompletedByColumnMove = columns[0].name.toLowerCase() === 'completed';
+      }
     }
 
-    // Check if the new column is a "completed" column
-    const column = await base44.asServiceRole.entities.Column.filter({ id: task.column_id });
-    if (!column || column.length === 0) {
-      return Response.json({ message: 'Column not found' });
+    const isCompletionEvent = isCompletedByColumnMove || statusChangedToCompleted;
+
+    if (!isCompletionEvent) {
+      return Response.json({ message: 'Not a completion event, skipping' });
     }
 
-    const columnName = column[0].name || '';
-    if (columnName.toLowerCase() !== 'completed') {
-      return Response.json({ message: 'Not a completed column, skipping' });
+    // Avoid re-triggering if already marked completed
+    if (task.status === 'completed' && task.completed_at && !statusChangedToCompleted && !isCompletedByColumnMove) {
+      return Response.json({ message: 'Task already completed, skipping' });
     }
 
-    // Already completed — skip to avoid re-triggering
-    if (task.status === 'completed' && task.completed_at) {
-      return Response.json({ message: 'Task already completed' });
+    const completedAt = task.completed_at || new Date().toISOString();
+    const updates = {};
+
+    // Set status + completed_at if not already set
+    if (task.status !== 'completed') updates.status = 'completed';
+    if (!task.completed_at) updates.completed_at = completedAt;
+
+    // If completed by status change, move to "Completed" column if one exists
+    if (statusChangedToCompleted && !columnChanged) {
+      const allColumns = await base44.asServiceRole.entities.Column.filter({ board_id: task.board_id });
+      const completedColumn = (allColumns || []).find(c => c.name.toLowerCase() === 'completed');
+      if (completedColumn && task.column_id !== completedColumn.id) {
+        updates.column_id = completedColumn.id;
+      }
     }
 
-    const completedAt = new Date().toISOString();
-
-    // Mark task as completed with timestamp
-    await base44.asServiceRole.entities.Task.update(task.id, {
-      status: 'completed',
-      completed_at: completedAt,
-    });
+    if (Object.keys(updates).length > 0) {
+      await base44.asServiceRole.entities.Task.update(task.id, updates);
+    }
 
     // Log activity
     await base44.asServiceRole.entities.ActivityLog.create({
