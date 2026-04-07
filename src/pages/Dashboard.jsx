@@ -171,27 +171,27 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500">
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-3 md:p-6 space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="text-center text-white space-y-2 py-8">
-          <p className="text-sm opacity-90">{format(new Date(), 'EEEE, MMMM d')}</p>
-          <h1 className="text-4xl font-bold">{getGreeting()}, {firstName}</h1>
+        <div className="text-center text-white space-y-1 py-4 md:py-8">
+          <p className="text-xs md:text-sm opacity-90">{format(new Date(), 'EEEE, MMMM d')}</p>
+          <h1 className="text-2xl md:text-4xl font-bold">{getGreeting()}, {firstName}</h1>
         </div>
 
         {/* Search Bar */}
         <div className="max-w-2xl mx-auto">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 md:w-5 md:h-5" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search tasks, projects, and more..."
-              className="pl-12 h-14 bg-white shadow-lg border-none rounded-full text-lg"
+              placeholder="Search tasks, projects..."
+              className="pl-11 md:pl-12 h-11 md:h-14 bg-white shadow-lg border-none rounded-full text-sm md:text-lg"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Tasks Section */}
           <div className="lg:col-span-2">
             <Card className="border-none shadow-xl">
@@ -220,13 +220,13 @@ export default function Dashboard() {
                         className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors"
                         onClick={() => handleTaskClick(task)}
                       >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-slate-900 truncate">{task.title}</p>
+                        <div className="flex-1 min-w-0 mr-2">
+                          <p className="font-medium text-slate-900 truncate text-sm md:text-base">{task.title}</p>
                           {board && (
-                            <p className="text-xs text-slate-500">{board.name}</p>
+                            <p className="text-xs text-slate-500 truncate">{board.name}</p>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 ml-4">
+                        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
                           {task.due_date && (
                             <Badge variant="outline" className="text-xs">
                               {formatDate(task.due_date)}
@@ -315,7 +315,7 @@ export default function Dashboard() {
                     )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     {filteredBoards.map((board, index) => (
                       <motion.div
                         key={board.id}

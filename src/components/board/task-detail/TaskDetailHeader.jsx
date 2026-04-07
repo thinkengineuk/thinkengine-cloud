@@ -87,12 +87,12 @@ export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onR
 
   return (
     <>
-      <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 bg-white">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div className="flex items-center justify-between px-3 py-3 md:px-6 md:py-4 border-b border-slate-200 bg-white">
+        <div className="flex items-center gap-1 md:gap-2 flex-1 min-w-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="flex-shrink-0">
-                <MoreVertical className="w-5 h-5 text-slate-600" />
+              <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8">
+                <MoreVertical className="w-4 h-4 text-slate-600" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
@@ -116,7 +116,7 @@ export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onR
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex-1 min-w-0 pr-4">
+          <h2 className="text-base md:text-2xl font-bold text-slate-900 flex-1 min-w-0 truncate pr-2">
             {task.title}
           </h2>
         </div>
