@@ -49,7 +49,6 @@ export default function TaskAttachments({ task, onRefresh }) {
 
   const handleDelete = async (attachmentId) => {
     if (!confirm("Delete this attachment?")) return;
-
     await Attachment.delete(attachmentId);
     loadAttachments();
     onRefresh();
@@ -111,7 +110,7 @@ export default function TaskAttachments({ task, onRefresh }) {
       </button>
 
       {isExpanded && (
-        <div className="mt-3 space-y-2 pl-10">
+        <div className="mt-3 pl-10">
           {attachments.length === 0 ? (
             <div className="text-center py-6 text-slate-500">
               <Paperclip className="w-12 h-12 mx-auto mb-2 opacity-30" />
@@ -119,50 +118,46 @@ export default function TaskAttachments({ task, onRefresh }) {
               <p className="text-xs mt-1">Supports all file types: documents, images, videos, spreadsheets, etc.</p>
             </div>
           ) : (
-            attachments.map((attachment) => (
-              <div
-                key={attachment.id}
-                className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg group cursor-pointer"
-                onClick={() => setViewingAttachment(attachment)}
-              >
-                <div className="flex-shrink-0 w-10 h-10 bg-slate-100 rounded overflow-hidden flex items-center justify-center text-slate-600">
-                  {attachment.file_type?.startsWith('image/') ? (
-                    <img src={attachment.file_url} alt={attachment.file_name} className="w-full h-full object-cover" />
-                  ) : (
-                    getFileIcon(attachment.file_type)
-                  )}
+            <div className="flex flex-wrap gap-3">
+              {attachments.map((attachment) => (
+                <div
+                  key={attachment.id}
+                  className="flex flex-col items-center w-20 p-1 hover:bg-slate-50 rounded-lg group cursor-pointer"
+                  onClick={() => setViewingAttachment(attachment)}
+                >
+                  <div className="w-16 h-16 bg-slate-100 rounded overflow-hidden flex items-center justify-center text-slate-600 flex-shrink-0">
+                    {attachment.file_type?.startsWith('image/') ? (
+                      <img src={attachment.file_url} alt={attachment.file_name} className="w-full h-full object-cover" />
+                    ) : (
+                      getFileIcon(attachment.file_type)
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-700 truncate w-full text-center mt-1">{attachment.file_name}</p>
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => { e.stopPropagation(); window.open(attachment.file_url, '_blank'); }}
+                      className="h-6 w-6"
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => { e.stopPropagation(); handleDelete(attachment.id); }}
+                      className="h-6 w-6"
+                    >
+                      <Trash2 className="w-3 h-3 text-red-600" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">
-                    {attachment.file_name}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {formatFileSize(attachment.file_size)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => { e.stopPropagation(); window.open(attachment.file_url, '_blank'); }}
-                    className="h-8 w-8"
-                  >
-                    <Download className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => { e.stopPropagation(); handleDelete(attachment.id); }}
-                    className="h-8 w-8"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-600" />
-                  </Button>
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       )}
+
       {viewingAttachment && (
         <AttachmentViewerModal
           attachment={viewingAttachment}
