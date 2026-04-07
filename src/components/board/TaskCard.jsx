@@ -175,18 +175,22 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </div>
         )}
         
+        <p className={`text-sm font-semibold leading-snug ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+          {task.title}
+        </p>
+
         {task.attachmentPreview && (
-          <div className="w-full rounded-md overflow-hidden bg-slate-100 -mt-1 mb-1">
+          <div className="w-full rounded-md overflow-hidden bg-slate-100">
             {task.attachmentPreview.type.startsWith('image/') ? (
               <img
                 src={task.attachmentPreview.url}
                 alt="Attachment preview"
-                className="w-full h-auto max-h-48 object-cover"
+                className="w-full h-auto max-h-40 object-cover"
               />
             ) : (
               <video
                 src={task.attachmentPreview.url}
-                className="w-full h-auto max-h-48 object-cover"
+                className="w-full h-auto max-h-40 object-cover"
                 muted
                 playsInline
               />
