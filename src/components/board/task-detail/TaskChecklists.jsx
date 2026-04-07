@@ -137,6 +137,22 @@ export default function TaskChecklists({ taskId }) {
     loadChecklists();
   };
 
+  const handleChecklistDragEnd = async (result) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
+    if (source.index === destination.index) return;
+
+    const reordered = Array.from(checklists);
+    const [moved] = reordered.splice(source.index, 1);
+    reordered.splice(destination.index, 0, moved);
+
+    setChecklists(reordered);
+
+    await Promise.all(reordered.map((cl, idx) =>
+      Checklist.update(cl.id, { position: idx })
+    ));
+  };
+
   const handleDragEnd = async (result, checklistId) => {
     if (!result.destination) return;
     const { source, destination } = result;
@@ -147,12 +163,10 @@ export default function TaskChecklists({ taskId }) {
     const [moved] = reordered.splice(source.index, 1);
     reordered.splice(destination.index, 0, moved);
 
-    // Optimistic update
     setChecklists(prev => prev.map(c =>
       c.id === checklistId ? { ...c, items: reordered } : c
     ));
 
-    // Persist new positions
     await Promise.all(reordered.map((item, idx) =>
       ChecklistItem.update(item.id, { position: idx })
     ));
@@ -166,11 +180,7 @@ export default function TaskChecklists({ taskId }) {
           <h3 className="font-semibold text-slate-900">Checklists</h3>
         </div>
         {!showNewChecklist && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowNewChecklist(true)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowNewChecklist(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Checklist
           </Button>
@@ -191,113 +201,115 @@ export default function TaskChecklists({ taskId }) {
         </div>
       )}
 
-      {checklists.map((checklist) => {
-        const completedCount = checklist.items.filter(i => i.completed).length;
-        const totalCount = checklist.items.length;
-        const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+      <DragDropContext onDragEnd={handleChecklistDragEnd}>
+        <Droppable droppableId="checklists">
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-4">
+              {checklists.map((checklist, clIndex) => {
+                const completedCount = checklist.items.filter(i => i.completed).length;
+                const totalCount = checklist.items.length;
+                const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
-        return (
-          <div key={checklist.id} className="border rounded-lg p-4 bg-white">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h4 className="font-semibold text-slate-900">{checklist.title}</h4>
-                  <span className="text-sm text-slate-500">
-                    {completedCount}/{totalCount}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDeletingChecklist(checklist.id)}
-                    className="h-7 w-7 p-0"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-600" />
-                  </Button>
-                </div>
-                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-green-500 transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <DragDropContext onDragEnd={(result) => handleDragEnd(result, checklist.id)}>
-                <Droppable droppableId={checklist.id}>
-                  {(provided) => (
-                    <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
-                      {checklist.items.map((item, index) => (
-                        <Draggable key={item.id} draggableId={item.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className={`flex items-start gap-2 group rounded-md ${snapshot.isDragging ? 'bg-slate-100 shadow-md' : ''}`}
-                            >
-                              <div {...provided.dragHandleProps} className="mt-1 cursor-grab text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <GripVertical className="w-4 h-4" />
-                              </div>
-                              <Checkbox
-                                checked={item.completed}
-                                onCheckedChange={() => handleToggleItem(item)}
-                                className="mt-1"
-                              />
-                              {editingItem === item.id ? (
-                                <div className="flex-1 flex gap-2">
-                                  <Input
-                                    value={editItemText}
-                                    onChange={(e) => setEditItemText(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
-                                    autoFocus
-                                    className="flex-1"
-                                  />
-                                  <Button size="sm" onClick={handleSaveEdit}>Save</Button>
-                                  <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>Cancel</Button>
-                                </div>
-                              ) : (
-                                <>
-                                  <span className={`flex-1 text-sm ${item.completed ? 'line-through text-slate-500' : 'text-slate-700'}`}>
-                                    <LinkifiedText text={item.text} />
-                                  </span>
-                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleEditItem(item)}
-                                      className="h-7 w-7 p-0"
-                                    >
-                                      <Pencil className="w-3 h-3 text-slate-600" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => setDeletingItem(item.id)}
-                                      className="h-7 w-7 p-0"
-                                    >
-                                      <Trash2 className="w-3 h-3 text-red-600" />
-                                    </Button>
-                                  </div>
-                                </>
-                              )}
+                return (
+                  <Draggable key={checklist.id} draggableId={checklist.id} index={clIndex}>
+                    {(clProvided, clSnapshot) => (
+                      <div
+                        ref={clProvided.innerRef}
+                        {...clProvided.draggableProps}
+                        className={`border rounded-lg p-4 bg-white ${clSnapshot.isDragging ? 'shadow-lg' : ''}`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div {...clProvided.dragHandleProps} className="mr-2 cursor-grab text-slate-300 hover:text-slate-500">
+                            <GripVertical className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-semibold text-slate-900">{checklist.title}</h4>
+                              <span className="text-sm text-slate-500">{completedCount}/{totalCount}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeletingChecklist(checklist.id)}
+                                className="h-7 w-7 p-0"
+                              >
+                                <Trash2 className="w-4 h-4 text-red-600" />
+                              </Button>
                             </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </DragDropContext>
-              <ChecklistItemInput
-                checklistId={checklist.id}
-                onAdd={handleAddItem}
-              />
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-green-500 transition-all duration-300" style={{ width: `${progress}%` }} />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <DragDropContext onDragEnd={(result) => handleDragEnd(result, checklist.id)}>
+                            <Droppable droppableId={checklist.id}>
+                              {(provided) => (
+                                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+                                  {checklist.items.map((item, index) => (
+                                    <Draggable key={item.id} draggableId={item.id} index={index}>
+                                      {(provided, snapshot) => (
+                                        <div
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          className={`flex items-start gap-2 group rounded-md ${snapshot.isDragging ? 'bg-slate-100 shadow-md' : ''}`}
+                                        >
+                                          <div {...provided.dragHandleProps} className="mt-1 cursor-grab text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <GripVertical className="w-4 h-4" />
+                                          </div>
+                                          <Checkbox
+                                            checked={item.completed}
+                                            onCheckedChange={() => handleToggleItem(item)}
+                                            className="mt-1"
+                                          />
+                                          {editingItem === item.id ? (
+                                            <div className="flex-1 flex gap-2">
+                                              <Input
+                                                value={editItemText}
+                                                onChange={(e) => setEditItemText(e.target.value)}
+                                                onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
+                                                autoFocus
+                                                className="flex-1"
+                                              />
+                                              <Button size="sm" onClick={handleSaveEdit}>Save</Button>
+                                              <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>Cancel</Button>
+                                            </div>
+                                          ) : (
+                                            <>
+                                              <span className={`flex-1 text-sm ${item.completed ? 'line-through text-slate-500' : 'text-slate-700'}`}>
+                                                <LinkifiedText text={item.text} />
+                                              </span>
+                                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button variant="ghost" size="sm" onClick={() => handleEditItem(item)} className="h-7 w-7 p-0">
+                                                  <Pencil className="w-3 h-3 text-slate-600" />
+                                                </Button>
+                                                <Button variant="ghost" size="sm" onClick={() => setDeletingItem(item.id)} className="h-7 w-7 p-0">
+                                                  <Trash2 className="w-3 h-3 text-red-600" />
+                                                </Button>
+                                              </div>
+                                            </>
+                                          )}
+                                        </div>
+                                      )}
+                                    </Draggable>
+                                  ))}
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+                          </DragDropContext>
+                          <ChecklistItemInput checklistId={checklist.id} onAdd={handleAddItem} />
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                );
+              })}
+              {provided.placeholder}
             </div>
-          </div>
-        );
-      })}
+          )}
+        </Droppable>
+      </DragDropContext>
 
       <AlertDialog open={!!deletingChecklist} onOpenChange={(open) => !open && setDeletingChecklist(null)}>
         <AlertDialogContent>
@@ -309,9 +321,7 @@ export default function TaskChecklists({ taskId }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteChecklist} className="bg-red-600 hover:bg-red-700">
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteChecklist} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -326,9 +336,7 @@ export default function TaskChecklists({ taskId }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteItem} className="bg-red-600 hover:bg-red-700">
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteItem} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
