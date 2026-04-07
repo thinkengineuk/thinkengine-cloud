@@ -22,6 +22,10 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [commentAttachments, setCommentAttachments] = useState({});
+  const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState("");
+  const [mentionSuggestions, setMentionSuggestions] = useState([]);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
 
