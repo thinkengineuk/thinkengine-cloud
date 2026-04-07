@@ -762,6 +762,8 @@ export default function BoardPage() {
           boardId={boardId}
           onClose={() => setSelectedTask(null)}
           onRefresh={loadBoard}
+          allColumns={columns}
+          onMoveTask={handleMoveTask}
         />
       )}
 

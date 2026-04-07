@@ -17,7 +17,7 @@ import TaskDetailHeader from "./TaskDetailHeader";
 import TaskDetailSidebar from "./TaskDetailSidebar";
 import TaskDetailMain from "./TaskDetailMain";
 
-export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
+export default function TaskDetailModal({ task, boardId, onClose, onRefresh, allColumns, onMoveTask }) {
   const [taskData, setTaskData] = useState(task);
   const [allUsers, setAllUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -150,6 +150,8 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh }) {
           onClose={onClose} 
           onUpdate={handleUpdate}
           onRefresh={onRefresh}
+          allColumns={allColumns}
+          onMoveTask={onMoveTask}
         />
           
         {/* Mobile: Tabs Layout */}

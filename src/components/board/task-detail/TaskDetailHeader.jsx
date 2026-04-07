@@ -22,9 +22,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
+import { MoveRight } from "lucide-react";
 
-export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onRefresh }) {
+export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onRefresh, allColumns, onMoveTask }) {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
@@ -106,6 +111,32 @@ export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onR
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Copy Link
               </DropdownMenuItem>
+              {allColumns && allColumns.length > 0 && onMoveTask && (
+                <>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <MoveRight className="w-4 h-4 mr-2" />
+                      Move to...
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent>
+                        {allColumns.filter(c => c.id !== task.column_id).map((col) => (
+                          <DropdownMenuItem
+                            key={col.id}
+                            onClick={() => {
+                              onMoveTask(task.id, col.id);
+                              onClose();
+                            }}
+                          >
+                            {col.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={() => setShowDeleteDialog(true)}
