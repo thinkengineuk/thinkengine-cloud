@@ -210,7 +210,7 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
               <SelectValue placeholder="Select assignee" />
             </SelectTrigger>
             <SelectContent>
-              {boardMembers.map((user) => ( // Filtered to board members
+              {(allUsers || []).map((user) => (
                 <SelectItem key={user.id} value={user.email}>
                   <div className="flex items-center gap-2">
                     <Avatar className="w-6 h-6">
@@ -224,122 +224,6 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
                   </div>
                 </SelectItem>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Watchers */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-              <Eye className="w-4 h-4" />
-              Watchers
-            </Label>
-            <Dialog open={showWatchersDialog} onOpenChange={setShowWatchersDialog}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 text-xs px-2">
-                  Add
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-sm">
-                <DialogHeader>
-                  <DialogTitle>Add Watchers</DialogTitle>
-                </DialogHeader>
-                <ScrollArea className="h-64">
-                           <div className="space-y-2">
-                             {(allUsers || [])
-                               .filter(u => !(task.watchers || []).includes(u.email))
-                               .map((user) => (
-                                <div
-                                  key={user.id}
-                                  className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer"
-                                  onClick={() => {
-                                    onAddWatcher(user.email);
-                                    setShowWatchersDialog(false);
-                                  }}
-                                >
-                                  <Avatar className="w-8 h-8">
-                                    {user.profile_picture_url ? (
-                                      <AvatarImage src={user.profile_picture_url} />
-                                    ) : (
-                                      <AvatarFallback className="text-xs">{user.full_name ? user.full_name[0] : '?'}</AvatarFallback>
-                                    )}
-                                  </Avatar>
-                                  <span className="text-sm">{user.full_name}</span>
-                                </div>
-                              ))}
-                           </div>
-                        </ScrollArea>
-              </DialogContent>
-            </Dialog>
-          </div>
-          {task.watchers && task.watchers.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {task.watchers.map((email) => {
-                const user = (allUsers || []).find(u => u.email === email);
-                return user ? (
-                  <div key={email} className="flex items-center gap-1 bg-slate-100 rounded-full pl-1 pr-2 py-1">
-                    <Avatar className="w-5 h-5">
-                      {user.profile_picture_url ? (
-                        <AvatarImage src={user.profile_picture_url} />
-                      ) : (
-                        <AvatarFallback className="text-[10px]">{user.full_name ? user.full_name[0] : '?'}</AvatarFallback>
-                      )}
-                    </Avatar>
-                    <span className="text-xs">{user.full_name}</span>
-                    <button
-                      onClick={() => removeWatcher(email)}
-                      className="ml-1 text-slate-400 hover:text-red-600 font-bold text-sm"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ) : null;
-              })}
-            </div>
-          ) : (
-            <p className="text-sm text-slate-500">No watchers yet</p>
-          )}
-        </div>
-
-        {/* Due Date */}
-        <div className="space-y-3">
-          <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <CalendarIcon className="w-4 h-4" />
-            Due Date
-          </Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start bg-white text-sm">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {task.due_date ? format(new Date(task.due_date), 'PPP') : 'Set due date'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                mode="single"
-                selected={taskDueDate}
-                onSelect={(date) => onUpdate({ due_date: date })}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        {/* Priority */}
-        <div className="space-y-3">
-          <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <AlertCircle className="w-4 h-4" />
-            Priority
-          </Label>
-          <Select value={task.priority || "medium"} onValueChange={(value) => onUpdate({ priority: value })}>
-            <SelectTrigger className="bg-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">Low Priority</SelectItem>
-              <SelectItem value="medium">Medium Priority</SelectItem>
-              <SelectItem value="high">High Priority</SelectItem>
             </SelectContent>
           </Select>
         </div>
