@@ -324,16 +324,13 @@ export default function BoardPage() {
     });
     setAllTasks(updatedAllTasks);
 
-    // Persist to database and reload to sync
-    (async () => {
-      try {
-        await Promise.all(tasksToUpdate.map(({ id, updates }) => Task.update(id, updates)));
-      } catch (error) {
-        console.error('Error updating tasks:', error);
-      } finally {
-        await loadBoard();
-      }
-    })();
+    // Persist to database
+    try {
+      await Promise.all(tasksToUpdate.map(({ id, updates }) => Task.update(id, updates)));
+    } catch (error) {
+      console.error('Error updating tasks:', error);
+      loadBoard();
+    }
   };
 
   if (loading || checkingAccess) {
