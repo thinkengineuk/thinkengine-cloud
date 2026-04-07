@@ -8,7 +8,7 @@ import { Paperclip, Download, Trash2, Upload, ChevronDown, ChevronRight, FileTex
 export default function TaskAttachments({ task, onRefresh }) {
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [viewingAttachment, setViewingAttachment] = useState(null);
 
   useEffect(() => {
