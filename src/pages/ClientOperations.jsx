@@ -45,6 +45,7 @@ export default function ClientOperations() {
   const [companyFilter, setCompanyFilter] = useState("all");
   const [agreementFilter, setAgreementFilter] = useState("all");
   const [personFilter, setPersonFilter] = useState("all");
+  const [archivedFilter, setArchivedFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
@@ -94,7 +95,8 @@ export default function ClientOperations() {
     const matchCompany = companyFilter === "all" || p.company === companyFilter;
     const matchAgreement = agreementFilter === "all" || p.agreement_type === agreementFilter;
     const matchPerson = personFilter === "all" || STAFF_FIELDS.some(f => p[f] === personFilter);
-    return matchSearch && matchCompany && matchAgreement && matchPerson;
+    const matchArchived = archivedFilter === "all" || (archivedFilter === "active" ? !p.is_archived : p.is_archived);
+    return matchSearch && matchCompany && matchAgreement && matchPerson && matchArchived;
   });
 
   const teMarketingProjects = filtered.filter(p => p.company === "ThinkEngine Marketing");
@@ -261,6 +263,14 @@ export default function ClientOperations() {
             <SelectItem value="12 Months">12 Months</SelectItem>
             <SelectItem value="24 Months">24 Months</SelectItem>
             <SelectItem value="36 Months">36 Months</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={archivedFilter} onValueChange={setArchivedFilter}>
+          <SelectTrigger className="w-40"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="active">Active Only</SelectItem>
+            <SelectItem value="archived">Archived Only</SelectItem>
           </SelectContent>
         </Select>
       </div>
