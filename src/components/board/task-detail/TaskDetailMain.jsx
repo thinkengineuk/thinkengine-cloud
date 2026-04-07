@@ -165,7 +165,7 @@ export default function TaskDetailMain({ task, allUsers, currentUser, onUpdate, 
       <Separator />
 
       <TaskComments 
-        taskId={task.id} 
+        taskId={task.id}
         task={task}
         allUsers={allUsers}
         currentUser={currentUser}

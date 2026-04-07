@@ -1,22 +1,19 @@
-
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Comment } from "@/entities/Comment";
 import { User } from "@/entities/User";
 import { ActivityLog } from "@/entities/ActivityLog";
-import { Task } from "@/entities/Task"; // Added Task entity
-import { Board } from "@/entities/Board"; // Added Board entity
-import { SendEmail } from "@/integrations/Core";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Send, Pencil, Trash2, X, Check } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 
-export default function TaskComments({ taskId }) {
+export default function TaskComments({ taskId, task, allUsers, currentUser: currentUserProp, onRefresh }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
-  const [currentUser, setCurrentUser] = useState(null);
-  const [users, setUsers] = useState([]);
+  const [currentUser, setCurrentUser] = useState(currentUserProp || null);
+  const [users, setUsers] = useState(allUsers || []);
   const [submitting, setSubmitting] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editText, setEditText] = useState("");
@@ -35,15 +32,26 @@ export default function TaskComments({ taskId }) {
 
   useEffect(() => {
     const init = async () => {
-      const me = await User.me();
-      setCurrentUser(me);
-      
-      const allUsers = await User.list();
-      setUsers(allUsers);
+      if (!currentUserProp) {
+        const me = await User.me();
+        setCurrentUser(me);
+      }
+      if (!allUsers || allUsers.length === 0) {
+        const fetchedUsers = await User.list();
+        setUsers(fetchedUsers);
+      }
     };
     init();
     loadComments();
   }, [loadComments]);
+
+  useEffect(() => {
+    if (currentUserProp) setCurrentUser(currentUserProp);
+  }, [currentUserProp]);
+
+  useEffect(() => {
+    if (allUsers && allUsers.length > 0) setUsers(allUsers);
+  }, [allUsers]);
 
   // Handle mention detection and filtering
   useEffect(() => {
@@ -57,18 +65,22 @@ export default function TaskComments({ taskId }) {
     if (lastAtSymbol !== -1) {
       const textAfterAt = textBeforeCursor.substring(lastAtSymbol + 1);
       
-      // Check if we're still in a mention (no spaces after @)
-      if (!textAfterAt.includes(' ')) {
+      // Allow spaces in mention search to support full names
+      // Stop if we detect a double-space or if a known user's full name is already complete
+      const alreadyCompleted = users.some(u => 
+        newComment.substring(lastAtSymbol + 1, lastAtSymbol + 1 + u.full_name.length + 1) === u.full_name + ' '
+      );
+
+      if (!alreadyCompleted && textAfterAt.length >= 0) {
         setMentionSearch(textAfterAt.toLowerCase());
         
-        // Filter users based on search
         const filtered = users.filter(user => 
-          user.full_name.toLowerCase().includes(textAfterAt.toLowerCase()) ||
-          user.email.toLowerCase().includes(textAfterAt.toLowerCase())
+          user.full_name.toLowerCase().startsWith(textAfterAt.toLowerCase()) ||
+          user.email.toLowerCase().startsWith(textAfterAt.toLowerCase())
         );
         
         setMentionSuggestions(filtered);
-        setShowMentionSuggestions(filtered.length > 0);
+        setShowMentionSuggestions(filtered.length > 0 && textAfterAt.length > 0);
         setSelectedSuggestionIndex(0);
         return;
       }
@@ -132,20 +144,17 @@ export default function TaskComments({ taskId }) {
     
     setSubmitting(true);
     try {
-      // Extract mentions - match @FullName pattern
-      const mentionRegex = /@([A-Za-z\s]+?)(?=\s|$|[.,!?])/g;
+      // Extract mentions by checking if any known user's full name appears after @
       const mentions = [];
-      let match;
-      
-      while ((match = mentionRegex.exec(newComment)) !== null) {
-        const mentionedName = match[1].trim();
-        const user = users.find(u => 
-          u.full_name.toLowerCase() === mentionedName.toLowerCase()
-        );
-        if (user && !mentions.includes(user.email)) {
+      for (const user of users) {
+        const mention = `@${user.full_name}`;
+        if (newComment.includes(mention) && !mentions.includes(user.email)) {
           mentions.push(user.email);
         }
       }
+
+      const taskData = task || {};
+      const taskUrl = `${window.location.origin}/Board?id=${taskData.board_id}&taskId=${taskData.id || taskId}`;
 
       await Comment.create({
         task_id: taskId,
@@ -159,16 +168,6 @@ export default function TaskComments({ taskId }) {
         action_description: `${currentUser.full_name} added a comment`,
         user_email: currentUser.email,
       });
-
-      // Get task details for email
-      const taskDetails = await Task.filter({ id: taskId });
-      const task = taskDetails[0];
-      
-      // Get board details
-      const boardDetails = await Board.filter({ id: task.board_id });
-      const board = boardDetails[0];
-      
-      const taskUrl = `${window.location.origin}/Board?id=${task.board_id}&taskId=${taskId}`;
 
       for (const email of mentions) {
         const mentionedUser = users.find(u => u.email === email);
@@ -186,27 +185,22 @@ export default function TaskComments({ taskId }) {
     .greeting { font-size: 16px; color: #475569; margin: 0 0 24px 0; }
     .notification { font-size: 16px; color: #334155; line-height: 1.6; margin: 0 0 24px 0; }
     .task-link { color: #0891b2; text-decoration: none; font-weight: 600; }
-    .task-link:hover { text-decoration: underline; }
     .comment-box { background-color: #f8fafc; border-left: 4px solid #0891b2; padding: 16px; margin: 24px 0; border-radius: 4px; }
     .comment-author { font-weight: 600; color: #1e293b; margin-bottom: 8px; font-size: 14px; }
     .comment-text { color: #475569; line-height: 1.6; white-space: pre-wrap; font-size: 15px; }
     .button { display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%); color: #ffffff !important; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-weight: 600; margin: 24px 0; font-size: 16px; }
-    .button:hover { opacity: 0.9; }
     .footer { padding: 24px; text-align: center; color: #94a3b8; font-size: 14px; border-top: 1px solid #e2e8f0; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h1 class="logo">TaskFlow</h1>
-    </div>
+    <div class="header"><h1 class="logo">TaskFlow</h1></div>
     <div class="content">
       <h2 class="title">You were mentioned in a comment</h2>
       <p class="greeting">Hello ${mentionedUser?.full_name || 'there'},</p>
       <p class="notification">
-        <strong>${currentUser.full_name}</strong> mentioned you on the task 
-        <a href="${taskUrl}" class="task-link">${task.title}</a> 
-        in the <strong>${board.name}</strong> project.
+        <strong>${currentUser.full_name}</strong> mentioned you on the task
+        <a href="${taskUrl}" class="task-link">${taskData.title}</a>.
       </p>
       <div class="comment-box">
         <div class="comment-author">${currentUser.full_name} said:</div>
@@ -214,16 +208,14 @@ export default function TaskComments({ taskId }) {
       </div>
       <a href="${taskUrl}" class="button">View Task</a>
     </div>
-    <div class="footer">
-      This is an automated notification from TaskFlow Task Management
-    </div>
+    <div class="footer">This is an automated notification from TaskFlow Task Management</div>
   </div>
 </body>
 </html>`;
-        
-        await SendEmail({
+
+        await base44.integrations.Core.SendEmail({
           to: email,
-          subject: `${currentUser.full_name} mentioned you on "${task.title}"`,
+          subject: `${currentUser.full_name} mentioned you on "${taskData.title}"`,
           body: htmlBody,
         });
       }
