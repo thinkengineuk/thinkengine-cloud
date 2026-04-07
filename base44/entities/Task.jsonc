@@ -150,6 +150,16 @@
     "client_project_stage": {
       "type": "string",
       "description": "The specific stage of the client project this task is linked to"
+    },
+    "is_archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this task has been archived (auto-archived after 30 days in completed state)"
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the task was archived"
     }
   },
   "required": [

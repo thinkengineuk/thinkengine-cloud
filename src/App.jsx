@@ -11,6 +11,7 @@ import Productivity from './pages/Productivity';
 import ClientProjects from './pages/ClientProjects';
 import Clients from './pages/Clients';
 import ClientOperations from './pages/ClientOperations';
+import ArchivedTasks from './pages/ArchivedTasks';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -82,6 +83,11 @@ const AuthenticatedApp = () => {
       <Route path="/ClientOperations" element={
         <LayoutWrapper currentPageName="ClientOperations">
           <ClientOperations />
+        </LayoutWrapper>
+      } />
+      <Route path="/ArchivedTasks" element={
+        <LayoutWrapper currentPageName="ArchivedTasks">
+          <ArchivedTasks />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
