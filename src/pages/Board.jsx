@@ -137,20 +137,9 @@ export default function BoardPage() {
         Checklist.list(),
       ]);
       const countsMap = {};
-      uniqueTasks.forEach(t => { countsMap[t.id] = { comments: 0, attachments: 0, checklists: 0, firstImageUrl: null }; });
+      uniqueTasks.forEach(t => { countsMap[t.id] = { comments: 0, attachments: 0, checklists: 0 }; });
       commentsData.forEach(c => { if (countsMap[c.task_id]) countsMap[c.task_id].comments++; });
-      attachmentsData.forEach(a => {
-        if (!countsMap[a.task_id]) return;
-        countsMap[a.task_id].attachments++;
-        if (!countsMap[a.task_id].firstImageUrl) {
-          const isImage = a.file_type?.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(a.file_name || '');
-          const isVideo = a.file_type?.startsWith('video/') || /\.(mp4|webm|mov|avi)$/i.test(a.file_name || '');
-          if (isImage || isVideo) {
-            countsMap[a.task_id].firstImageUrl = a.file_url;
-            countsMap[a.task_id].firstIsVideo = isVideo;
-          }
-        }
-      });
+      attachmentsData.forEach(a => { if (countsMap[a.task_id]) countsMap[a.task_id].attachments++; });
       checklistsData.forEach(ch => { if (countsMap[ch.task_id]) countsMap[ch.task_id].checklists++; });
       setTaskCountsMap(countsMap);
 
