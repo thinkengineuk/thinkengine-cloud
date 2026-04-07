@@ -180,17 +180,19 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         </p>
 
         {task.attachmentPreview && (
-          <div className="w-full rounded-md overflow-hidden bg-slate-100">
+          <div className="w-full rounded-md overflow-hidden bg-slate-100" style={{maxHeight: '160px'}}>
             {task.attachmentPreview.type.startsWith('image/') ? (
               <img
                 src={task.attachmentPreview.url}
                 alt="Attachment preview"
-                className="w-full h-auto block"
+                className="w-full h-full object-cover object-top"
+                style={{maxHeight: '160px'}}
               />
             ) : (
               <video
                 src={task.attachmentPreview.url}
-                className="w-full h-auto block"
+                className="w-full h-full object-cover"
+                style={{maxHeight: '160px'}}
                 muted
                 playsInline
               />
