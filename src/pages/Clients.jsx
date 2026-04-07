@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ClientDetailModal from "@/components/clients/ClientDetailModal";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +13,8 @@ export default function Clients() {
   const [user, setUser] = useState(null);
   const [newName, setNewName] = useState("");
   const [newCompany, setNewCompany] = useState("ThinkEngine");
-  const [editingId, setEditingId] = useState(null);
-  const [editName, setEditName] = useState("");
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [filterCompany, setFilterCompany] = useState("all");
   const { toast } = useToast();
 
@@ -49,12 +50,9 @@ export default function Clients() {
     loadAll();
   };
 
-  const handleEdit = async (id) => {
-    if (!editName.trim()) return;
-    await base44.entities.Client.update(id, { name: editName.trim() });
-    setEditingId(null);
-    toast({ title: "Client updated" });
-    loadAll();
+  const handleOpenEdit = (client) => {
+    setSelectedClient(client);
+    setShowDetailModal(true);
   };
 
   const thinkEngineClients = filtered.filter(c => c.company === "ThinkEngine");
@@ -62,23 +60,15 @@ export default function Clients() {
 
   const ClientRow = ({ client }) => (
     <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-slate-50 group">
-      {editingId === client.id ? (
-        <Input value={editName} onChange={e => setEditName(e.target.value)} className="h-7 text-sm flex-1 mr-2" autoFocus onKeyDown={e => e.key === "Enter" && handleEdit(client.id)} />
-      ) : (
-        <span className="text-sm text-slate-800">{client.name}</span>
-      )}
+      <span
+        className="text-sm text-slate-800 cursor-pointer hover:text-teal-600 hover:underline"
+        onClick={() => handleOpenEdit(client)}
+      >
+        {client.name}
+      </span>
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {editingId === client.id ? (
-          <>
-            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleEdit(client.id)}><Check className="w-3.5 h-3.5 text-green-600" /></Button>
-            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditingId(null)}><X className="w-3.5 h-3.5 text-slate-500" /></Button>
-          </>
-        ) : (
-          <>
-            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setEditingId(client.id); setEditName(client.name); }}><Pencil className="w-3.5 h-3.5 text-slate-500" /></Button>
-            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleDelete(client.id)}><Trash2 className="w-3.5 h-3.5 text-red-500" /></Button>
-          </>
-        )}
+        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleOpenEdit(client)}><Pencil className="w-3.5 h-3.5 text-slate-500" /></Button>
+        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleDelete(client.id)}><Trash2 className="w-3.5 h-3.5 text-red-500" /></Button>
       </div>
     </div>
   );
@@ -131,6 +121,15 @@ export default function Clients() {
           </div>
         )}
       </div>
+
+      {showDetailModal && selectedClient && (
+        <ClientDetailModal
+          client={selectedClient}
+          open={showDetailModal}
+          onOpenChange={setShowDetailModal}
+          onRefresh={loadAll}
+        />
+      )}
     </div>
   );
 }
