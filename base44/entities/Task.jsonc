@@ -74,14 +74,16 @@
     "is_recurring": {
       "type": "boolean",
       "default": false,
-      "description": "Whether this task is recurring"
+      "description": "Whether this task is a recurring template"
     },
     "recurrence_pattern": {
       "type": "string",
       "enum": [
         "daily",
         "weekly",
-        "monthly"
+        "monthly",
+        "3_monthly",
+        "yearly"
       ],
       "description": "How often the task recurs"
     },
@@ -90,9 +92,14 @@
       "format": "date",
       "description": "When the recurrence starts"
     },
+    "last_spawned_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The date the last recurring instance was spawned"
+    },
     "parent_recurring_task_id": {
       "type": "string",
-      "description": "If this task was created from a recurring task, the ID of the parent"
+      "description": "If this task was created from a recurring task, the ID of the parent template"
     },
     "estimated_minutes": {
       "type": "number",

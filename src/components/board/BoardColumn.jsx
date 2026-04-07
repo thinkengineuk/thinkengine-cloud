@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, GripVertical, Settings, Trash2, ArrowUpDown } from "lucide-react";
+import { Plus, GripVertical, Settings, Trash2, ArrowUpDown, RefreshCw } from "lucide-react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import TaskCard from "./TaskCard";
 import CreateTaskDialog from "./CreateTaskDialog";
 import EditColumnDialog from "./EditColumnDialog";
+import CreateRecurringTaskDialog from "./CreateRecurringTaskDialog";
 import { Task } from "@/entities/Task";
 import { Column } from "@/entities/Column";
 import { SendEmail } from "@/integrations/Core";
@@ -47,6 +48,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showEditColumn, setShowEditColumn] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showRecurringDialog, setShowRecurringDialog] = useState(false);
   
   // Load sort preference from localStorage, default to 'due_date'
   const getSavedSortPreference = () => {
@@ -357,6 +359,10 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
                       <Settings className="w-4 h-4 mr-2" />
                       Edit Column
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowRecurringDialog(true)}>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Add Recurring Task
+                    </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => setShowDeleteDialog(true)}
                       className="text-red-600"
@@ -426,7 +432,15 @@ export default function BoardColumn({ column, tasks, users, usersMap, onTaskClic
         open={showCreateTask}
         onOpenChange={setShowCreateTask}
         onSubmit={handleCreateTask}
-        boardMembers={users} // The original outline's filter effectively returned all users, so passing `users` directly
+        boardMembers={users}
+      />
+
+      <CreateRecurringTaskDialog
+        open={showRecurringDialog}
+        onOpenChange={setShowRecurringDialog}
+        column={column}
+        users={users}
+        onCreated={onRefresh}
       />
 
       <EditColumnDialog
