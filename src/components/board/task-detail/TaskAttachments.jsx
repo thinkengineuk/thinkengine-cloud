@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import AttachmentViewerModal from "./AttachmentViewerModal";
 import { Attachment } from "@/entities/Attachment";
 import { Button } from "@/components/ui/button";
 import { UploadFile } from "@/integrations/Core";
@@ -8,6 +9,7 @@ export default function TaskAttachments({ task, onRefresh }) {
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [viewingAttachment, setViewingAttachment] = useState(null);
 
   useEffect(() => {
     loadAttachments();
@@ -120,7 +122,8 @@ export default function TaskAttachments({ task, onRefresh }) {
             attachments.map((attachment) => (
               <div
                 key={attachment.id}
-                className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg group"
+                className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg group cursor-pointer"
+                onClick={() => setViewingAttachment(attachment)}
               >
                 <div className="flex-shrink-0 w-8 h-8 bg-slate-100 rounded flex items-center justify-center text-slate-600">
                   {getFileIcon(attachment.file_type)}
@@ -137,7 +140,7 @@ export default function TaskAttachments({ task, onRefresh }) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => window.open(attachment.file_url, '_blank')}
+                    onClick={(e) => { e.stopPropagation(); window.open(attachment.file_url, '_blank'); }}
                     className="h-8 w-8"
                   >
                     <Download className="w-4 h-4" />
@@ -145,7 +148,7 @@ export default function TaskAttachments({ task, onRefresh }) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDelete(attachment.id)}
+                    onClick={(e) => { e.stopPropagation(); handleDelete(attachment.id); }}
                     className="h-8 w-8"
                   >
                     <Trash2 className="w-4 h-4 text-red-600" />
@@ -155,6 +158,12 @@ export default function TaskAttachments({ task, onRefresh }) {
             ))
           )}
         </div>
+      )}
+      {viewingAttachment && (
+        <AttachmentViewerModal
+          attachment={viewingAttachment}
+          onClose={() => setViewingAttachment(null)}
+        />
       )}
     </div>
   );
