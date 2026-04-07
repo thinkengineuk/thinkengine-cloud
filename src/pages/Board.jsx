@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Board as BoardEntity } from "@/entities/Board";
 import { Column } from "@/entities/Column";
 import { Task } from "@/entities/Task";
+import { Comment } from "@/entities/Comment";
+import { Attachment } from "@/entities/Attachment";
+import { Checklist } from "@/entities/Checklist";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,6 +79,7 @@ export default function BoardPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [taskCountsMap, setTaskCountsMap] = useState({});
 
   const loadBoard = useCallback(async () => {
     if (!boardId) {
@@ -88,10 +92,13 @@ export default function BoardPage() {
     try {
       // OPTIMIZATION: Fetch all data in parallel for faster page load
       // Reduces total loading time by making concurrent requests
-      const [boardData, columnsData, tasksData] = await Promise.all([
+      const [boardData, columnsData, tasksData, allComments, allAttachments, allChecklists] = await Promise.all([
         BoardEntity.filter({ id: boardId }),
         Column.filter({ board_id: boardId }, "position"),
         Task.filter({ board_id: boardId }, "position"),
+        Comment.list(),
+        Attachment.list(),
+        Checklist.list(),
       ]);
       
       if (boardData.length === 0) {
@@ -718,8 +725,10 @@ export default function BoardPage() {
                           dragHandleProps={provided.dragHandleProps}
                           isDragging={snapshot.isDragging}
                           onToggleTaskComplete={handleToggleTaskComplete}
-                          allBoardColumns={columns}
-                          onMoveTask={handleMoveTask}
+                           allBoardColumns={columns}
+                           onMoveTask={handleMoveTask}
+                           taskCountsMap={taskCountsMap}
+                            taskCountsMap={taskCountsMap}
                         />
                       </div>
                     )}

@@ -29,7 +29,7 @@ const colorMap = {
   cyan: { bg: 'from-cyan-500 to-cyan-700', light: 'bg-cyan-50' },
 };
 
-export default function BoardColumn({ column, tasks, users, usersMap, currentUser, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete, allBoardColumns, onMoveTask }) {
+export default function BoardColumn({ column, tasks, users, usersMap, currentUser, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete, allBoardColumns, onMoveTask, taskCountsMap }) {
   const otherColumns = React.useMemo(() => {
     if (!allBoardColumns) return [];
     return allBoardColumns.filter(c => c.id !== column.id);
@@ -377,6 +377,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
                           onToggleTaskComplete={onToggleTaskComplete}
                           allColumns={otherColumns}
                           onMoveTask={onMoveTask}
+                          counts={taskCountsMap?.[task.id]}
                         />
                       </div>
                     )}

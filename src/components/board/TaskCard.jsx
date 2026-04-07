@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreVertical } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreVertical, MessageSquare, Paperclip, CheckSquare } from "lucide-react";
 import { format, isToday, isPast, startOfDay } from "date-fns";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
@@ -29,7 +29,7 @@ const getTagColor = (tag) => {
 
 // OPTIMIZATION: Memoized component to prevent unnecessary re-renders
 // Only re-renders when task or usersMap props change
-const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete, allColumns, onMoveTask }) => {
+const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete, allColumns, onMoveTask, counts }) => {
   // OPTIMIZATION: Get assigned user from passed usersMap instead of fetching
   // This avoids redundant API calls and improves performance
   const assignedUser = task.assigned_to ? usersMap[task.assigned_to] : null;
@@ -234,6 +234,24 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </div>
 
           <div className="flex items-center gap-1.5">
+            {counts?.comments > 0 && (
+              <div className="flex items-center gap-0.5 text-slate-400">
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span className="text-xs">{counts.comments}</span>
+              </div>
+            )}
+            {counts?.attachments > 0 && (
+              <div className="flex items-center gap-0.5 text-slate-400">
+                <Paperclip className="w-3.5 h-3.5" />
+                <span className="text-xs">{counts.attachments}</span>
+              </div>
+            )}
+            {counts?.checklists > 0 && (
+              <div className="flex items-center gap-0.5 text-slate-400">
+                <CheckSquare className="w-3.5 h-3.5" />
+                <span className="text-xs">{counts.checklists}</span>
+              </div>
+            )}
             {task.watchers && task.watchers.length > 0 && (
               <div className="flex items-center gap-0.5 text-slate-400">
                 <Eye className="w-3.5 h-3.5" />
