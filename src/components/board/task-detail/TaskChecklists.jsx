@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckSquare, Plus, Pencil, Trash2, GripVertical } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -136,6 +137,27 @@ export default function TaskChecklists({ taskId }) {
     loadChecklists();
   };
 
+  const handleDragEnd = async (result, checklistId) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
+    if (source.index === destination.index) return;
+
+    const checklist = checklists.find(c => c.id === checklistId);
+    const reordered = Array.from(checklist.items);
+    const [moved] = reordered.splice(source.index, 1);
+    reordered.splice(destination.index, 0, moved);
+
+    // Optimistic update
+    setChecklists(prev => prev.map(c =>
+      c.id === checklistId ? { ...c, items: reordered } : c
+    ));
+
+    // Persist new positions
+    await Promise.all(reordered.map((item, idx) =>
+      ChecklistItem.update(item.id, { position: idx })
+    ));
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -202,53 +224,72 @@ export default function TaskChecklists({ taskId }) {
             </div>
 
             <div className="space-y-2">
-              {checklist.items.map((item) => (
-                <div key={item.id} className="flex items-start gap-2 group">
-                  <Checkbox
-                    checked={item.completed}
-                    onCheckedChange={() => handleToggleItem(item)}
-                    className="mt-1"
-                  />
-                  {editingItem === item.id ? (
-                    <div className="flex-1 flex gap-2">
-                      <Input
-                        value={editItemText}
-                        onChange={(e) => setEditItemText(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
-                        autoFocus
-                        className="flex-1"
-                      />
-                      <Button size="sm" onClick={handleSaveEdit}>Save</Button>
-                      <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>Cancel</Button>
+              <DragDropContext onDragEnd={(result) => handleDragEnd(result, checklist.id)}>
+                <Droppable droppableId={checklist.id}>
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+                      {checklist.items.map((item, index) => (
+                        <Draggable key={item.id} draggableId={item.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`flex items-start gap-2 group rounded-md ${snapshot.isDragging ? 'bg-slate-100 shadow-md' : ''}`}
+                            >
+                              <div {...provided.dragHandleProps} className="mt-1 cursor-grab text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <GripVertical className="w-4 h-4" />
+                              </div>
+                              <Checkbox
+                                checked={item.completed}
+                                onCheckedChange={() => handleToggleItem(item)}
+                                className="mt-1"
+                              />
+                              {editingItem === item.id ? (
+                                <div className="flex-1 flex gap-2">
+                                  <Input
+                                    value={editItemText}
+                                    onChange={(e) => setEditItemText(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
+                                    autoFocus
+                                    className="flex-1"
+                                  />
+                                  <Button size="sm" onClick={handleSaveEdit}>Save</Button>
+                                  <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>Cancel</Button>
+                                </div>
+                              ) : (
+                                <>
+                                  <span className={`flex-1 text-sm ${item.completed ? 'line-through text-slate-500' : 'text-slate-700'}`}>
+                                    <LinkifiedText text={item.text} />
+                                  </span>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleEditItem(item)}
+                                      className="h-7 w-7 p-0"
+                                    >
+                                      <Pencil className="w-3 h-3 text-slate-600" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setDeletingItem(item.id)}
+                                      className="h-7 w-7 p-0"
+                                    >
+                                      <Trash2 className="w-3 h-3 text-red-600" />
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
                     </div>
-                  ) : (
-                    <>
-                      <span className={`flex-1 text-sm ${item.completed ? 'line-through text-slate-500' : 'text-slate-700'}`}>
-                        <LinkifiedText text={item.text} />
-                      </span>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditItem(item)}
-                          className="h-7 w-7 p-0"
-                        >
-                          <Pencil className="w-3 h-3 text-slate-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeletingItem(item.id)}
-                          className="h-7 w-7 p-0"
-                        >
-                          <Trash2 className="w-3 h-3 text-red-600" />
-                        </Button>
-                      </div>
-                    </>
                   )}
-                </div>
-              ))}
-
+                </Droppable>
+              </DragDropContext>
               <ChecklistItemInput
                 checklistId={checklist.id}
                 onAdd={handleAddItem}
