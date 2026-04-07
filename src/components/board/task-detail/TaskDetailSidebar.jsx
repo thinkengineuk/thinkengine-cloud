@@ -513,6 +513,9 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
                     <SelectItem value="daily">Daily</SelectItem>
                     <SelectItem value="weekly">Weekly</SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="3_monthly">Every 3 Months (Quarterly)</SelectItem>
+                    <SelectItem value="6_monthly">Every 6 Months</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
