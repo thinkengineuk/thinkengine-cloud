@@ -19,27 +19,29 @@ export default function TaskAttachments({ task, onRefresh }) {
   };
 
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
 
     setUploading(true);
     try {
-      const { file_url } = await UploadFile({ file });
-
-      await Attachment.create({
-        task_id: task.id,
-        file_url,
-        file_name: file.name,
-        file_size: file.size,
-        file_type: file.type,
-      });
+      await Promise.all(files.map(async (file) => {
+        const { file_url } = await UploadFile({ file });
+        await Attachment.create({
+          task_id: task.id,
+          file_url,
+          file_name: file.name,
+          file_size: file.size,
+          file_type: file.type,
+        });
+      }));
 
       loadAttachments();
       onRefresh();
     } catch (error) {
-      alert("Failed to upload file: " + error.message);
+      alert("Failed to upload file(s): " + error.message);
     } finally {
       setUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -97,6 +99,7 @@ export default function TaskAttachments({ task, onRefresh }) {
           </Button>
           <input
             type="file"
+            multiple
             onChange={handleFileUpload}
             className="hidden"
             disabled={uploading}
