@@ -130,6 +130,19 @@ export default function BoardPage() {
       
       setAllTasks(uniqueTasks);
 
+      // Fetch counts for comments, attachments, checklists and build the map
+      const [commentsData, attachmentsData, checklistsData] = await Promise.all([
+        Comment.list(),
+        Attachment.list(),
+        Checklist.list(),
+      ]);
+      const countsMap = {};
+      uniqueTasks.forEach(t => { countsMap[t.id] = { comments: 0, attachments: 0, checklists: 0 }; });
+      commentsData.forEach(c => { if (countsMap[c.task_id]) countsMap[c.task_id].comments++; });
+      attachmentsData.forEach(a => { if (countsMap[a.task_id]) countsMap[a.task_id].attachments++; });
+      checklistsData.forEach(ch => { if (countsMap[ch.task_id]) countsMap[ch.task_id].checklists++; });
+      setTaskCountsMap(countsMap);
+
       const tagsSet = new Set();
 
       if (taskIdFromUrl) {
@@ -716,7 +729,6 @@ export default function BoardPage() {
                            allBoardColumns={columns}
                            onMoveTask={handleMoveTask}
                            taskCountsMap={taskCountsMap}
-                            taskCountsMap={taskCountsMap}
                         />
                       </div>
                     )}
