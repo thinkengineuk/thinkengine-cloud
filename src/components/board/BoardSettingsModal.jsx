@@ -56,6 +56,9 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
     color: "blue",
     members: []
   });
+  const BOARD_DELETE_ALLOWED = ['chloe@thinkengine.co', 'ben@thinkengine.co'];
+  const canDeleteBoard = BOARD_DELETE_ALLOWED.includes(currentUser?.email);
+
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [cleaningDuplicates, setCleaningDuplicates] = useState(false);
@@ -279,6 +282,7 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
                 {cleaningDuplicates ? 'Cleaning...' : 'Remove Duplicate Tasks'}
               </Button>
               
+              {canDeleteBoard && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" className="bg-red-600 hover:bg-red-700" disabled={deleting}>
@@ -305,6 +309,7 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+              )}
             </div>
 
             <Button
