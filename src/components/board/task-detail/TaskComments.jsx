@@ -280,7 +280,6 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
   const formatTimestamp = (dateString) => {
     if (!dateString) return '';
     try {
-      // Ensure UTC parsing by appending Z if no timezone info present
       const normalized = dateString.endsWith('Z') || dateString.includes('+') ? dateString : dateString + 'Z';
       const date = new Date(normalized);
       const now = new Date();
@@ -355,6 +354,19 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     });
     
     return formattedElements;
+  };
+
+  const handleCommentDragEnd = async (result) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
+    if (source.index === destination.index) return;
+
+    const reordered = Array.from(comments);
+    const [moved] = reordered.splice(source.index, 1);
+    reordered.splice(destination.index, 0, moved);
+
+    setComments(reordered);
+    await Promise.all(reordered.map((c, idx) => Comment.update(c.id, { position: idx })));
   };
 
   return (
@@ -453,46 +465,153 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
             <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-30" />
             <p className="text-sm">No comments yet</p>
           </div>
-        {comment.mentions && comment.mentions.length > 0 && !isEditing && (
-          <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
-            <span>Mentioned:</span>
-            {comment.mentions.map((email, idx) => {
-              const mentionedUser = users.find(u => u.email === email);
-              return (
-                <span key={idx} className="font-medium">
-                  {mentionedUser?.full_name || email}
-                  {idx < comment.mentions.length - 1 && ','}
-                </span>
-              );
-            })}
-          </div>
-        )}
-        </div>
-        </div>
-        )}
-        </Draggable>
-        );
-        })}
-        {provided.placeholder}
-        </div>
-        )}
-        </Droppable>
-        </DragDropContext>
+        ) : (
+          <DragDropContext onDragEnd={currentUser?.role === 'admin' ? handleCommentDragEnd : undefined}>
+            <Droppable droppableId="comments" isDragDisabled={currentUser?.role !== 'admin'}>
+              {(provided, snapshot) => (
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-4">
+                  {comments.map((comment, index) => {
+                    const author = getCommentAuthor(comment);
+                    const isOwnComment = comment.created_by === currentUser?.email;
+                    const isEditing = editingCommentId === comment.id;
+                    
+                    return (
+                      <Draggable key={comment.id} draggableId={comment.id} index={index} isDragDisabled={currentUser?.role !== 'admin'}>
+                        {(dragProvided, dragSnapshot) => (
+                          <div
+                            ref={dragProvided.innerRef}
+                            {...dragProvided.draggableProps}
+                            className={`flex gap-3 ${dragSnapshot.isDragging ? 'bg-slate-50 rounded-lg p-2' : ''}`}
+                          >
+                            {currentUser?.role === 'admin' && (
+                              <div {...dragProvided.dragHandleProps} className="cursor-grab text-slate-300 hover:text-slate-500 flex items-start mt-2">
+                                <GripVertical className="w-4 h-4" />
+                              </div>
+                            )}
+                            
+                            <Avatar className="w-9 h-9 flex-shrink-0">
+                              {author?.profile_picture_url ? (
+                                <AvatarImage src={author.profile_picture_url} alt={author.full_name} />
+                              ) : (
+                                <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-400 text-white text-sm">
+                                  {author?.full_name?.[0]?.toUpperCase() || comment.created_by?.[0]?.toUpperCase() || 'U'}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <div className="flex flex-col">
+                                  <span className="font-semibold text-sm text-slate-900">
+                                    {author?.full_name || comment.created_by || 'Unknown User'}
+                                  </span>
+                                  <span className="text-xs text-slate-500">
+                                    {formatTimestamp(comment.created_date)}
+                                    {comment.updated_date && comment.updated_date !== comment.created_date && (
+                                      <span className="ml-1">(edited)</span>
+                                    )}
+                                  </span>
+                                </div>
+                                
+                                {isOwnComment && !isEditing && (
+                                  <div className="flex gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      onClick={() => handleEditComment(comment)}
+                                    >
+                                      <Pencil className="w-3.5 h-3.5 text-slate-500" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      onClick={() => handleDeleteComment(comment.id)}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {isEditing ? (
+                                <div className="space-y-2">
+                                  <Textarea
+                                    value={editText}
+                                    onChange={(e) => setEditText(e.target.value)}
+                                    className="min-h-[100px] resize-none text-sm"
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleSaveEdit(comment.id)}
+                                      className="bg-slate-900 hover:bg-slate-800"
+                                    >
+                                      <Check className="w-4 h-4 mr-1" />
+                                      Save
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={handleCancelEdit}
+                                    >
+                                      <X className="w-4 h-4 mr-1" />
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-700 border border-slate-100">
+                                  {formatCommentText(comment.text)}
+                                </div>
+                              )}
+                              
+                              {commentAttachments[comment.id]?.length > 0 && !isEditing && (
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {commentAttachments[comment.id].map((att) => (
+                                    <a
+                                      key={att.id}
+                                      href={att.file_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 transition-colors"
+                                    >
+                                      <Paperclip className="w-3 h-3 flex-shrink-0" />
+                                      <span className="max-w-[160px] truncate">{att.file_name}</span>
+                                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+
+                              {comment.mentions && comment.mentions.length > 0 && !isEditing && (
+                                <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
+                                  <span>Mentioned:</span>
+                                  {comment.mentions.map((email, idx) => {
+                                    const mentionedUser = users.find(u => u.email === email);
+                                    return (
+                                      <span key={idx} className="font-medium">
+                                        {mentionedUser?.full_name || email}
+                                        {idx < comment.mentions.length - 1 && ','}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    );
+                  })}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         )}
       </div>
     </div>
   );
-
-  const handleCommentDragEnd = async (result) => {
-    if (!result.destination) return;
-    const { source, destination } = result;
-    if (source.index === destination.index) return;
-
-    const reordered = Array.from(comments);
-    const [moved] = reordered.splice(source.index, 1);
-    reordered.splice(destination.index, 0, moved);
-
-    setComments(reordered);
-    await Promise.all(reordered.map((c, idx) => Comment.update(c.id, { position: idx })));
-  };
 }
