@@ -10,6 +10,7 @@ import TaskCard from "./TaskCard";
 import CreateTaskDialog from "./CreateTaskDialog";
 import EditColumnDialog from "./EditColumnDialog";
 import CreateRecurringTaskDialog from "./CreateRecurringTaskDialog";
+import RecurringTasksListDialog from "./RecurringTasksListDialog";
 import { Task } from "@/entities/Task";
 import { Column } from "@/entities/Column";
 import { SendEmail } from "@/integrations/Core";
@@ -42,6 +43,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
   const [showEditColumn, setShowEditColumn] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showRecurringDialog, setShowRecurringDialog] = useState(false);
+  const [showRecurringList, setShowRecurringList] = useState(false);
   
   // Load sort preference from localStorage, default to 'due_date'
   const getSavedSortPreference = () => {
@@ -347,6 +349,10 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Add Recurring Task
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowRecurringList(true)}>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      View Recurring Tasks
+                    </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => setShowDeleteDialog(true)}
                       className="text-red-600"
@@ -428,6 +434,14 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
         column={column}
         users={users}
         onCreated={onRefresh}
+      />
+
+      <RecurringTasksListDialog
+        open={showRecurringList}
+        onOpenChange={setShowRecurringList}
+        boardId={column.board_id}
+        usersMap={usersMap}
+        onTaskClick={onTaskClick}
       />
 
       <EditColumnDialog

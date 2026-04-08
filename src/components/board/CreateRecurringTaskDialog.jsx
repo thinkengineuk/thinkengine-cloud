@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { RefreshCw, ChevronRight } from "lucide-react";
+import { RefreshCw, ChevronRight, X } from "lucide-react";
 import RecurrencePicker from "@/components/shared/RecurrencePicker";
 import { base44 } from "@/api/base44Client";
 import { format, addMonths, subMonths, getDaysInMonth } from "date-fns";
@@ -21,6 +21,7 @@ export default function CreateRecurringTaskDialog({ open, onOpenChange, column, 
   const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [assignedTo, setAssignedTo] = useState("");
   const [priority, setPriority] = useState("medium");
+  const [watchers, setWatchers] = useState([]);
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
@@ -53,6 +54,7 @@ export default function CreateRecurringTaskDialog({ open, onOpenChange, column, 
       recurrence_start_date: startDate,
       last_spawned_date: null,
       assigned_to: assignedTo || undefined,
+      watchers: watchers.length > 0 ? watchers : undefined,
       priority,
       status: "active",
       position: 9999,
@@ -63,6 +65,7 @@ export default function CreateRecurringTaskDialog({ open, onOpenChange, column, 
     setRecurrencePattern("monthly");
     setAssignedTo("");
     setPriority("medium");
+    setWatchers([]);
     onOpenChange(false);
     onCreated();
   };
@@ -163,6 +166,40 @@ export default function CreateRecurringTaskDialog({ open, onOpenChange, column, 
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Watchers */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Watchers</Label>
+            <Select
+              onValueChange={(email) => {
+                if (!watchers.includes(email)) setWatchers(prev => [...prev, email]);
+              }}
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Add watchers..." />
+              </SelectTrigger>
+              <SelectContent>
+                {(users || []).filter(u => !watchers.includes(u.email)).map(u => (
+                  <SelectItem key={u.email} value={u.email}>{u.full_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {watchers.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {watchers.map(email => {
+                  const u = (users || []).find(u => u.email === email);
+                  return (
+                    <span key={email} className="flex items-center gap-1 bg-slate-100 text-slate-700 text-xs rounded-full px-2.5 py-1">
+                      {u?.full_name || email}
+                      <button type="button" onClick={() => setWatchers(prev => prev.filter(e => e !== email))}>
+                        <X className="w-3 h-3 text-slate-400 hover:text-slate-700" />
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
