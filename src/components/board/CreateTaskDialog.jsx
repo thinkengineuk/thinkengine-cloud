@@ -15,7 +15,8 @@ import { Task } from "@/entities/Task";
 import { base44 } from "@/api/base44Client";
 import { listAllUsers } from "@/functions/listAllUsers";
 import { STAGE_COLUMNS } from "@/components/client-projects/projectStages";
-import { FolderKanban, X, ChevronDown, Plus, Clock, CheckSquare, RefreshCw, Flag } from "lucide-react";
+import { FolderKanban, X, ChevronDown, Plus, Clock, CheckSquare, RefreshCw, Flag, ChevronRight } from "lucide-react";
+import RecurrencePicker from "@/components/shared/RecurrencePicker";
 import {
   Select,
   SelectContent,
@@ -48,6 +49,19 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
   const [checklistInput, setChecklistInput] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrencePattern, setRecurrencePattern] = useState("weekly");
+  const [recurrenceSummary, setRecurrenceSummary] = useState("Weekly");
+  const [showRecurrencePicker, setShowRecurrencePicker] = useState(false);
+  const recurrencePickerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (recurrencePickerRef.current && !recurrencePickerRef.current.contains(e.target)) {
+        setShowRecurrencePicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const [users, setUsers] = useState([]);
   const [boardMembers, setBoardMembers] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,6 +89,8 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
       setTagSearch("");
       setIsRecurring(false);
       setRecurrencePattern("weekly");
+      setRecurrenceSummary("Weekly");
+      setShowRecurrencePicker(false);
       setIsSubmitting(false);
       loadUsers();
       loadClientProjects();
@@ -307,27 +323,43 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
 
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5"><RefreshCw className="w-4 h-4" />Recurring</Label>
-              <Select
-                value={isRecurring ? recurrencePattern : "none"}
-                onValueChange={(v) => {
-                  if (v === "none") { setIsRecurring(false); }
-                  else { setIsRecurring(true); setRecurrencePattern(v); }
-                }}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Not recurring</SelectItem>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="3_monthly">Every 3 Months</SelectItem>
-                  <SelectItem value="6_monthly">Every 6 Months</SelectItem>
-                  <SelectItem value="yearly">Yearly</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="is-recurring"
+                    checked={isRecurring}
+                    onChange={e => {
+                      setIsRecurring(e.target.checked);
+                      if (e.target.checked) setShowRecurrencePicker(true);
+                      else setShowRecurrencePicker(false);
+                    }}
+                    className="w-4 h-4 rounded"
+                    disabled={isSubmitting}
+                  />
+                  <label htmlFor="is-recurring" className="text-sm text-slate-600">Make recurring</label>
+                </div>
+                {isRecurring && (
+                  <div className="relative" ref={recurrencePickerRef}>
+                    <button
+                      type="button"
+                      onClick={() => setShowRecurrencePicker(v => !v)}
+                      className="w-full flex items-center justify-between border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      <span>{recurrenceSummary}</span>
+                      <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${showRecurrencePicker ? "rotate-90" : ""}`} />
+                    </button>
+                    {showRecurrencePicker && (
+                      <div className="absolute left-0 top-full mt-1 z-50">
+                        <RecurrencePicker
+                          onPatternChange={setRecurrencePattern}
+                          onSummaryChange={setRecurrenceSummary}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
