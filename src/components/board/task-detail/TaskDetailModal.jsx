@@ -62,6 +62,16 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh, all
   };
 
   const handleAssign = async (email) => {
+    // If there was a previous assignee (not the same as new), add them to watchers
+    const previousAssignee = taskData.assigned_to;
+    if (previousAssignee && previousAssignee !== email) {
+      const currentWatchers = taskData.watchers || [];
+      if (!currentWatchers.includes(previousAssignee)) {
+        await Task.update(taskData.id, { watchers: [...currentWatchers, previousAssignee] });
+        setTaskData(prev => ({ ...prev, watchers: [...currentWatchers, previousAssignee] }));
+      }
+    }
+
     await handleUpdate({ assigned_to: email });
 
     // Don't email yourself
