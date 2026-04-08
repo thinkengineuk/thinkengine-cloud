@@ -200,11 +200,12 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
         taskUrl,
       });
 
-      await SendEmail({
-        to: taskData.assigned_to,
-        subject: `New task assigned: "${taskData.title}"`,
-        body: htmlBody,
-      });
+      // EMAIL PAUSED
+      // await SendEmail({
+      //   to: taskData.assigned_to,
+      //   subject: `New task assigned: "${taskData.title}"`,
+      //   body: htmlBody,
+      // });
 
       await ActivityLog.create({
         task_id: createdTask.id,
