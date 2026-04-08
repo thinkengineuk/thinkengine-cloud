@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Board } from "@/entities/Board";
 import { Task } from "@/entities/Task";
 import { ActivityLog } from "@/entities/ActivityLog";
+import { Column } from "@/entities/Column";
 import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,11 +67,12 @@ export default function Dashboard() {
     });
     setBoardsMap(bMap);
 
-    // Fetch user's active tasks, recent activity, and all users in parallel
-    const [currentUserActiveTasks, allActivityLogs, allUsers] = await Promise.all([
+    // Fetch tasks, activity, users, and columns in parallel
+    const [allAssignedTasks, allActivityLogs, allUsers, allColumns] = await Promise.all([
       Task.filter({ assigned_to: currentUser.email, status: 'active' }, "-created_date"),
       ActivityLog.list("-created_date", 10),
-      User.list()
+      User.list(),
+      Column.list()
     ]);
 
     // Build users map keyed by email
@@ -78,25 +80,25 @@ export default function Dashboard() {
     allUsers.forEach(u => { uMap[u.email] = u; });
     setUsersMap(uMap);
 
-    // Sort by priority: high > medium > low, then by due_date
-    const sortedTasks = currentUserActiveTasks.sort((a, b) => {
+    // Find all "Today" column IDs
+    const todayColumnIds = new Set(
+      allColumns.filter(c => c.name.toLowerCase() === 'today').map(c => c.id)
+    );
+
+    // Filter tasks to only those in a "Today" column
+    const todayTasks = allAssignedTasks.filter(t => todayColumnIds.has(t.column_id));
+
+    // Sort by priority then due_date
+    const sortedTasks = todayTasks.sort((a, b) => {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       const aPriority = priorityOrder[a.priority] || 2;
       const bPriority = priorityOrder[b.priority] || 2;
-      
-      if (aPriority !== bPriority) {
-        return bPriority - aPriority;
-      }
-      
-      if (a.due_date && b.due_date) {
-        return new Date(a.due_date) - new Date(b.due_date);
-      }
+      if (aPriority !== bPriority) return bPriority - aPriority;
+      if (a.due_date && b.due_date) return new Date(a.due_date) - new Date(b.due_date);
       return 0;
     });
-    
-    setTasks(sortedTasks);
 
-    // Show all recent activity (no filtering needed — rate-limit friendly)
+    setTasks(sortedTasks);
     setRecentActivity(allActivityLogs);
   };
 
