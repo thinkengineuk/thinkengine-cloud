@@ -162,6 +162,14 @@ export default function BoardPage() {
     }
   }, [boardId, navigate]);
 
+  // Sync selectedTask when allTasks refreshes (e.g. after attachment upload)
+  useEffect(() => {
+    if (selectedTask) {
+      const updated = allTasks.find(t => t.id === selectedTask.id);
+      if (updated) setSelectedTask(updated);
+    }
+  }, [allTasks]);
+
   // Only reload on pathname change (not search params) to avoid re-opening task on close
   useEffect(() => {
     loadBoard().then(uniqueTasks => {
