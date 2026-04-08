@@ -124,12 +124,11 @@ export default function Layout({ children }) {
         <Sidebar collapsible="icon" className="border-r border-slate-200 bg-white/80 backdrop-blur-sm">
           <SidebarHeader className="border-b border-slate-200 py-1 px-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center justify-center flex-1 group-data-[collapsible=icon]:hidden">
+              <div className="flex items-center justify-center flex-1 group-data-[collapsible=icon]:hidden overflow-hidden">
                 <img
                   src="https://media.base44.com/images/public/68dcdd68fd2e656bc4f622ca/d940d5b06_ThinkEngineCloud1.png"
                   alt="ThinkEngine Cloud"
-                  className="h-15 w-auto object-contain flex-shrink-0"
-                  style={{ height: '120px' }}
+                  className="w-full max-w-[160px] h-auto object-contain"
                 />
               </div>
               <div className="group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:mt-2">
@@ -286,13 +285,13 @@ export default function Layout({ children }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col overflow-hidden min-w-0">
-          <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 px-4 py-3 md:hidden shadow-sm">
+          <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 px-4 py-2 md:hidden shadow-sm">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="hover:bg-slate-100 p-2 rounded-lg transition-colors flex-shrink-0" />
               <img
                 src="https://media.base44.com/images/public/68dcdd68fd2e656bc4f622ca/d940d5b06_ThinkEngineCloud1.png"
                 alt="ThinkEngine Cloud"
-                className="h-8 w-auto object-contain"
+                className="h-12 w-auto object-contain"
               />
             </div>
           </header>
