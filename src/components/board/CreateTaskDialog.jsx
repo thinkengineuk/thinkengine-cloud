@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Board } from "@/entities/Board";
+import { Task } from "@/entities/Task";
 import { base44 } from "@/api/base44Client";
 import { listAllUsers } from "@/functions/listAllUsers";
 import { STAGE_COLUMNS } from "@/components/client-projects/projectStages";
@@ -48,6 +49,7 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
   const [clientProjects, setClientProjects] = useState([]);
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState("");
+  const [existingBoardTags, setExistingBoardTags] = useState([]);
 
   useEffect(() => {
     if (open) {
@@ -62,10 +64,18 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
         client_project_id: null,
         client_project_stage: null
       });
-      setNewTag("");
+      setTagSearch("");
       setIsSubmitting(false);
       loadUsers();
       loadClientProjects();
+      const boardId = new URLSearchParams(window.location.search).get('id');
+      if (boardId) {
+        Task.filter({ board_id: boardId }).then(tasks => {
+          const tagsSet = new Set();
+          tasks.forEach(t => t.tags?.forEach(tag => tagsSet.add(tag)));
+          setExistingBoardTags(Array.from(tagsSet).sort());
+        });
+      }
     }
   }, [open]);
 
@@ -99,9 +109,9 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
 
   const allAvailableTags = useMemo(() => {
     const clientNames = clientProjects.map(p => p.name).filter(Boolean);
-    const combined = [...new Set([...STATIC_TAGS, ...clientNames])];
+    const combined = [...new Set([...STATIC_TAGS, ...clientNames, ...existingBoardTags])].sort();
     return combined;
-  }, [clientProjects]);
+  }, [clientProjects, existingBoardTags]);
 
   const filteredTags = useMemo(() => {
     const q = tagSearch.toLowerCase();
