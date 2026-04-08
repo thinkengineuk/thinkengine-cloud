@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
-import { Zap, ChevronRight, X } from "lucide-react";
+import { Zap, ChevronRight, ChevronDown, X } from "lucide-react";
 import RecurrencePicker from "@/components/shared/RecurrencePicker";
 import { base44 } from "@/api/base44Client";
 
@@ -20,10 +22,33 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
   const [watchers, setWatchers] = useState([]);
   const [priority, setPriority] = useState("medium");
   const [tags, setTags] = useState([]);
-  const [tagInput, setTagInput] = useState("");
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
+  const [tagSearch, setTagSearch] = useState("");
+  const [existingBoardTags, setExistingBoardTags] = useState([]);
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
+
+  useEffect(() => {
+    if (open && column?.board_id) {
+      base44.entities.Task.filter({ board_id: column.board_id }).then(tasks => {
+        const tagsSet = new Set();
+        tasks.forEach(t => t.tags?.forEach(tag => tagsSet.add(tag)));
+        setExistingBoardTags(Array.from(tagsSet).sort());
+      });
+    }
+  }, [open, column?.board_id]);
+
+  const STATIC_TAGS = ["High", "Medium", "Low", "CogsAI", "ThinkEngine"];
+
+  const allAvailableTags = useMemo(() => {
+    return [...new Set([...STATIC_TAGS, ...existingBoardTags])].sort();
+  }, [existingBoardTags]);
+
+  const filteredTags = useMemo(() => {
+    const q = tagSearch.toLowerCase();
+    return allAvailableTags.filter(t => t.toLowerCase().includes(q) && !tags.includes(t));
+  }, [allAvailableTags, tagSearch, tags]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -52,7 +77,7 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
     });
     setSaving(false);
     setTitle(""); setDescription(""); setRecurrencePattern("monthly");
-    setAssignedTo(""); setWatchers([]); setPriority("medium"); setTags([]);
+    setAssignedTo(""); setWatchers([]); setPriority("medium"); setTags([]); setTagSearch("");
     onOpenChange(false);
     onCreated?.();
   };
@@ -150,29 +175,68 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
 
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tags</Label>
-            <div className="flex gap-2">
-              <Input
-                value={tagInput}
-                onChange={e => setTagInput(e.target.value)}
-                onKeyDown={e => {
-                  if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
-                    e.preventDefault();
-                    const t = tagInput.trim().replace(/,$/, "");
-                    if (t && !tags.includes(t)) setTags(prev => [...prev, t]);
-                    setTagInput("");
-                  }
-                }}
-                placeholder="Type a tag and press Enter..."
-                className="text-sm"
-              />
-            </div>
+            <Popover open={tagDropdownOpen} onOpenChange={setTagDropdownOpen}>
+              <PopoverTrigger asChild>
+                <Button type="button" variant="outline" className="w-full justify-between font-normal text-sm">
+                  <span className="text-slate-500">Select or add tags...</span>
+                  <ChevronDown className="w-4 h-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-2" align="start">
+                <Input
+                  value={tagSearch}
+                  onChange={e => setTagSearch(e.target.value)}
+                  placeholder="Search or type new tag..."
+                  className="mb-2 h-8 text-sm"
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (filteredTags.length > 0) {
+                        if (!tags.includes(filteredTags[0])) setTags(prev => [...prev, filteredTags[0]]);
+                        setTagSearch("");
+                      } else if (tagSearch.trim()) {
+                        const t = tagSearch.trim();
+                        if (!tags.includes(t)) setTags(prev => [...prev, t]);
+                        setTagSearch("");
+                      }
+                    }
+                  }}
+                />
+                <ScrollArea className="h-52">
+                  <div className="space-y-0.5 pr-3">
+                    {filteredTags.map(tag => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => { if (!tags.includes(tag)) setTags(prev => [...prev, tag]); setTagSearch(""); }}
+                        className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-slate-100 transition-colors"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                    {tagSearch.trim() && !allAvailableTags.some(t => t.toLowerCase() === tagSearch.toLowerCase()) && (
+                      <button
+                        type="button"
+                        onClick={() => { const t = tagSearch.trim(); if (!tags.includes(t)) setTags(prev => [...prev, t]); setTagSearch(""); }}
+                        className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-blue-50 text-blue-700 transition-colors"
+                      >
+                        + Add "{tagSearch.trim()}"
+                      </button>
+                    )}
+                    {filteredTags.length === 0 && !tagSearch.trim() && (
+                      <p className="text-xs text-slate-400 px-2 py-2">All tags selected</p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-1.5">
                 {tags.map(tag => (
-                  <span key={tag} className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs rounded-full px-2.5 py-1">
+                  <span key={tag} className="flex items-center gap-1 bg-blue-100 text-blue-800 text-xs rounded px-2 py-1">
                     {tag}
                     <button type="button" onClick={() => setTags(prev => prev.filter(t => t !== tag))}>
-                      <X className="w-3 h-3 text-blue-400 hover:text-blue-700" />
+                      <X className="w-3 h-3 hover:text-red-600" />
                     </button>
                   </span>
                 ))}
