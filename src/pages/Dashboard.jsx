@@ -66,12 +66,18 @@ export default function Dashboard() {
     });
     setBoardsMap(bMap);
 
-    // Fetch user's active tasks and recent activity in parallel (no full task scan to avoid rate limits)
-    const [currentUserActiveTasks, allActivityLogs] = await Promise.all([
+    // Fetch user's active tasks, recent activity, and all users in parallel
+    const [currentUserActiveTasks, allActivityLogs, allUsers] = await Promise.all([
       Task.filter({ assigned_to: currentUser.email, status: 'active' }, "-created_date"),
-      ActivityLog.list("-created_date", 10)
+      ActivityLog.list("-created_date", 10),
+      User.list()
     ]);
-    
+
+    // Build users map keyed by email
+    const uMap = {};
+    allUsers.forEach(u => { uMap[u.email] = u; });
+    setUsersMap(uMap);
+
     // Sort by priority: high > medium > low, then by due_date
     const sortedTasks = currentUserActiveTasks.sort((a, b) => {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
