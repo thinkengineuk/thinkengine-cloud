@@ -19,6 +19,8 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
   const [assignedTo, setAssignedTo] = useState("");
   const [watchers, setWatchers] = useState([]);
   const [priority, setPriority] = useState("medium");
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
@@ -45,11 +47,12 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
       assigned_to: assignedTo || undefined,
       watchers: watchers.length > 0 ? watchers : undefined,
       priority,
+      tags: tags.length > 0 ? tags : undefined,
       is_active: true,
     });
     setSaving(false);
     setTitle(""); setDescription(""); setRecurrencePattern("monthly");
-    setAssignedTo(""); setWatchers([]); setPriority("medium");
+    setAssignedTo(""); setWatchers([]); setPriority("medium"); setTags([]);
     onOpenChange(false);
     onCreated?.();
   };
@@ -143,6 +146,38 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tags</Label>
+            <div className="flex gap-2">
+              <Input
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={e => {
+                  if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+                    e.preventDefault();
+                    const t = tagInput.trim().replace(/,$/, "");
+                    if (t && !tags.includes(t)) setTags(prev => [...prev, t]);
+                    setTagInput("");
+                  }
+                }}
+                placeholder="Type a tag and press Enter..."
+                className="text-sm"
+              />
+            </div>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {tags.map(tag => (
+                  <span key={tag} className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs rounded-full px-2.5 py-1">
+                    {tag}
+                    <button type="button" onClick={() => setTags(prev => prev.filter(t => t !== tag))}>
+                      <X className="w-3 h-3 text-blue-400 hover:text-blue-700" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
