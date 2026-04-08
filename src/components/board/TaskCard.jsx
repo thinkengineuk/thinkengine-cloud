@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreVertical, MessageSquare, Paperclip, CheckSquare } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreVertical, MessageSquare, Paperclip, CheckSquare, Link } from "lucide-react";
 import { format, isToday, isPast, startOfDay } from "date-fns";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
@@ -30,9 +30,18 @@ const getTagColor = (tag) => {
 // OPTIMIZATION: Memoized component to prevent unnecessary re-renders
 // Only re-renders when task or usersMap props change
 const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete, allColumns, onMoveTask, counts }) => {
-  // OPTIMIZATION: Get assigned user from passed usersMap instead of fetching
-  // This avoids redundant API calls and improves performance
   const assignedUser = task.assigned_to ? usersMap[task.assigned_to] : null;
+  const [linkCopied, setLinkCopied] = useState(false);
+  const copyTimeoutRef = useRef(null);
+
+  const handleCopyLink = (e) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/Board?id=${task.board_id}&taskId=${task.id}`;
+    navigator.clipboard.writeText(url);
+    setLinkCopied(true);
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    copyTimeoutRef.current = setTimeout(() => setLinkCopied(false), 3000);
+  };
 
   const priorityColors = {
     low: 'bg-blue-100 text-blue-700 border-blue-200',
@@ -101,6 +110,18 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuItem
+              onClick={handleCopyLink}
+              className="flex items-center gap-2"
+            >
+              <Link className="h-4 w-4" />
+              {linkCopied ? (
+                <span className="text-green-600 font-medium">Link copied!</span>
+              ) : (
+                'Copy link'
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 Move to...
