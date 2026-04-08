@@ -274,7 +274,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
       </CardContent>
 
       {assignedUser && (
-        <div className="absolute top-2 right-2 group-hover:opacity-0 transition-opacity pointer-events-none">
+        <div className="absolute top-2 right-2 pointer-events-none">
           <Avatar className="w-7 h-7">
             {assignedUser.profile_picture_url ? (
               <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
