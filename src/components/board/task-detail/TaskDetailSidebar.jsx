@@ -337,6 +337,9 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
                  if (timeValue) {
                    const [h, m] = timeValue.split(':').map(Number);
                    date.setHours(h, m, 0, 0);
+                 } else {
+                   date.setHours(17, 0, 0, 0);
+                   setTimeValue('17:00');
                  }
                  onUpdate({ due_date: date });
                }}

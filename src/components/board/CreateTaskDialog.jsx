@@ -232,7 +232,10 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
                   <Calendar
                     mode="single"
                     selected={formData.due_date}
-                    onSelect={(date) => setFormData({ ...formData, due_date: date })}
+                    onSelect={(date) => {
+                      if (date) date.setHours(17, 0, 0, 0);
+                      setFormData({ ...formData, due_date: date });
+                    }}
                     initialFocus
                   />
                 </PopoverContent>
