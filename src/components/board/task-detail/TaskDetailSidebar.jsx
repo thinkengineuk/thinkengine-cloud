@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CalendarIcon, User, Eye, Tag, AlertCircle, Trash2, Repeat, CheckCircle2, FolderKanban } from "lucide-react";
+import { CalendarIcon, User, Eye, Tag, AlertCircle, Trash2, Repeat, CheckCircle2, FolderKanban, ChevronDown, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TimeTrackingSection from "./TimeTrackingSection";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +35,8 @@ import { Label } from "@/components/ui/label";
 import { STAGE_COLUMNS } from "@/components/client-projects/projectStages";
 
 export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdate, onAssign, onAddWatcher, onClose, onRefresh }) {
-  const [newTag, setNewTag] = useState("");
+  const [tagSearch, setTagSearch] = useState("");
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
   const [dueDateOpen, setDueDateOpen] = useState(false);
   const [timeValue, setTimeValue] = useState(() => {
     if (!task?.due_date) return "";
@@ -70,16 +71,19 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
     loadClientProjects();
   }, []);
 
+  const STATIC_TAGS = ["High", "Medium", "Low", "CogsAI", "ThinkEngine"];
+
   React.useEffect(() => {
     const loadBoardTags = async () => {
       if (!task?.board_id) return;
       const allTasks = await Task.filter({ board_id: task.board_id });
-      const tagsSet = new Set();
+      const tagsSet = new Set(STATIC_TAGS);
       allTasks.forEach(t => {
-        if (t.tags) {
-          t.tags.forEach(tag => tagsSet.add(tag));
-        }
+        if (t.tags) t.tags.forEach(tag => tagsSet.add(tag));
       });
+      // Also add client project names
+      const projects = await base44.entities.ClientProject.list();
+      projects.forEach(p => { if (p.name) tagsSet.add(p.name); });
       setAllBoardTags(Array.from(tagsSet).sort());
     };
     loadBoardTags();
@@ -106,11 +110,24 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
   }, [task?.board_id, allUsers]);
 
 
-  const addTag = () => {
-    if (newTag.trim() && !task.tags?.includes(newTag.trim())) {
-      onUpdate({ tags: [...(task.tags || []), newTag.trim()] });
-      setNewTag("");
+  const filteredTagOptions = useMemo(() => {
+    const q = tagSearch.toLowerCase();
+    return allBoardTags.filter(t => t.toLowerCase().includes(q) && !(task.tags || []).includes(t));
+  }, [allBoardTags, tagSearch, task.tags]);
+
+  const handleSelectTag = (tag) => {
+    if (!(task.tags || []).includes(tag)) {
+      onUpdate({ tags: [...(task.tags || []), tag] });
     }
+    setTagSearch("");
+  };
+
+  const handleAddCustomTag = () => {
+    const tag = tagSearch.trim();
+    if (tag && !(task.tags || []).includes(tag)) {
+      onUpdate({ tags: [...(task.tags || []), tag] });
+    }
+    setTagSearch("");
   };
 
   const removeTag = (tagToRemove) => {
@@ -390,29 +407,61 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
             </Button>
           </div>
 
-          <div className="flex gap-2">
-            <Input
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && addTag()}
-              placeholder="Add tag"
-              className="flex-1 bg-white text-sm"
-            />
-            <Button onClick={addTag} size="sm" className="bg-slate-900 hover:bg-slate-800 px-4">
-              Add
-            </Button>
-          </div>
+          <Popover open={tagDropdownOpen} onOpenChange={setTagDropdownOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-between font-normal bg-white text-sm">
+                <span className="text-slate-500">Select or add tags...</span>
+                <ChevronDown className="w-4 h-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-2" align="start">
+              <Input
+                value={tagSearch}
+                onChange={(e) => setTagSearch(e.target.value)}
+                placeholder="Search or type new tag..."
+                className="mb-2 h-8 text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (filteredTagOptions.length > 0) handleSelectTag(filteredTagOptions[0]);
+                    else if (tagSearch.trim()) handleAddCustomTag();
+                  }
+                }}
+              />
+              <div className="max-h-48 overflow-y-auto space-y-0.5">
+                {filteredTagOptions.map(tag => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => handleSelectTag(tag)}
+                    className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-slate-100 transition-colors"
+                  >
+                    {tag}
+                  </button>
+                ))}
+                {tagSearch.trim() && !allBoardTags.some(t => t.toLowerCase() === tagSearch.toLowerCase()) && (
+                  <button
+                    type="button"
+                    onClick={handleAddCustomTag}
+                    className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-blue-50 text-blue-700 transition-colors"
+                  >
+                    + Add "{tagSearch.trim()}"
+                  </button>
+                )}
+                {filteredTagOptions.length === 0 && !tagSearch.trim() && (
+                  <p className="text-xs text-slate-400 px-2 py-2">All tags selected</p>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
 
           {task.tags && task.tags.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {task.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs py-1 px-2">
+                <Badge key={tag} variant="secondary" className="text-xs py-1 px-2 flex items-center gap-1">
                   {tag}
-                  <button
-                    onClick={() => removeTag(tag)}
-                    className="ml-1.5 hover:text-red-600 font-bold"
-                  >
-                    ×
+                  <button onClick={() => removeTag(tag)} className="hover:text-red-600">
+                    <X className="w-3 h-3" />
                   </button>
                 </Badge>
               ))}
