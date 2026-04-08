@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, User, LogOut, BarChart2, FolderKanban, Users, Briefcase, Archive } from "lucide-react";
+import { LayoutDashboard, User, LogOut, BarChart2, FolderKanban, Users, Briefcase, Archive, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { User as UserEntity } from "@/entities/User";
 import { Board } from "@/entities/Board";
 import {
@@ -17,6 +17,7 @@ import {
   SidebarFooter,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -120,20 +121,25 @@ export default function Layout({ children }) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50">
-        <Sidebar className="border-r border-slate-200 bg-white/80 backdrop-blur-sm">
-          <SidebarHeader className="border-b border-slate-200 p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#1e3a5f] rounded-xl flex items-center justify-center shadow-lg">
-                <svg viewBox="0 0 100 100" className="w-6 h-6" fill="none">
-                  <text x="15" y="65" fontSize="48" fontWeight="bold" fill="#60d5f2" fontFamily="Arial, sans-serif">T</text>
-                  <rect x="60" y="30" width="25" height="8" fill="#60d5f2" rx="2"/>
-                  <rect x="60" y="45" width="25" height="8" fill="#60d5f2" rx="2"/>
-                  <rect x="60" y="60" width="25" height="8" fill="#60d5f2" rx="2"/>
-                </svg>
+        <Sidebar collapsible="icon" className="border-r border-slate-200 bg-white/80 backdrop-blur-sm">
+          <SidebarHeader className="border-b border-slate-200 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 group-data-[collapsible=icon]:hidden">
+                <div className="w-10 h-10 bg-[#1e3a5f] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                  <svg viewBox="0 0 100 100" className="w-6 h-6" fill="none">
+                    <text x="15" y="65" fontSize="48" fontWeight="bold" fill="#60d5f2" fontFamily="Arial, sans-serif">T</text>
+                    <rect x="60" y="30" width="25" height="8" fill="#60d5f2" rx="2"/>
+                    <rect x="60" y="45" width="25" height="8" fill="#60d5f2" rx="2"/>
+                    <rect x="60" y="60" width="25" height="8" fill="#60d5f2" rx="2"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="font-bold text-slate-900 text-lg">TaskFlow</h2>
+                  <p className="text-xs text-slate-500">Task Management</p>
+                </div>
               </div>
-              <div>
-                <h2 className="font-bold text-slate-900 text-lg">TaskFlow</h2>
-                <p className="text-xs text-slate-500">Task Management</p>
+              <div className="group-data-[collapsible=icon]:mx-auto">
+                <SidebarTrigger className="hover:bg-slate-100 rounded-lg transition-colors" />
               </div>
             </div>
           </SidebarHeader>
@@ -236,12 +242,13 @@ export default function Layout({ children }) {
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
+                        tooltip={item.title}
                         className={`hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-xl mb-1 ${
                           location.pathname === item.url ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 shadow-sm' : ''
                         }`}
                       >
                         <Link to={item.url} className="flex items-center gap-3 px-4 py-3">
-                          <item.icon className="w-5 h-5" />
+                          <item.icon className="w-5 h-5 flex-shrink-0" />
                           <span className="font-medium">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -253,11 +260,10 @@ export default function Layout({ children }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-slate-200 p-4">
-            {/* Users link - admin only, just above user info */}
             {user?.role === 'admin' && (
               <Link
                 to={createPageUrl("Users")}
-                className={`flex items-center gap-3 px-4 py-2 mb-3 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 ${
+                className={`flex items-center gap-3 px-4 py-2 mb-3 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 group-data-[collapsible=icon]:hidden ${
                   location.pathname === createPageUrl("Users") ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700' : 'text-slate-700'
                 }`}
               >
@@ -265,10 +271,10 @@ export default function Layout({ children }) {
                 Users
               </Link>
             )}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
               <div className="flex items-center gap-3">
                 <ProfilePictureUpload user={user} onUpdated={(url) => setUser(prev => ({ ...prev, profile_picture_url: url }))} />
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
                   <p className="font-medium text-slate-900 text-sm truncate">{user?.full_name || 'User'}</p>
                   <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                 </div>
@@ -277,7 +283,7 @@ export default function Layout({ children }) {
                 variant="ghost"
                 size="icon"
                 onClick={handleLogout}
-                className="hover:bg-red-50 hover:text-red-600 transition-colors"
+                className="hover:bg-red-50 hover:text-red-600 transition-colors group-data-[collapsible=icon]:hidden"
               >
                 <LogOut className="w-4 h-4" />
               </Button>
