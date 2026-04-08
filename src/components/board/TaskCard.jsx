@@ -166,6 +166,12 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </div>
         )}
 
+        {task.priority && task.priority !== 'medium' && !isCompleted && (
+          <Badge className={`${priorityColors[task.priority]} border text-xs capitalize w-fit`}>
+            {task.priority} Priority
+          </Badge>
+        )}
+
         <p className={`text-sm font-semibold leading-snug pr-8 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
           {task.title}
         </p>
