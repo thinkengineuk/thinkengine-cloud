@@ -161,19 +161,19 @@ export default function Layout({ children }) {
                             }`}
                           >
                             <Link to={`${createPageUrl("Board")}?id=${project.id}`} className="flex items-center gap-3 px-4 py-3">
-                              <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${
-                                project.color === 'blue' ? 'from-blue-400 to-blue-600' :
-                                project.color === 'purple' ? 'from-purple-400 to-purple-600' :
-                                project.color === 'green' ? 'from-green-400 to-green-600' :
-                                project.color === 'orange' ? 'from-orange-400 to-orange-600' :
-                                project.color === 'pink' ? 'from-pink-400 to-pink-600' :
-                                project.color === 'red' ? 'from-red-400 to-red-600' :
-                                project.color === 'teal' ? 'from-teal-400 to-teal-600' :
-                                project.color === 'indigo' ? 'from-indigo-400 to-indigo-600' :
-                                project.color === 'cyan' ? 'from-cyan-400 to-cyan-600' :
-                                project.color === 'black' ? 'from-slate-700 to-slate-900' :
-                                    'from-gray-400 to-gray-600'
-                                }`}></span>
+                              <span className={`w-2 h-2 min-w-[0.5rem] min-h-[0.5rem] rounded-full flex-shrink-0 bg-gradient-to-r ${
+                              project.color === 'blue' ? 'from-blue-400 to-blue-600' :
+                              project.color === 'purple' ? 'from-purple-400 to-purple-600' :
+                              project.color === 'green' ? 'from-green-400 to-green-600' :
+                              project.color === 'orange' ? 'from-orange-400 to-orange-600' :
+                              project.color === 'pink' ? 'from-pink-400 to-pink-600' :
+                              project.color === 'red' ? 'from-red-400 to-red-600' :
+                              project.color === 'teal' ? 'from-teal-400 to-teal-600' :
+                              project.color === 'indigo' ? 'from-indigo-400 to-indigo-600' :
+                              project.color === 'cyan' ? 'from-cyan-400 to-cyan-600' :
+                              project.color === 'black' ? 'from-slate-700 to-slate-900' :
+                              'from-gray-400 to-gray-600'
+                            }`}></span>
                                 <span className="font-medium text-sm">{project.name}</span>
                             </Link>
                           </SidebarMenuButton>
@@ -202,7 +202,7 @@ export default function Layout({ children }) {
                           }`}
                         >
                           <Link to={`${createPageUrl("Board")}?id=${project.id}`} className="flex items-center gap-3 px-4 py-3">
-                            <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${
+                            <span className={`w-2 h-2 min-w-[0.5rem] min-h-[0.5rem] rounded-full flex-shrink-0 bg-gradient-to-r ${
                               project.color === 'blue' ? 'from-blue-400 to-blue-600' :
                               project.color === 'purple' ? 'from-purple-400 to-purple-600' :
                               project.color === 'green' ? 'from-green-400 to-green-600' :
