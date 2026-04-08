@@ -56,7 +56,7 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md flex flex-col max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl font-bold">
             <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
@@ -66,7 +66,7 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-1">
+        <div className="space-y-4 py-1 overflow-y-auto flex-1 pr-1">
           <div className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm space-y-2">
             <Input
               value={title}
