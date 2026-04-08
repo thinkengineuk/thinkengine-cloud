@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Copy, ExternalLink, MoreVertical } from "lucide-react";
 import { Task } from "@/entities/Task";
@@ -32,7 +31,8 @@ import { MoveRight } from "lucide-react";
 export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onRefresh, allColumns, onMoveTask }) {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { toast } = useToast();
+  const [linkCopied, setLinkCopied] = useState(false);
+  const copyTimeoutRef = useRef(null);
 
   const handleDelete = async () => {
     if (deleting) return;
@@ -89,7 +89,9 @@ export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onR
   const handleCopyLink = () => {
     const taskUrl = `${window.location.origin}/Board?id=${boardId}&taskId=${task.id}`;
     navigator.clipboard.writeText(taskUrl);
-    toast({ title: "Link copied!", description: "Task link copied to clipboard." });
+    setLinkCopied(true);
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    copyTimeoutRef.current = setTimeout(() => setLinkCopied(false), 3000);
   };
 
   return (
@@ -109,7 +111,7 @@ export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onR
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleCopyLink}>
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Copy Link
+                {linkCopied ? <span className="text-green-600 font-medium">Link copied!</span> : 'Copy Link'}
               </DropdownMenuItem>
               {allColumns && allColumns.length > 0 && onMoveTask && (
                 <>
