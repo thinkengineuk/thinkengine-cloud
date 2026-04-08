@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import ProfilePictureUpload from "@/components/user/ProfilePictureUpload";
 
 const RECENT_BOARDS_KEY = "taskflow_recent_boards";
 const MAX_RECENT = 3;
@@ -266,19 +267,9 @@ export default function Layout({ children }) {
             )}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Avatar className="w-10 h-10 shadow-md">
-                  {user?.profile_picture_url ? (
-                    <AvatarImage src={user.profile_picture_url} alt={user.full_name} />
-                  ) : (
-                    <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-400 text-white font-semibold text-sm">
-                      {user?.full_name?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
+                <ProfilePictureUpload user={user} onUpdated={(url) => setUser(prev => ({ ...prev, profile_picture_url: url }))} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-slate-900 text-sm truncate">
-                    {user?.full_name || 'User'}
-                  </p>
+                  <p className="font-medium text-slate-900 text-sm truncate">{user?.full_name || 'User'}</p>
                   <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                 </div>
               </div>
