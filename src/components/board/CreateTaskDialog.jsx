@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import { Board } from "@/entities/Board";
 import { base44 } from "@/api/base44Client";
 import { listAllUsers } from "@/functions/listAllUsers";
 import { STAGE_COLUMNS } from "@/components/client-projects/projectStages";
-import { FolderKanban } from "lucide-react";
+import { FolderKanban, X, ChevronDown } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -43,9 +43,10 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
   });
   const [users, setUsers] = useState([]);
   const [boardMembers, setBoardMembers] = useState([]);
-  const [newTag, setNewTag] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientProjects, setClientProjects] = useState([]);
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
+  const [tagSearch, setTagSearch] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -93,11 +94,32 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
     }
   };
 
-  const handleAddTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData({ ...formData, tags: [...formData.tags, newTag.trim()] });
-      setNewTag("");
+  const STATIC_TAGS = ["High", "Medium", "Low", "CogsAI", "ThinkEngine"];
+
+  const allAvailableTags = useMemo(() => {
+    const clientNames = clientProjects.map(p => p.name).filter(Boolean);
+    const combined = [...new Set([...STATIC_TAGS, ...clientNames])];
+    return combined;
+  }, [clientProjects]);
+
+  const filteredTags = useMemo(() => {
+    const q = tagSearch.toLowerCase();
+    return allAvailableTags.filter(t => t.toLowerCase().includes(q) && !formData.tags.includes(t));
+  }, [allAvailableTags, tagSearch, formData.tags]);
+
+  const handleSelectTag = (tag) => {
+    if (!formData.tags.includes(tag)) {
+      setFormData({ ...formData, tags: [...formData.tags, tag] });
     }
+    setTagSearch("");
+  };
+
+  const handleAddCustomTag = () => {
+    const tag = tagSearch.trim();
+    if (tag && !formData.tags.includes(tag)) {
+      setFormData({ ...formData, tags: [...formData.tags, tag] });
+    }
+    setTagSearch("");
   };
 
   const handleRemoveTag = (tagToRemove) => {
@@ -209,16 +231,58 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
 
           <div className="space-y-2">
             <Label>Tags</Label>
-            <div className="flex gap-2">
-              <Input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                placeholder="Add a tag and press Enter"
-                disabled={isSubmitting}
-              />
-              <Button type="button" onClick={handleAddTag} disabled={isSubmitting}>Add</Button>
-            </div>
+            <Popover open={tagDropdownOpen} onOpenChange={setTagDropdownOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-between font-normal"
+                  disabled={isSubmitting}
+                >
+                  <span className="text-slate-500">Select or add tags...</span>
+                  <ChevronDown className="w-4 h-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-2" align="start">
+                <Input
+                  value={tagSearch}
+                  onChange={(e) => setTagSearch(e.target.value)}
+                  placeholder="Search or type new tag..."
+                  className="mb-2 h-8 text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (filteredTags.length > 0) handleSelectTag(filteredTags[0]);
+                      else if (tagSearch.trim()) handleAddCustomTag();
+                    }
+                  }}
+                />
+                <div className="max-h-52 overflow-y-auto space-y-0.5">
+                  {filteredTags.map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => handleSelectTag(tag)}
+                      className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-slate-100 transition-colors"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                  {tagSearch.trim() && !allAvailableTags.some(t => t.toLowerCase() === tagSearch.toLowerCase()) && (
+                    <button
+                      type="button"
+                      onClick={handleAddCustomTag}
+                      className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-blue-50 text-blue-700 transition-colors"
+                    >
+                      + Add "{tagSearch.trim()}"
+                    </button>
+                  )}
+                  {filteredTags.length === 0 && !tagSearch.trim() && (
+                    <p className="text-xs text-slate-400 px-2 py-2">All tags selected</p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
             {formData.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.tags.map((tag) => (
@@ -230,10 +294,10 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
                     <button
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:text-red-600 font-bold"
+                      className="hover:text-red-600"
                       disabled={isSubmitting}
                     >
-                      ×
+                      <X className="w-3 h-3" />
                     </button>
                   </span>
                 ))}
