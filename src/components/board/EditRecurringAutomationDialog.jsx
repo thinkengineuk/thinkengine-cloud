@@ -1,0 +1,190 @@
+import React, { useState, useRef, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Zap, ChevronRight, X } from "lucide-react";
+import RecurrencePicker from "@/components/shared/RecurrencePicker";
+import { base44 } from "@/api/base44Client";
+
+export default function EditRecurringAutomationDialog({ open, onOpenChange, automation, users, onUpdated }) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [recurrencePattern, setRecurrencePattern] = useState("monthly");
+  const [recurrenceSummary, setRecurrenceSummary] = useState("Monthly");
+  const [startDate, setStartDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("09:00");
+  const [assignedTo, setAssignedTo] = useState("");
+  const [watchers, setWatchers] = useState([]);
+  const [priority, setPriority] = useState("medium");
+  const [saving, setSaving] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const pickerRef = useRef(null);
+
+  useEffect(() => {
+    if (automation) {
+      setTitle(automation.title || "");
+      setDescription(automation.description || "");
+      setRecurrencePattern(automation.recurrence_pattern || "monthly");
+      setRecurrenceSummary(automation.recurrence_pattern || "monthly");
+      setStartDate(automation.recurrence_start_date || new Date().toISOString().split("T")[0]);
+      setScheduledTime(automation.scheduled_time || "09:00");
+      setAssignedTo(automation.assigned_to || "");
+      setWatchers(automation.watchers || []);
+      setPriority(automation.priority || "medium");
+    }
+  }, [automation]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target)) setShowPicker(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!title.trim()) return;
+    setSaving(true);
+    await base44.entities.RecurringAutomation.update(automation.id, {
+      title: title.trim(),
+      description: description.trim() || undefined,
+      recurrence_pattern: recurrencePattern,
+      recurrence_start_date: startDate,
+      scheduled_time: scheduledTime,
+      assigned_to: assignedTo || undefined,
+      watchers: watchers.length > 0 ? watchers : undefined,
+      priority,
+    });
+    setSaving(false);
+    onOpenChange(false);
+    onUpdated?.();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3 text-xl font-bold">
+            <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
+              <Zap className="w-5 h-5 text-purple-500" />
+            </div>
+            Edit Automation
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-1">
+          <div className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm space-y-2">
+            <Input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="Task title..."
+              className="border-0 p-0 text-base font-semibold shadow-none focus-visible:ring-0 placeholder:text-slate-400"
+              autoFocus
+            />
+            <Textarea
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Add a description..."
+              rows={2}
+              className="border-0 p-0 text-sm shadow-none focus-visible:ring-0 resize-none text-slate-500 placeholder:text-slate-300"
+            />
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Repeat</p>
+            <div className="relative" ref={pickerRef}>
+              <button
+                type="button"
+                onClick={() => setShowPicker(v => !v)}
+                className="w-full flex items-center justify-between border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <span>{recurrenceSummary}</span>
+                <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${showPicker ? "rotate-90" : ""}`} />
+              </button>
+              {showPicker && (
+                <div className="absolute left-0 top-full mt-1 z-50">
+                  <RecurrencePicker
+                    value={recurrencePattern}
+                    onChange={(pattern, summary) => { setRecurrencePattern(pattern); setRecurrenceSummary(summary); }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Starting Date</p>
+              <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="text-sm" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Time of Day</p>
+              <Input type="time" value={scheduledTime} onChange={e => setScheduledTime(e.target.value)} className="text-sm" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Assign To</Label>
+              <Select value={assignedTo} onValueChange={setAssignedTo}>
+                <SelectTrigger className="text-sm"><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>Unassigned</SelectItem>
+                  {(users || []).map(u => <SelectItem key={u.email} value={u.email}>{u.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Priority</Label>
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Watchers</Label>
+            <Select onValueChange={(email) => { if (!watchers.includes(email)) setWatchers(prev => [...prev, email]); }}>
+              <SelectTrigger className="text-sm"><SelectValue placeholder="Add watchers..." /></SelectTrigger>
+              <SelectContent>
+                {(users || []).filter(u => !watchers.includes(u.email)).map(u => (
+                  <SelectItem key={u.email} value={u.email}>{u.full_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {watchers.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {watchers.map(email => {
+                  const u = (users || []).find(u => u.email === email);
+                  return (
+                    <span key={email} className="flex items-center gap-1 bg-slate-100 text-slate-700 text-xs rounded-full px-2.5 py-1">
+                      {u?.full_name || email}
+                      <button type="button" onClick={() => setWatchers(prev => prev.filter(e => e !== email))}>
+                        <X className="w-3 h-3 text-slate-400 hover:text-slate-700" />
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={saving || !title.trim()} className="bg-purple-600 hover:bg-purple-700 text-white">
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

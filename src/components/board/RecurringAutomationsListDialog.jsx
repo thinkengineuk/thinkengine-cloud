@@ -2,17 +2,19 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Zap, Calendar, Clock, User, Trash2, Eye, EyeOff } from "lucide-react";
+import { Zap, Calendar, Clock, User, Trash2, Eye, EyeOff, Pencil } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import EditRecurringAutomationDialog from "./EditRecurringAutomationDialog";
 
 const patternLabel = {
   daily: "Daily", weekly: "Weekly", monthly: "Monthly",
   "3_monthly": "Every 3 Months", "6_monthly": "Every 6 Months", yearly: "Yearly",
 };
 
-export default function RecurringAutomationsListDialog({ open, onOpenChange, boardId, columnId, usersMap }) {
+export default function RecurringAutomationsListDialog({ open, onOpenChange, boardId, columnId, usersMap, users }) {
   const [automations, setAutomations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [editingAutomation, setEditingAutomation] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -29,7 +31,7 @@ export default function RecurringAutomationsListDialog({ open, onOpenChange, boa
   };
 
   const handleToggle = async (automation) => {
-    const updated = await base44.entities.RecurringAutomation.update(automation.id, { is_active: !automation.is_active });
+    await base44.entities.RecurringAutomation.update(automation.id, { is_active: !automation.is_active });
     setAutomations(prev => prev.map(a => a.id === automation.id ? { ...a, is_active: !a.is_active } : a));
   };
 
@@ -97,6 +99,9 @@ export default function RecurringAutomationsListDialog({ open, onOpenChange, boa
                 </div>
 
                 <div className="flex items-center justify-end gap-2 mt-3 pt-2 border-t border-slate-100">
+                  <Button variant="ghost" size="sm" className="h-7 text-xs text-slate-500 hover:text-slate-700" onClick={() => setEditingAutomation(automation)}>
+                    <Pencil className="w-3 h-3 mr-1" />Edit
+                  </Button>
                   <Button variant="ghost" size="sm" className="h-7 text-xs text-slate-500 hover:text-slate-700" onClick={() => handleToggle(automation)}>
                     {automation.is_active ? <><EyeOff className="w-3 h-3 mr-1" />Pause</> : <><Eye className="w-3 h-3 mr-1" />Activate</>}
                   </Button>
@@ -109,6 +114,14 @@ export default function RecurringAutomationsListDialog({ open, onOpenChange, boa
           })}
         </div>
       </DialogContent>
+
+      <EditRecurringAutomationDialog
+        open={!!editingAutomation}
+        onOpenChange={(v) => { if (!v) setEditingAutomation(null); }}
+        automation={editingAutomation}
+        users={users}
+        onUpdated={() => { setEditingAutomation(null); load(); }}
+      />
     </Dialog>
   );
 }

@@ -472,6 +472,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
         boardId={column.board_id}
         columnId={column.id}
         usersMap={usersMap}
+        users={users}
       />
 
       <EditColumnDialog
