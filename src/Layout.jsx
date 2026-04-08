@@ -125,11 +125,13 @@ export default function Layout({ children }) {
           <SidebarHeader className="border-b border-slate-200 py-1 px-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center justify-center flex-1 group-data-[collapsible=icon]:hidden overflow-hidden">
-                <img
-                  src="https://media.base44.com/images/public/68dcdd68fd2e656bc4f622ca/d940d5b06_ThinkEngineCloud1.png"
-                  alt="ThinkEngine Cloud"
-                  className="w-full max-w-[160px] h-auto object-contain"
-                />
+                <Link to="/">
+                  <img
+                    src="https://media.base44.com/images/public/68dcdd68fd2e656bc4f622ca/d940d5b06_ThinkEngineCloud1.png"
+                    alt="ThinkEngine Cloud"
+                    className="w-full max-w-[160px] h-auto object-contain"
+                  />
+                </Link>
               </div>
               <div className="group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:mt-2">
                 <SidebarTrigger className="hover:bg-slate-100 rounded-lg transition-colors" />
