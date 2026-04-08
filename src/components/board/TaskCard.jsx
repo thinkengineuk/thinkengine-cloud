@@ -130,7 +130,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
       )}
 
       {assignedUser && (
-        <div className="absolute top-2 right-2 z-10 group-hover:opacity-0 transition-opacity">
+        <div className="absolute top-2 right-2 z-10 group-hover:opacity-0 transition-opacity pointer-events-none">
           <Avatar className="w-7 h-7">
             {assignedUser.profile_picture_url ? (
               <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
@@ -147,7 +147,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-2 right-2 h-7 w-7 text-slate-400 hover:text-green-600 hover:bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          className="absolute top-2 right-2 h-7 w-7 text-slate-400 hover:text-green-600 hover:bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity z-20"
           onClick={(e) => {
             e.stopPropagation();
             onToggleTaskComplete(task.id);
@@ -194,7 +194,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </div>
         )}
 
-        <p className={`text-sm font-semibold leading-snug ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+        <p className={`text-sm font-semibold leading-snug pr-8 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
           {task.title}
         </p>
 
