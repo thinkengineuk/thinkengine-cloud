@@ -237,8 +237,8 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
               <Label>Due Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start text-left font-normal"
                     disabled={isSubmitting}
                   >
@@ -251,15 +251,33 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
                     mode="single"
                     selected={formData.due_date}
                     onSelect={(date) => {
-                      if (date) date.setHours(17, 0, 0, 0);
+                      if (date) {
+                        const existing = formData.due_date;
+                        const hours = existing ? existing.getHours() : 17;
+                        const mins = existing ? existing.getMinutes() : 0;
+                        date.setHours(hours, mins, 0, 0);
+                      }
                       setFormData({ ...formData, due_date: date });
                     }}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
+              {formData.due_date && (
+                <Input
+                  type="time"
+                  value={format(formData.due_date, 'HH:mm')}
+                  onChange={(e) => {
+                    const [hours, mins] = e.target.value.split(':').map(Number);
+                    const updated = new Date(formData.due_date);
+                    updated.setHours(hours, mins, 0, 0);
+                    setFormData({ ...formData, due_date: updated });
+                  }}
+                  disabled={isSubmitting}
+                />
+              )}
             </div>
-          </div>
+            </div>
 
           <div className="space-y-2">
             <Label>Tags</Label>
