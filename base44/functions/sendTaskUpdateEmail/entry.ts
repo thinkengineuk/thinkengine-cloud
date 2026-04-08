@@ -137,12 +137,11 @@ Deno.serve(async (req) => {
         ctaUrl: taskUrl,
       });
 
-      // EMAIL PAUSED
-      // await base44.asServiceRole.integrations.Core.SendEmail({
-      //   to: email,
-      //   subject: `[TaskFlow] Task Updated: ${task.title}`,
-      //   body: html,
-      // });
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: email,
+        subject: `[TaskFlow] Task Updated: ${task.title}`,
+        body: html,
+      });
     });
 
     await Promise.all(sendPromises);

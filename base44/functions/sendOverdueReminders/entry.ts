@@ -93,13 +93,11 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-                    // Use the SDK's integration method instead of direct import
-                    // EMAIL PAUSED
-                    // await base44.asServiceRole.integrations.Core.SendEmail({
-                    //     to: task.assigned_to,
-                    //     subject: `⚠️ Overdue: "${task.title}" was due ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} ago`,
-                    //     body: htmlBody,
-                    // });
+                    await base44.asServiceRole.integrations.Core.SendEmail({
+                        to: task.assigned_to,
+                        subject: `⚠️ Overdue: "${task.title}" was due ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} ago`,
+                        body: htmlBody,
+                    });
                     
                     remindersSent++;
                     console.log(`Sent overdue reminder for task ${task.id} to ${task.assigned_to}`);
