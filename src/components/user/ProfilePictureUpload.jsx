@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Camera } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { updateProfilePicture } from "@/functions/updateProfilePicture";
 
 export default function ProfilePictureUpload({ user, onUpdated }) {
@@ -11,9 +12,8 @@ export default function ProfilePictureUpload({ user, onUpdated }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setLoading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await updateProfilePicture(formData);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const res = await updateProfilePicture({ profile_picture_url: file_url });
     if (res?.data?.profile_picture_url) {
       onUpdated(res.data.profile_picture_url);
     }
