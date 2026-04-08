@@ -124,11 +124,12 @@ export default function Layout({ children }) {
         <Sidebar collapsible="icon" className="border-r border-slate-200 bg-white/80 backdrop-blur-sm">
           <SidebarHeader className="border-b border-slate-200 p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 group-data-[collapsible=icon]:hidden">
+              <div className="flex items-center justify-center flex-1 group-data-[collapsible=icon]:hidden">
                 <img
                   src="https://media.base44.com/images/public/68dcdd68fd2e656bc4f622ca/d940d5b06_ThinkEngineCloud1.png"
                   alt="ThinkEngine Cloud"
-                  className="h-10 w-auto object-contain flex-shrink-0"
+                  className="h-15 w-auto object-contain flex-shrink-0"
+                  style={{ height: '60px' }}
                 />
               </div>
               <div className="group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:mt-2">
