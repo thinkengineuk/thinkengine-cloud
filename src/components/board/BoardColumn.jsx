@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { startOfDay, isToday } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, GripVertical, Settings, Trash2, ArrowUpDown, RefreshCw } from "lucide-react";
+import { Plus, GripVertical, Settings, Trash2, ArrowUpDown, RefreshCw, Zap } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
@@ -11,6 +11,8 @@ import CreateTaskDialog from "./CreateTaskDialog";
 import EditColumnDialog from "./EditColumnDialog";
 import CreateRecurringTaskDialog from "./CreateRecurringTaskDialog";
 import RecurringTasksListDialog from "./RecurringTasksListDialog";
+import CreateRecurringAutomationDialog from "./CreateRecurringAutomationDialog";
+import RecurringAutomationsListDialog from "./RecurringAutomationsListDialog";
 import { Task } from "@/entities/Task";
 import { Column } from "@/entities/Column";
 import { SendEmail } from "@/integrations/Core";
@@ -44,6 +46,8 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showRecurringDialog, setShowRecurringDialog] = useState(false);
   const [showRecurringList, setShowRecurringList] = useState(false);
+  const [showAutomationDialog, setShowAutomationDialog] = useState(false);
+  const [showAutomationList, setShowAutomationList] = useState(false);
   
   // Load sort preference from localStorage, default to 'due_date'
   const getSavedSortPreference = () => {
@@ -353,6 +357,15 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
                       <RefreshCw className="w-4 h-4 mr-2" />
                       View Recurring Tasks
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setShowAutomationDialog(true)}>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Add Recurring Automation
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowAutomationList(true)}>
+                      <Zap className="w-4 h-4 mr-2" />
+                      View Automations
+                    </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => setShowDeleteDialog(true)}
                       className="text-red-600"
@@ -443,6 +456,22 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
         columnId={column.id}
         usersMap={usersMap}
         onTaskClick={onTaskClick}
+      />
+
+      <CreateRecurringAutomationDialog
+        open={showAutomationDialog}
+        onOpenChange={setShowAutomationDialog}
+        column={column}
+        users={users}
+        onCreated={() => {}}
+      />
+
+      <RecurringAutomationsListDialog
+        open={showAutomationList}
+        onOpenChange={setShowAutomationList}
+        boardId={column.board_id}
+        columnId={column.id}
+        usersMap={usersMap}
       />
 
       <EditColumnDialog
