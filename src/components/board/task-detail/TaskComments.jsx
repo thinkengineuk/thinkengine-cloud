@@ -36,7 +36,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     loadingRef.current = true;
     try {
       const [taskComments, allAttachments] = await Promise.all([
-        Comment.filter({ task_id: taskId }, "position"),
+        Comment.filter({ task_id: taskId }, "-created_date"),
         Attachment.filter({ task_id: taskId }),
       ]);
       setComments(taskComments);
