@@ -267,14 +267,7 @@ export default function BoardPage() {
     const sourceColumnId = source.droppableId;
     const destColumnId = destination.droppableId;
 
-    // Only switch to manual if the column doesn't already have a sort preference set
-    const destSort = localStorage.getItem(`column-${destColumnId}-sort`);
-    const sourceSort = localStorage.getItem(`column-${sourceColumnId}-sort`);
-    if (!destSort) localStorage.setItem(`column-${destColumnId}-sort`, 'manual');
-    if (sourceColumnId !== destColumnId && !sourceSort) {
-      localStorage.setItem(`column-${sourceColumnId}-sort`, 'manual');
-    }
-    window.dispatchEvent(new Event('sort-change'));
+
 
     // Get tasks in each column, sorted by current position to ensure consistency
     const sourceColumnTasks = allTasks
