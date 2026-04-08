@@ -12,12 +12,18 @@ export default function ProfilePictureUpload({ user, onUpdated }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setLoading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    const res = await updateProfilePicture({ profile_picture_url: file_url });
-    if (res?.data?.profile_picture_url) {
-      onUpdated(res.data.profile_picture_url);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const res = await updateProfilePicture({ profile_picture_url: file_url });
+      if (res?.data?.profile_picture_url) {
+        onUpdated(res.data.profile_picture_url);
+      }
+    } catch (err) {
+      console.error('Profile picture upload failed:', err);
+    } finally {
+      setLoading(false);
+      if (inputRef.current) inputRef.current.value = '';
     }
-    setLoading(false);
   };
 
   return (
