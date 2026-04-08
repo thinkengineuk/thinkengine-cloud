@@ -129,7 +129,7 @@ export default function Layout({ children }) {
                   src="https://media.base44.com/images/public/68dcdd68fd2e656bc4f622ca/d940d5b06_ThinkEngineCloud1.png"
                   alt="ThinkEngine Cloud"
                   className="h-15 w-auto object-contain flex-shrink-0"
-                  style={{ height: '80px' }}
+                  style={{ height: '120px' }}
                 />
               </div>
               <div className="group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:mt-2">
