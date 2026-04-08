@@ -341,33 +341,35 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
             </div>
           </div>
 
+          {column.name.toLowerCase() !== 'completed' && (
+            <div className="px-4 pt-3">
+              <Button
+                onClick={() => setShowCreateTask(true)}
+                variant="outline"
+                className="w-full justify-center border-dashed border-2 hover:border-slate-400 hover:bg-slate-50 text-slate-600"
+                size="sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add task
+              </Button>
+            </div>
+          )}
+
           <Droppable droppableId={column.id} type="task" isDropDisabled={false}>
             {(provided, snapshot) => (
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className={`flex-1 overflow-y-auto column-scroll-area p-4 space-y-3 min-h-[100px] ${snapshot.isDraggingOver ? colors.light : ''}`}
-                style={{ maxHeight: 'calc(100vh - 220px)' }}
+                className={`flex-1 overflow-y-auto column-scroll-area p-4 space-y-3 min-h-[60px] ${snapshot.isDraggingOver ? colors.light : ''}`}
+                style={{ maxHeight: 'calc(100vh - 260px)' }}
               >
-                {column.name.toLowerCase() !== 'completed' && (
-                  <Button
-                    onClick={() => setShowCreateTask(true)}
-                    variant="outline"
-                    className="w-full justify-center border-dashed border-2 hover:border-slate-400 hover:bg-slate-50 text-slate-600"
-                    size="sm"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add task
-                  </Button>
-                )}
-
                 {sortedTasks.map((task, index) => (
                   <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={false}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
-                        {...provided.dragHandleProps}
                         {...provided.draggableProps}
+                        {...provided.dragHandleProps}
                       >
                         <TaskCard
                           task={task}
