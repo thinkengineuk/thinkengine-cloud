@@ -68,6 +68,14 @@
       "type": "boolean",
       "default": true,
       "description": "Whether this automation is active"
+    },
+    "checklist_items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Checklist items to be created for each spawned task",
+      "default": []
     }
   },
   "required": [

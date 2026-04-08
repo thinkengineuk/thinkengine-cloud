@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
-import { Zap, ChevronRight, ChevronDown, X } from "lucide-react";
+import { Zap, ChevronRight, ChevronDown, X, Plus, CheckSquare } from "lucide-react";
 import RecurrencePicker from "@/components/shared/RecurrencePicker";
 import { base44 } from "@/api/base44Client";
 
@@ -25,6 +25,8 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState("");
   const [existingBoardTags, setExistingBoardTags] = useState([]);
+  const [checklistItems, setChecklistItems] = useState([]);
+  const [checklistInput, setChecklistInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
@@ -73,11 +75,13 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
       watchers: watchers.length > 0 ? watchers : undefined,
       priority,
       tags: tags.length > 0 ? tags : undefined,
+      checklist_items: checklistItems.length > 0 ? checklistItems : undefined,
       is_active: true,
     });
     setSaving(false);
     setTitle(""); setDescription(""); setRecurrencePattern("monthly");
     setAssignedTo(""); setWatchers([]); setPriority("medium"); setTags([]); setTagSearch("");
+    setChecklistItems([]); setChecklistInput("");
     onOpenChange(false);
     onCreated?.();
   };
@@ -267,6 +271,51 @@ export default function CreateRecurringAutomationDialog({ open, onOpenChange, co
                     </span>
                   );
                 })}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <CheckSquare className="w-3.5 h-3.5" />
+              Checklist
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                value={checklistInput}
+                onChange={e => setChecklistInput(e.target.value)}
+                placeholder="Add checklist item..."
+                className="text-sm"
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const text = checklistInput.trim();
+                    if (text) { setChecklistItems(prev => [...prev, text]); setChecklistInput(""); }
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  const text = checklistInput.trim();
+                  if (text) { setChecklistItems(prev => [...prev, text]); setChecklistInput(""); }
+                }}
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            {checklistItems.length > 0 && (
+              <div className="space-y-1 mt-1">
+                {checklistItems.map((item, index) => (
+                  <div key={index} className="flex items-center gap-2 bg-slate-50 rounded px-2 py-1">
+                    <span className="text-sm flex-1">{item}</span>
+                    <button type="button" onClick={() => setChecklistItems(prev => prev.filter((_, i) => i !== index))} className="text-slate-400 hover:text-red-500">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

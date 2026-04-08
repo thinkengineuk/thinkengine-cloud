@@ -16,6 +16,7 @@ function addInterval(date, pattern) {
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
+  let spawned = 0;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -71,7 +72,7 @@ Deno.serve(async (req) => {
 
     if (today >= nextSpawnDate) {
       const todayStr = today.toISOString().split('T')[0];
-      await base44.asServiceRole.entities.Task.create({
+      const newTask = await base44.asServiceRole.entities.Task.create({
         board_id: automation.board_id,
         column_id: automation.column_id,
         title: automation.title,
@@ -82,6 +83,24 @@ Deno.serve(async (req) => {
         status: 'active',
         position: 9999,
       });
+
+      // Create checklist if automation has checklist items
+      if (automation.checklist_items?.length > 0) {
+        const checklist = await base44.asServiceRole.entities.Checklist.create({
+          task_id: newTask.id,
+          title: "Checklist",
+          position: 0,
+        });
+        for (let i = 0; i < automation.checklist_items.length; i++) {
+          await base44.asServiceRole.entities.ChecklistItem.create({
+            checklist_id: checklist.id,
+            text: automation.checklist_items[i],
+            completed: false,
+            position: i,
+          });
+        }
+      }
+
       await base44.asServiceRole.entities.RecurringAutomation.update(automation.id, { last_spawned_date: todayStr });
       spawned++;
       console.log(`Spawned automation task: "${automation.title}"`);
