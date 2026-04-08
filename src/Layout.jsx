@@ -122,7 +122,7 @@ export default function Layout({ children }) {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50">
         <Sidebar collapsible="icon" className="border-r border-slate-200 bg-white/80 backdrop-blur-sm">
-          <SidebarHeader className="border-b border-slate-200 p-4">
+          <SidebarHeader className="border-b border-slate-200 py-1 px-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center justify-center flex-1 group-data-[collapsible=icon]:hidden">
                 <img
