@@ -5,7 +5,7 @@ import { format, addMonths, subMonths, getDaysInMonth, startOfWeek, endOfWeek, e
 const DAYS_OF_WEEK_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-export default function RecurrencePicker({ onPatternChange, onSummaryChange }) {
+export default function RecurrencePicker({ value, onChange }) {
   const [tab, setTab] = useState("week");
   const [selectedDays, setSelectedDays] = useState(["Monday"]);
   const [everyWeeks, setEveryWeeks] = useState(1);
@@ -38,8 +38,7 @@ export default function RecurrencePicker({ onPatternChange, onSummaryChange }) {
   };
 
   useEffect(() => {
-    onPatternChange(getPattern());
-    onSummaryChange(getSummary());
+    if (onChange) onChange(getPattern(), getSummary());
   }, [tab, selectedDays, everyWeeks, selectedDayOfMonth, everyMonths, selectedYearDate, everyYears]);
 
   const toggleDay = (day) => {
