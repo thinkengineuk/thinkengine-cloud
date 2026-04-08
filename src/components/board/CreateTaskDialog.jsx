@@ -15,7 +15,7 @@ import { Task } from "@/entities/Task";
 import { base44 } from "@/api/base44Client";
 import { listAllUsers } from "@/functions/listAllUsers";
 import { STAGE_COLUMNS } from "@/components/client-projects/projectStages";
-import { FolderKanban, X, ChevronDown, Plus, Clock, CheckSquare } from "lucide-react";
+import { FolderKanban, X, ChevronDown, Plus, Clock, CheckSquare, RefreshCw, Flag } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -46,6 +46,8 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
   });
   const [checklistItems, setChecklistItems] = useState([]);
   const [checklistInput, setChecklistInput] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrencePattern, setRecurrencePattern] = useState("weekly");
   const [users, setUsers] = useState([]);
   const [boardMembers, setBoardMembers] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,6 +73,8 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
       setChecklistItems([]);
       setChecklistInput("");
       setTagSearch("");
+      setIsRecurring(false);
+      setRecurrencePattern("weekly");
       setIsSubmitting(false);
       loadUsers();
       loadClientProjects();
@@ -175,6 +179,9 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
         ...formData,
         estimated_minutes: formData.estimated_minutes ? Number(formData.estimated_minutes) : undefined,
         _checklistItems: checklistItems,
+        is_recurring: isRecurring || undefined,
+        recurrence_pattern: isRecurring ? recurrencePattern : undefined,
+        recurrence_start_date: isRecurring ? new Date().toISOString().split('T')[0] : undefined,
       });
     } finally {
       setIsSubmitting(false);
@@ -278,6 +285,51 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
               )}
             </div>
             </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5"><Flag className="w-4 h-4" />Priority</Label>
+              <Select
+                value={formData.priority}
+                onValueChange={(value) => setFormData({ ...formData, priority: value })}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5"><RefreshCw className="w-4 h-4" />Recurring</Label>
+              <Select
+                value={isRecurring ? recurrencePattern : "none"}
+                onValueChange={(v) => {
+                  if (v === "none") { setIsRecurring(false); }
+                  else { setIsRecurring(true); setRecurrencePattern(v); }
+                }}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Not recurring</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="3_monthly">Every 3 Months</SelectItem>
+                  <SelectItem value="6_monthly">Every 6 Months</SelectItem>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <div className="space-y-2">
             <Label>Tags</Label>
