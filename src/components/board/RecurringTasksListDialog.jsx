@@ -13,14 +13,14 @@ const patternLabel = {
   yearly: "Yearly",
 };
 
-export default function RecurringTasksListDialog({ open, onOpenChange, boardId, usersMap, onTaskClick }) {
+export default function RecurringTasksListDialog({ open, onOpenChange, boardId, columnId, usersMap, onTaskClick }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open && boardId) {
       setLoading(true);
-      base44.entities.Task.filter({ board_id: boardId, is_recurring: true })
+      base44.entities.Task.filter({ board_id: boardId, column_id: columnId, is_recurring: true })
         .then(setTasks)
         .finally(() => setLoading(false));
     }

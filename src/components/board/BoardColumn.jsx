@@ -440,6 +440,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
         open={showRecurringList}
         onOpenChange={setShowRecurringList}
         boardId={column.board_id}
+        columnId={column.id}
         usersMap={usersMap}
         onTaskClick={onTaskClick}
       />
