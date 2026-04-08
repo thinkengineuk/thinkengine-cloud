@@ -267,9 +267,11 @@ export default function BoardPage() {
     const sourceColumnId = source.droppableId;
     const destColumnId = destination.droppableId;
 
-    // Switch both columns to manual sort mode to prevent glitching
-    localStorage.setItem(`column-${destColumnId}-sort`, 'manual');
-    if (sourceColumnId !== destColumnId) {
+    // Only switch to manual if the column doesn't already have a sort preference set
+    const destSort = localStorage.getItem(`column-${destColumnId}-sort`);
+    const sourceSort = localStorage.getItem(`column-${sourceColumnId}-sort`);
+    if (!destSort) localStorage.setItem(`column-${destColumnId}-sort`, 'manual');
+    if (sourceColumnId !== destColumnId && !sourceSort) {
       localStorage.setItem(`column-${sourceColumnId}-sort`, 'manual');
     }
     window.dispatchEvent(new Event('sort-change'));
