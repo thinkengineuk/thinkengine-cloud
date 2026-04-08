@@ -154,13 +154,20 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
       return tasksCopy.sort((a, b) => (a.position || 0) - (b.position || 0));
     } else if (sortBy === 'team_order') {
       const teamOrder = ['josh', 'tom', 'emma', 'karl', 'keara', 'chloe', 'ben'];
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
       const getTeamIndex = (task) => {
         const user = usersMap[task.assigned_to];
         const firstName = user?.full_name?.split(' ')[0]?.toLowerCase() || '';
         const idx = teamOrder.indexOf(firstName);
         return idx === -1 ? 999 : idx;
       };
-      return tasksCopy.sort((a, b) => getTeamIndex(a) - getTeamIndex(b));
+      return tasksCopy.sort((a, b) => {
+        const teamDiff = getTeamIndex(a) - getTeamIndex(b);
+        if (teamDiff !== 0) return teamDiff;
+        const aPriority = priorityOrder[a.priority] ?? 3;
+        const bPriority = priorityOrder[b.priority] ?? 3;
+        return aPriority - bPriority;
+      });
     }
     
     return tasksCopy;
