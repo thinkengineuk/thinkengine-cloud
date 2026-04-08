@@ -291,7 +291,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-2 right-2 h-7 w-7 text-slate-400 hover:text-green-600 hover:bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute bottom-2 right-2 h-7 w-7 text-slate-400 hover:text-green-600 hover:bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity"
           onClick={(e) => {
             e.stopPropagation();
             onToggleTaskComplete(task.id);
