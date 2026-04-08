@@ -7,7 +7,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import TaskCard from "./TaskCard";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import CreateTaskDialog from "./CreateTaskDialog";
 import EditColumnDialog from "./EditColumnDialog";
 import CreateRecurringTaskDialog from "./CreateRecurringTaskDialog";
@@ -344,49 +343,48 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
 
           <Droppable droppableId={column.id} type="task" isDropDisabled={false}>
             {(provided, snapshot) => (
-              <ScrollArea className={`flex-1 ${snapshot.isDraggingOver ? colors.light : ''}`}>
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="p-4 space-y-3 min-h-full"
-                >
-                  {column.name.toLowerCase() !== 'completed' && (
-                    <Button
-                      onClick={() => setShowCreateTask(true)}
-                      variant="outline"
-                      className="w-full justify-center border-dashed border-2 hover:border-slate-400 hover:bg-slate-50 text-slate-600"
-                      size="sm"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add task
-                    </Button>
-                  )}
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className={`flex-1 overflow-y-auto column-scroll-area p-4 space-y-3 min-h-[100px] ${snapshot.isDraggingOver ? colors.light : ''}`}
+                style={{ maxHeight: 'calc(100vh - 220px)' }}
+              >
+                {column.name.toLowerCase() !== 'completed' && (
+                  <Button
+                    onClick={() => setShowCreateTask(true)}
+                    variant="outline"
+                    className="w-full justify-center border-dashed border-2 hover:border-slate-400 hover:bg-slate-50 text-slate-600"
+                    size="sm"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add task
+                  </Button>
+                )}
 
-                  {sortedTasks.map((task, index) => (
-                    <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={false}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.dragHandleProps}
-                          {...provided.draggableProps}
-                        >
-                          <TaskCard
-                            task={task}
-                            usersMap={usersMap}
-                            onClick={() => onTaskClick(task)}
-                            isDragging={snapshot.isDragging}
-                            onToggleTaskComplete={onToggleTaskComplete}
-                            allColumns={otherColumns}
-                            onMoveTask={onMoveTask}
-                            counts={taskCountsMap?.[task.id]}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              </ScrollArea>
+                {sortedTasks.map((task, index) => (
+                  <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={false}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.dragHandleProps}
+                        {...provided.draggableProps}
+                      >
+                        <TaskCard
+                          task={task}
+                          usersMap={usersMap}
+                          onClick={() => onTaskClick(task)}
+                          isDragging={snapshot.isDragging}
+                          onToggleTaskComplete={onToggleTaskComplete}
+                          allColumns={otherColumns}
+                          onMoveTask={onMoveTask}
+                          counts={taskCountsMap?.[task.id]}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
             )}
           </Droppable>
         </Card>
