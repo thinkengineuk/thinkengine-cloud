@@ -349,14 +349,6 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
                       <Settings className="w-4 h-4 mr-2" />
                       Edit Column
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowRecurringDialog(true)}>
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Add Recurring Task
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowRecurringList(true)}>
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      View Recurring Tasks
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setShowAutomationDialog(true)}>
                       <Zap className="w-4 h-4 mr-2" />
