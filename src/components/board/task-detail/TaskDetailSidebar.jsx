@@ -428,7 +428,8 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
                   }
                 }}
               />
-              <div className="max-h-48 overflow-y-auto space-y-0.5">
+              <ScrollArea className="h-48">
+                <div className="space-y-0.5 pr-3">
                 {filteredTagOptions.map(tag => (
                   <button
                     key={tag}
@@ -451,7 +452,8 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
                 {filteredTagOptions.length === 0 && !tagSearch.trim() && (
                   <p className="text-xs text-slate-400 px-2 py-2">All tags selected</p>
                 )}
-              </div>
+                </div>
+              </ScrollArea>
             </PopoverContent>
           </Popover>
 

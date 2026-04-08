@@ -27,6 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
@@ -257,7 +258,8 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
                     }
                   }}
                 />
-                <div className="max-h-52 overflow-y-auto space-y-0.5">
+                <ScrollArea className="h-52">
+                  <div className="space-y-0.5 pr-3">
                   {filteredTags.map(tag => (
                     <button
                       key={tag}
@@ -280,7 +282,8 @@ export default function CreateTaskDialog({ open, onOpenChange, onSubmit }) {
                   {filteredTags.length === 0 && !tagSearch.trim() && (
                     <p className="text-xs text-slate-400 px-2 py-2">All tags selected</p>
                   )}
-                </div>
+                  </div>
+                </ScrollArea>
               </PopoverContent>
             </Popover>
             {formData.tags.length > 0 && (
