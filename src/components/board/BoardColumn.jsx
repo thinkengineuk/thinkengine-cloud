@@ -17,6 +17,8 @@ import { ActivityLog } from "@/entities/ActivityLog";
 import { User } from "@/entities/User";
 import { buildAssignedEmail } from "@/utils/emailTemplates";
 import { Board } from "@/entities/Board";
+import { Checklist } from "@/entities/Checklist";
+import { ChecklistItem } from "@/entities/ChecklistItem";
 
 const colorMap = {
   blue: { bg: 'from-blue-500 to-blue-700', light: 'bg-blue-50' },
@@ -176,14 +178,27 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
   const handleCreateTask = async (taskData) => {
     const position = tasks.length;
     const currentUser = await User.me();
+    const { _checklistItems, ...cleanTaskData } = taskData;
 
     const createdTask = await Task.create({
-      ...taskData,
+      ...cleanTaskData,
       board_id: column.board_id,
       column_id: column.id,
       position,
     });
     setShowCreateTask(false);
+
+    // Create checklist if items were provided
+    if (_checklistItems && _checklistItems.length > 0) {
+      const checklist = await Checklist.create({
+        task_id: createdTask.id,
+        title: 'Checklist',
+        position: 0,
+      });
+      await Promise.all(_checklistItems.map((text, idx) =>
+        ChecklistItem.create({ checklist_id: checklist.id, text, position: idx })
+      ));
+    }
 
     await ActivityLog.create({
       task_id: createdTask.id,
