@@ -139,12 +139,11 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-    // EMAIL PAUSED
-    // await base44.asServiceRole.integrations.Core.SendEmail({
-    //   to: user.email,
-    //   subject: '🔐 Board Access Code Request',
-    //   body: emailHtml
-    // });
+    await base44.asServiceRole.integrations.Core.SendEmail({
+      to: user.email,
+      subject: '🔐 Board Access Code Request',
+      body: emailHtml
+    });
 
     return Response.json({ 
     success: true,
