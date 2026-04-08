@@ -31,8 +31,8 @@
     },
     "due_date": {
       "type": "string",
-      "format": "date",
-      "description": "Task due date"
+      "format": "date-time",
+      "description": "Task due date and time"
     },
     "tags": {
       "type": "array",
