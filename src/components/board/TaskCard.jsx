@@ -129,34 +129,6 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         </DropdownMenu>
       )}
 
-      {assignedUser && (
-        <div className="absolute top-2 right-2 z-10 group-hover:opacity-0 transition-opacity pointer-events-none">
-          <Avatar className="w-7 h-7">
-            {assignedUser.profile_picture_url ? (
-              <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
-            ) : (
-              <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
-                {assignedUser.full_name[0]?.toUpperCase()}
-              </AvatarFallback>
-            )}
-          </Avatar>
-        </div>
-      )}
-
-      {!isCompleted && onToggleTaskComplete && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 h-7 w-7 text-slate-400 hover:text-green-600 hover:bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity z-20"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleTaskComplete(task.id);
-          }}
-        >
-          <CheckCircle className="h-4 w-4" />
-        </Button>
-      )}
-
       <CardContent className="p-4 space-y-3" onClick={onClick}>
         {dueStatus && !isCompleted && (
           <div className="flex items-center gap-2 pb-2">
@@ -300,6 +272,34 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </div>
         </div>
       </CardContent>
+
+      {assignedUser && (
+        <div className="absolute top-2 right-2 group-hover:opacity-0 transition-opacity pointer-events-none">
+          <Avatar className="w-7 h-7">
+            {assignedUser.profile_picture_url ? (
+              <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
+            ) : (
+              <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
+                {assignedUser.full_name[0]?.toUpperCase()}
+              </AvatarFallback>
+            )}
+          </Avatar>
+        </div>
+      )}
+
+      {!isCompleted && onToggleTaskComplete && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 h-7 w-7 text-slate-400 hover:text-green-600 hover:bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleTaskComplete(task.id);
+          }}
+        >
+          <CheckCircle className="h-4 w-4" />
+        </Button>
+      )}
     </Card>
   );
 });
