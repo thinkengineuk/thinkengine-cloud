@@ -98,7 +98,7 @@ export default function TaskDetailHeader({ task, boardId, onClose, onUpdate, onR
     <>
       <div className="flex items-center justify-between px-3 py-3 md:px-6 md:py-4 border-b border-slate-200 bg-white">
         <div className="flex items-center gap-1 md:gap-2 flex-1 min-w-0">
-          <DropdownMenu>
+          <DropdownMenu onOpenChange={(open) => { if (!open) setLinkCopied(false); }}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8">
                 <MoreVertical className="w-4 h-4 text-slate-600" />
