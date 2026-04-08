@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
-import { Zap, ChevronRight, X } from "lucide-react";
+import { Zap, ChevronRight, ChevronDown, X, Plus, CheckSquare } from "lucide-react";
 import RecurrencePicker from "@/components/shared/RecurrencePicker";
 import { base44 } from "@/api/base44Client";
 
@@ -19,6 +21,12 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
   const [assignedTo, setAssignedTo] = useState("");
   const [watchers, setWatchers] = useState([]);
   const [priority, setPriority] = useState("medium");
+  const [tags, setTags] = useState([]);
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
+  const [tagSearch, setTagSearch] = useState("");
+  const [existingBoardTags, setExistingBoardTags] = useState([]);
+  const [checklistItems, setChecklistItems] = useState([]);
+  const [checklistInput, setChecklistInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
@@ -34,8 +42,20 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
       setAssignedTo(automation.assigned_to || "");
       setWatchers(automation.watchers || []);
       setPriority(automation.priority || "medium");
+      setTags(automation.tags || []);
+      setChecklistItems(automation.checklist_items || []);
     }
   }, [automation]);
+
+  useEffect(() => {
+    if (open && automation?.board_id) {
+      base44.entities.Task.filter({ board_id: automation.board_id }).then(tasks => {
+        const tagsSet = new Set();
+        tasks.forEach(t => t.tags?.forEach(tag => tagsSet.add(tag)));
+        setExistingBoardTags(Array.from(tagsSet).sort());
+      });
+    }
+  }, [open, automation?.board_id]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -44,6 +64,17 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const STATIC_TAGS = ["High", "Medium", "Low", "CogsAI", "ThinkEngine"];
+
+  const allAvailableTags = useMemo(() => {
+    return [...new Set([...STATIC_TAGS, ...existingBoardTags])].sort();
+  }, [existingBoardTags]);
+
+  const filteredTags = useMemo(() => {
+    const q = tagSearch.toLowerCase();
+    return allAvailableTags.filter(t => t.toLowerCase().includes(q) && !tags.includes(t));
+  }, [allAvailableTags, tagSearch, tags]);
 
   const handleSubmit = async () => {
     if (!title.trim()) return;
@@ -57,6 +88,8 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
       assigned_to: assignedTo || undefined,
       watchers: watchers.length > 0 ? watchers : undefined,
       priority,
+      tags: tags.length > 0 ? tags : undefined,
+      checklist_items: checklistItems.length > 0 ? checklistItems : undefined,
     });
     setSaving(false);
     onOpenChange(false);
@@ -65,7 +98,7 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md flex flex-col max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl font-bold">
             <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
@@ -75,7 +108,7 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-1">
+        <div className="space-y-4 py-1 overflow-y-auto flex-1 pr-1">
           <div className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm space-y-2">
             <Input
               value={title}
@@ -132,7 +165,6 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
               <Select value={assignedTo} onValueChange={setAssignedTo}>
                 <SelectTrigger className="text-sm"><SelectValue placeholder="Unassigned" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>Unassigned</SelectItem>
                   {(users || []).map(u => <SelectItem key={u.email} value={u.email}>{u.full_name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -148,6 +180,77 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tags</Label>
+            <Popover open={tagDropdownOpen} onOpenChange={setTagDropdownOpen}>
+              <PopoverTrigger asChild>
+                <Button type="button" variant="outline" className="w-full justify-between font-normal text-sm">
+                  <span className="text-slate-500">Select or add tags...</span>
+                  <ChevronDown className="w-4 h-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-2" align="start">
+                <Input
+                  value={tagSearch}
+                  onChange={e => setTagSearch(e.target.value)}
+                  placeholder="Search or type new tag..."
+                  className="mb-2 h-8 text-sm"
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (filteredTags.length > 0) {
+                        if (!tags.includes(filteredTags[0])) setTags(prev => [...prev, filteredTags[0]]);
+                        setTagSearch("");
+                      } else if (tagSearch.trim()) {
+                        const t = tagSearch.trim();
+                        if (!tags.includes(t)) setTags(prev => [...prev, t]);
+                        setTagSearch("");
+                      }
+                    }
+                  }}
+                />
+                <ScrollArea className="h-52">
+                  <div className="space-y-0.5 pr-3">
+                    {filteredTags.map(tag => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => { if (!tags.includes(tag)) setTags(prev => [...prev, tag]); setTagSearch(""); }}
+                        className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-slate-100 transition-colors"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                    {tagSearch.trim() && !allAvailableTags.some(t => t.toLowerCase() === tagSearch.toLowerCase()) && (
+                      <button
+                        type="button"
+                        onClick={() => { const t = tagSearch.trim(); if (!tags.includes(t)) setTags(prev => [...prev, t]); setTagSearch(""); }}
+                        className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-blue-50 text-blue-700 transition-colors"
+                      >
+                        + Add "{tagSearch.trim()}"
+                      </button>
+                    )}
+                    {filteredTags.length === 0 && !tagSearch.trim() && (
+                      <p className="text-xs text-slate-400 px-2 py-2">All tags selected</p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {tags.map(tag => (
+                  <span key={tag} className="flex items-center gap-1 bg-blue-100 text-blue-800 text-xs rounded px-2 py-1">
+                    {tag}
+                    <button type="button" onClick={() => setTags(prev => prev.filter(t => t !== tag))}>
+                      <X className="w-3 h-3 hover:text-red-600" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -173,6 +276,51 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
                     </span>
                   );
                 })}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <CheckSquare className="w-3.5 h-3.5" />
+              Checklist
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                value={checklistInput}
+                onChange={e => setChecklistInput(e.target.value)}
+                placeholder="Add checklist item..."
+                className="text-sm"
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const text = checklistInput.trim();
+                    if (text) { setChecklistItems(prev => [...prev, text]); setChecklistInput(""); }
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  const text = checklistInput.trim();
+                  if (text) { setChecklistItems(prev => [...prev, text]); setChecklistInput(""); }
+                }}
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            {checklistItems.length > 0 && (
+              <div className="space-y-1 mt-1">
+                {checklistItems.map((item, index) => (
+                  <div key={index} className="flex items-center gap-2 bg-slate-50 rounded px-2 py-1">
+                    <span className="text-sm flex-1">{item}</span>
+                    <button type="button" onClick={() => setChecklistItems(prev => prev.filter((_, i) => i !== index))} className="text-slate-400 hover:text-red-500">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

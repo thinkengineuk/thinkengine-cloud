@@ -80,6 +80,7 @@ Deno.serve(async (req) => {
         assigned_to: automation.assigned_to || undefined,
         watchers: automation.watchers || [],
         priority: automation.priority || 'medium',
+        tags: automation.tags || [],
         status: 'active',
         position: 9999,
       });

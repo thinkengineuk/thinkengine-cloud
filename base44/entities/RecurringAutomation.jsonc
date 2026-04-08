@@ -59,6 +59,14 @@
       ],
       "default": "medium"
     },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags for spawned tasks",
+      "default": []
+    },
     "last_spawned_date": {
       "type": "string",
       "format": "date",
