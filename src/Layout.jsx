@@ -125,20 +125,13 @@ export default function Layout({ children }) {
           <SidebarHeader className="border-b border-slate-200 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 group-data-[collapsible=icon]:hidden">
-                <div className="w-10 h-10 bg-[#1e3a5f] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                  <svg viewBox="0 0 100 100" className="w-6 h-6" fill="none">
-                    <text x="15" y="65" fontSize="48" fontWeight="bold" fill="#60d5f2" fontFamily="Arial, sans-serif">T</text>
-                    <rect x="60" y="30" width="25" height="8" fill="#60d5f2" rx="2"/>
-                    <rect x="60" y="45" width="25" height="8" fill="#60d5f2" rx="2"/>
-                    <rect x="60" y="60" width="25" height="8" fill="#60d5f2" rx="2"/>
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="font-bold text-slate-900 text-lg">TaskFlow</h2>
-                  <p className="text-xs text-slate-500">Task Management</p>
-                </div>
+                <img
+                  src="https://media.base44.com/images/public/68dcdd68fd2e656bc4f622ca/d940d5b06_ThinkEngineCloud1.png"
+                  alt="ThinkEngine Cloud"
+                  className="h-10 w-auto object-contain flex-shrink-0"
+                />
               </div>
-              <div className="group-data-[collapsible=icon]:mx-auto">
+              <div className="group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:mt-2">
                 <SidebarTrigger className="hover:bg-slate-100 rounded-lg transition-colors" />
               </div>
             </div>
@@ -295,9 +288,11 @@ export default function Layout({ children }) {
           <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 px-4 py-3 md:hidden shadow-sm">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="hover:bg-slate-100 p-2 rounded-lg transition-colors flex-shrink-0" />
-              <h1 className="text-lg font-bold bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 bg-clip-text text-transparent truncate">
-                TaskFlow
-              </h1>
+              <img
+                src="https://media.base44.com/images/public/68dcdd68fd2e656bc4f622ca/d940d5b06_ThinkEngineCloud1.png"
+                alt="ThinkEngine Cloud"
+                className="h-8 w-auto object-contain"
+              />
             </div>
           </header>
 
