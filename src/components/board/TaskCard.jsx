@@ -53,7 +53,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return null;
-      return format(date, 'MMM d');
+      return format(date, 'do MMMM');
     } catch {
       return null;
     }
@@ -127,6 +127,20 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
             </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
+      )}
+
+      {assignedUser && (
+        <div className="absolute top-2 right-2 z-10 group-hover:opacity-0 transition-opacity">
+          <Avatar className="w-7 h-7">
+            {assignedUser.profile_picture_url ? (
+              <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
+            ) : (
+              <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
+                {assignedUser.full_name[0]?.toUpperCase()}
+              </AvatarFallback>
+            )}
+          </Avatar>
+        </div>
       )}
 
       {!isCompleted && onToggleTaskComplete && (
@@ -282,22 +296,6 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
                 <Eye className="w-3.5 h-3.5" />
                 <span className="text-xs">{task.watchers.length}</span>
               </div>
-            )}
-            {assignedUser && (
-              <Avatar className="w-7 h-7">
-                {assignedUser.profile_picture_url ? (
-                  <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
-                ) : (
-                  <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
-                    {assignedUser.full_name[0]?.toUpperCase()}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-            )}
-            {task.priority && !isCompleted && (
-              <Badge className={`${priorityColors[task.priority]} border text-xs pointer-events-none`}>
-                {task.priority}
-              </Badge>
             )}
           </div>
         </div>
