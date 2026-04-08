@@ -291,7 +291,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
   return (
     <>
       <div className={`flex-shrink-0 w-80 ${isDragging ? 'opacity-50' : ''}`}>
-        <Card className="h-full flex flex-col border-none shadow-lg">
+        <Card className="h-full flex flex-col border-none shadow-lg rounded-2xl overflow-hidden">
           <div 
             className={`bg-gradient-to-r ${colors.bg} px-4 py-3 transition-opacity`}
           >
