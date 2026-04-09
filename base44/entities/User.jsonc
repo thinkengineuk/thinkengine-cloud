@@ -1,0 +1,46 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user"
+    },
+    "company": {
+      "type": "string",
+      "enum": [
+        "ThinkEngine",
+        "Cogs",
+        "Other"
+      ]
+    },
+    "profile_picture_url": {
+      "type": "string",
+      "description": "URL of the user's profile picture"
+    },
+    "avatar_border_color": {
+      "type": "string",
+      "description": "Color used for the avatar border ring on task cards",
+      "enum": [
+        "blue",
+        "pink",
+        "red",
+        "orange",
+        "green",
+        "purple",
+        "yellow",
+        "teal",
+        "indigo",
+        "cyan"
+      ]
+    },
+    "board_access_dates": {
+      "type": "object",
+      "description": "Map of board ID to last access date (for 2FA boards)"
+    }
+  }
+}

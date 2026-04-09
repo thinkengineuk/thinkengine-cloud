@@ -281,15 +281,29 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
 
       {assignedUser && (
         <div className="absolute top-2 right-2 pointer-events-none">
-          <Avatar className="w-7 h-7">
-            {assignedUser.profile_picture_url ? (
-              <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
-            ) : (
-              <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
-                {assignedUser.full_name[0]?.toUpperCase()}
-              </AvatarFallback>
-            )}
-          </Avatar>
+          <div className={`rounded-full p-0.5 ${
+            assignedUser.avatar_border_color === 'blue' ? 'bg-blue-500' :
+            assignedUser.avatar_border_color === 'pink' ? 'bg-pink-500' :
+            assignedUser.avatar_border_color === 'red' ? 'bg-red-500' :
+            assignedUser.avatar_border_color === 'orange' ? 'bg-orange-500' :
+            assignedUser.avatar_border_color === 'green' ? 'bg-green-500' :
+            assignedUser.avatar_border_color === 'purple' ? 'bg-purple-500' :
+            assignedUser.avatar_border_color === 'yellow' ? 'bg-yellow-500' :
+            assignedUser.avatar_border_color === 'teal' ? 'bg-teal-500' :
+            assignedUser.avatar_border_color === 'indigo' ? 'bg-indigo-500' :
+            assignedUser.avatar_border_color === 'cyan' ? 'bg-cyan-500' :
+            'bg-transparent'
+          }`}>
+            <Avatar className="w-7 h-7">
+              {assignedUser.profile_picture_url ? (
+                <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
+              ) : (
+                <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
+                  {assignedUser.full_name[0]?.toUpperCase()}
+                </AvatarFallback>
+              )}
+            </Avatar>
+          </div>
         </div>
       )}
 

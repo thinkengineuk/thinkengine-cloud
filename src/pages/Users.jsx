@@ -42,6 +42,24 @@ export default function Users() {
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, company } : u));
   };
 
+  const updateAvatarBorderColor = async (userId, color) => {
+    await base44.entities.User.update(userId, { avatar_border_color: color });
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, avatar_border_color: color } : u));
+  };
+
+  const AVATAR_COLORS = [
+    { value: 'blue', label: 'Blue', bg: 'bg-blue-500' },
+    { value: 'pink', label: 'Pink', bg: 'bg-pink-500' },
+    { value: 'red', label: 'Red', bg: 'bg-red-500' },
+    { value: 'orange', label: 'Orange', bg: 'bg-orange-500' },
+    { value: 'green', label: 'Green', bg: 'bg-green-500' },
+    { value: 'purple', label: 'Purple', bg: 'bg-purple-500' },
+    { value: 'yellow', label: 'Yellow', bg: 'bg-yellow-500' },
+    { value: 'teal', label: 'Teal', bg: 'bg-teal-500' },
+    { value: 'indigo', label: 'Indigo', bg: 'bg-indigo-500' },
+    { value: 'cyan', label: 'Cyan', bg: 'bg-cyan-500' },
+  ];
+
   const filteredUsers = users.filter(user => 
     user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -96,15 +114,19 @@ export default function Users() {
             <Card key={user.id} className="border-none shadow-xl hover:shadow-2xl transition-all duration-200 bg-white">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <Avatar className="w-12 h-12">
-                    {user.profile_picture_url ? (
-                      <AvatarImage src={user.profile_picture_url} alt={user.full_name} />
-                    ) : (
-                      <AvatarFallback className="text-lg bg-gradient-to-br from-blue-400 to-purple-400 text-white">
-                        {user.full_name[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
+                  <div className={`rounded-full p-0.5 ${
+                    user.avatar_border_color ? AVATAR_COLORS.find(c => c.value === user.avatar_border_color)?.bg : ''
+                  }`}>
+                    <Avatar className="w-12 h-12">
+                      {user.profile_picture_url ? (
+                        <AvatarImage src={user.profile_picture_url} alt={user.full_name} />
+                      ) : (
+                        <AvatarFallback className="text-lg bg-gradient-to-br from-blue-400 to-purple-400 text-white">
+                          {user.full_name[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold text-slate-900 truncate">
@@ -127,6 +149,21 @@ export default function Users() {
                           User
                         </Badge>
                       )}
+                    </div>
+                    <div className="mt-3">
+                      <p className="text-xs text-slate-400 mb-1">Avatar Border Colour</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {AVATAR_COLORS.map(color => (
+                          <button
+                            key={color.value}
+                            title={color.label}
+                            onClick={() => updateAvatarBorderColor(user.id, user.avatar_border_color === color.value ? null : color.value)}
+                            className={`w-6 h-6 rounded-full ${color.bg} transition-transform hover:scale-110 ${
+                              user.avatar_border_color === color.value ? 'ring-2 ring-offset-1 ring-slate-700 scale-110' : ''
+                            }`}
+                          />
+                        ))}
+                      </div>
                     </div>
                     <div className="mt-3">
                       <p className="text-xs text-slate-400 mb-1">Company</p>
