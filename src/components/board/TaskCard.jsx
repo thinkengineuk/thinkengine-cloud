@@ -215,58 +215,58 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
 
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
           <div className={`flex items-center gap-2 text-xs ${isCompleted ? 'text-slate-400' : 'text-slate-500'}`}>
-            {allColumns && allColumns.length > 0 && onMoveTask && (
-              <DropdownMenu onOpenChange={(open) => { if (!open) setLinkCopied(false); }}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity -ml-1"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoreHorizontal className="h-3.5 w-3.5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem onClick={handleCopyLink} className="flex items-center gap-2">
-                    <Link className="h-4 w-4" />
-                    {linkCopied ? (
-                      <span className="text-green-600 font-medium">Link copied!</span>
-                    ) : (
-                      'Copy link'
-                    )}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Move to...</DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                      <DropdownMenuSubContent>
-                        {allColumns.map((col) => (
-                          <DropdownMenuItem
-                            key={col.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onMoveTask(task.id, col.id);
-                            }}
-                          >
-                            {col.name}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
             {formattedDueDate && (
               <div className={`flex items-center gap-1 ${
                 dueStatus === 'overdue' ? 'text-orange-700 font-semibold' : ''
               } ${dueStatus === 'today' ? 'text-blue-700 font-semibold' : ''}`}>
                 <Calendar className="w-3.5 h-3.5" />
                 <span>{formattedDueDate}</span>
-              </div>
-            )}
-          </div>
+                </div>
+                )}
+                {allColumns && allColumns.length > 0 && onMoveTask && (
+                <DropdownMenu onOpenChange={(open) => { if (!open) setLinkCopied(false); }}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity -ml-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreHorizontal className="h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-48">
+                    <DropdownMenuItem onClick={handleCopyLink} className="flex items-center gap-2">
+                      <Link className="h-4 w-4" />
+                      {linkCopied ? (
+                        <span className="text-green-600 font-medium">Link copied!</span>
+                      ) : (
+                        'Copy link'
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>Move to...</DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          {allColumns.map((col) => (
+                            <DropdownMenuItem
+                              key={col.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onMoveTask(task.id, col.id);
+                              }}
+                            >
+                              {col.name}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                )}
+                </div>
 
           <div className="flex items-center gap-1.5">
             {counts?.comments > 0 && (
