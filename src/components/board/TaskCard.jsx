@@ -100,36 +100,37 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         dueStatus === 'overdue' ? 'bg-orange-50 border-orange-200' : ''
       } ${dueStatus === 'today' ? 'bg-blue-50 border-blue-200' : ''}`}
     >
-      {assignedUser && (() => {
-        const nameColorMap = {
-          ben: '#3b82f6', chloe: '#ec4899', josh: '#ef4444',
-          emma: '#a855f7', tom: '#f97316', karl: '#ca8a04',
-          keara: '#22c55e',
-        };
-        const rawFirst = assignedUser.full_name?.split(' ')[0] || assignedUser.full_name;
-        const firstName = rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1).toLowerCase();
-        const nameColor = nameColorMap[rawFirst.toLowerCase()] || '#64748b';
-        return (
-          <div className="absolute top-3 right-3 flex flex-col items-center pointer-events-none" style={{ gap: '4px' }}>
-            <Avatar className="w-7 h-7" style={{ outline: `3px solid ${nameColor}`, outlineOffset: '1px' }}>
-              {assignedUser.profile_picture_url ? (
-                <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
-              ) : (
-                <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
-                  {assignedUser.full_name[0]?.toUpperCase()}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <span className="text-[10px] font-semibold leading-none" style={{ color: nameColor }}>{firstName}</span>
-          </div>
-        );
-      })()}
       <CardContent className="px-4 pt-3 pb-4 space-y-3" onClick={onClick}>
-        {null}
-
-        <p className={`text-sm font-semibold leading-snug pr-10 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
-          {task.title}
-        </p>
+        {/* Title row with avatar */}
+        <div className="flex items-start justify-between gap-2">
+          <p className={`text-sm font-semibold leading-snug flex-1 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+            {task.title}
+          </p>
+          {assignedUser && (() => {
+            const nameColorMap = {
+              ben: '#3b82f6', chloe: '#ec4899', josh: '#ef4444',
+              emma: '#a855f7', tom: '#f97316', karl: '#ca8a04',
+              keara: '#22c55e',
+            };
+            const rawFirst = assignedUser.full_name?.split(' ')[0] || assignedUser.full_name;
+            const firstName = rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1).toLowerCase();
+            const nameColor = nameColorMap[rawFirst.toLowerCase()] || '#64748b';
+            return (
+              <div className="flex flex-col items-center flex-shrink-0" style={{ gap: '4px' }}>
+                <Avatar className="w-7 h-7" style={{ outline: `3px solid ${nameColor}`, outlineOffset: '1px' }}>
+                  {assignedUser.profile_picture_url ? (
+                    <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
+                  ) : (
+                    <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
+                      {assignedUser.full_name[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <span className="text-[10px] font-semibold leading-none" style={{ color: nameColor }}>{firstName}</span>
+              </div>
+            );
+          })()}
+        </div>
 
         {task.attachmentPreview && (
           <div className="w-full rounded-md overflow-hidden bg-slate-100" style={{height: '160px'}}>
