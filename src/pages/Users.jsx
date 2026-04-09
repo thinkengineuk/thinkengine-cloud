@@ -2,18 +2,21 @@ import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { base44 } from "@/api/base44Client";
 import { updateUserAvatarColor } from "@/functions/updateUserAvatarColor";
+import { updateUserName } from "@/functions/updateUserName";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Shield, User as UserIcon } from "lucide-react";
+import { Search, Shield, User as UserIcon, Pencil, Check, X } from "lucide-react";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [editingNameId, setEditingNameId] = useState(null);
+  const [editingNameValue, setEditingNameValue] = useState("");
 
   useEffect(() => {
     loadUsers();
@@ -41,6 +44,23 @@ export default function Users() {
   const updateCompany = async (userId, company) => {
     await base44.entities.User.update(userId, { company });
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, company } : u));
+  };
+
+  const handleEditName = (user) => {
+    setEditingNameId(user.id);
+    setEditingNameValue(user.full_name);
+  };
+
+  const handleSaveName = async (userId) => {
+    if (!editingNameValue.trim()) return;
+    await updateUserName({ userId, full_name: editingNameValue });
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, full_name: editingNameValue.trim() } : u));
+    setEditingNameId(null);
+  };
+
+  const handleCancelName = () => {
+    setEditingNameId(null);
+    setEditingNameValue("");
   };
 
   const updateAvatarBorderColor = async (userId, color) => {
@@ -129,14 +149,29 @@ export default function Users() {
                     </Avatar>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-slate-900 truncate">
-                        {user.full_name}
-                      </h3>
-                      {user.id === currentUser.id && (
-                        <Badge variant="outline" className="text-xs">You</Badge>
-                      )}
-                    </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    {editingNameId === user.id ? (
+                      <div className="flex items-center gap-1 flex-1">
+                        <Input
+                          value={editingNameValue}
+                          onChange={e => setEditingNameValue(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') handleSaveName(user.id); if (e.key === 'Escape') handleCancelName(); }}
+                          className="h-7 text-sm py-0 px-2"
+                          autoFocus
+                        />
+                        <button onClick={() => handleSaveName(user.id)} className="text-green-600 hover:text-green-800"><Check className="w-4 h-4" /></button>
+                        <button onClick={handleCancelName} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className="font-semibold text-slate-900 truncate">{user.full_name}</h3>
+                        {user.id === currentUser.id && (
+                          <Badge variant="outline" className="text-xs">You</Badge>
+                        )}
+                        <button onClick={() => handleEditName(user)} className="text-slate-300 hover:text-slate-600 ml-auto flex-shrink-0"><Pencil className="w-3.5 h-3.5" /></button>
+                      </>
+                    )}
+                  </div>
                     <p className="text-sm text-slate-600 truncate mb-3">{user.email}</p>
                     <div className="flex items-center gap-2">
                       {user.role === 'admin' ? (
