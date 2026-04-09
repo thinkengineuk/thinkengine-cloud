@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { base44 } from "@/api/base44Client";
+import { updateUserAvatarColor } from "@/functions/updateUserAvatarColor";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +44,7 @@ export default function Users() {
   };
 
   const updateAvatarBorderColor = async (userId, color) => {
-    await base44.entities.User.update(userId, { avatar_border_color: color });
+    await updateUserAvatarColor({ userId, avatar_border_color: color });
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, avatar_border_color: color } : u));
   };
 

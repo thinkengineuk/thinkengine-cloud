@@ -42,5 +42,6 @@
       "type": "object",
       "description": "Map of board ID to last access date (for 2FA boards)"
     }
-  }
+  },
+  "required": []
 }
