@@ -125,46 +125,55 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         );
       })()}
       <CardContent className="px-4 pt-3 pb-4 space-y-3" onClick={onClick}>
-        {(dueStatus && !isCompleted) || isCompleted || (isTimerRunning && !isCompleted) || (task.priority && task.priority !== 'medium' && !isCompleted) ? (
-          <div className="flex flex-wrap items-center gap-1.5" style={{ marginBottom: '5px' }}>
-            {isCompleted && (
-              <Badge className="bg-green-100 text-green-700 border-green-200 border flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" />
-                Completed
-              </Badge>
-            )}
-            {dueStatus === 'overdue' && !isCompleted && (
-              <Badge className="bg-orange-100 text-orange-700 border-orange-200 border flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
-                Overdue
-              </Badge>
-            )}
-            {dueStatus === 'today' && !isCompleted && (
-              <Badge className="bg-blue-100 text-blue-700 border-blue-200 border flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                Due today
-              </Badge>
-            )}
-            {task.priority && !isCompleted && (
-              <Badge className={`${priorityColors[task.priority]} border text-xs capitalize`}>
-                {task.priority}
-              </Badge>
-            )}
-            {isTimerRunning && !isCompleted && (
-              <div className="flex items-center gap-1.5">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                </span>
-                <span className="text-xs font-medium text-green-600">Timer running</span>
-              </div>
-            )}
-          </div>
-        ) : null}
+        {null}
 
         <p className={`text-sm font-semibold leading-snug pr-10 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
           {task.title}
         </p>
+
+        {/* Status/priority/timer badges inline with tags */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {isCompleted && (
+            <Badge className="bg-green-100 text-green-700 border-green-200 border flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" />
+              Completed
+            </Badge>
+          )}
+          {dueStatus === 'overdue' && !isCompleted && (
+            <Badge className="bg-orange-100 text-orange-700 border-orange-200 border flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              Overdue
+            </Badge>
+          )}
+          {dueStatus === 'today' && !isCompleted && (
+            <Badge className="bg-blue-100 text-blue-700 border-blue-200 border flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Due today
+            </Badge>
+          )}
+          {task.priority && !isCompleted && (
+            <Badge className={`${priorityColors[task.priority]} border text-xs capitalize`}>
+              {task.priority}
+            </Badge>
+          )}
+          {isTimerRunning && !isCompleted && (
+            <div className="flex items-center gap-1.5">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+              </span>
+              <span className="text-xs font-medium text-green-600">Timer running</span>
+            </div>
+          )}
+          {task.tags && task.tags.map((tagItem, index) => (
+            <Badge
+              key={index}
+              className={`${getTagColor(tagItem, task.tag_colors)} border text-xs ${isCompleted ? 'opacity-60' : ''} pointer-events-none`}
+            >
+              {typeof tagItem === 'object' && tagItem !== null ? tagItem.name : tagItem}
+            </Badge>
+          ))}
+        </div>
 
         {task.attachmentPreview && (
           <div className="w-full rounded-md overflow-hidden bg-slate-100" style={{height: '160px'}}>
@@ -193,40 +202,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           )}
         </div>
 
-        {task.tags && task.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5" onClick={(e) => e.stopPropagation()}>
-            {task.tags.slice(0, 3).map((tagItem, index) => (
-              <Badge
-                key={index}
-                className={`${getTagColor(tagItem, task.tag_colors)} border text-xs ${isCompleted ? 'opacity-60' : ''} pointer-events-none`}
-              >
-                {typeof tagItem === 'object' && tagItem !== null ? tagItem.name : tagItem}
-              </Badge>
-            ))}
-            {task.tags.length > 3 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Badge variant="outline" className={`text-xs cursor-pointer ${isCompleted ? 'opacity-60' : ''}`}>
-                    +{task.tags.length - 3}
-                  </Badge>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48 p-1">
-                  {task.tags.slice(3).map((tagItem, index) => (
-                    <DropdownMenuItem
-                      key={index}
-                      className={`flex items-center space-x-2 p-2 ${isCompleted ? 'opacity-60' : ''}`}
-                      onSelect={(e) => e.preventDefault()}
-                    >
-                      <Badge className={`${getTagColor(tagItem, task.tag_colors)} border text-xs pointer-events-none`}>
-                        {typeof tagItem === 'object' && tagItem !== null ? tagItem.name : tagItem}
-                      </Badge>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        )}
+        {null}
 
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
           <div className={`flex items-center gap-2 text-xs ${isCompleted ? 'text-slate-400' : 'text-slate-500'}`}>
