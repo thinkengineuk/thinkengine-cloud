@@ -147,7 +147,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
             )}
             {task.priority && !isCompleted && (
               <Badge className={`${priorityColors[task.priority]} border text-xs capitalize`}>
-                {task.priority} Priority
+                {task.priority}
               </Badge>
             )}
             {isTimerRunning && !isCompleted && (
