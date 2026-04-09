@@ -1,0 +1,31 @@
+{
+  "name": "ChecklistItem",
+  "type": "object",
+  "properties": {
+    "checklist_id": {
+      "type": "string",
+      "description": "Checklist this item belongs to"
+    },
+    "text": {
+      "type": "string",
+      "description": "Item text"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether item is completed"
+    },
+    "position": {
+      "type": "number",
+      "description": "Item position"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "User email assigned to this checklist item"
+    }
+  },
+  "required": [
+    "checklist_id",
+    "text"
+  ]
+}

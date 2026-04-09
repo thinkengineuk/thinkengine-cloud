@@ -219,12 +219,11 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
           conversationItems: safeConversationItems,
         });
 
-        // EMAIL PAUSED
-        // await base44.integrations.Core.SendEmail({
-        //   to: email,
-        //   subject: `${currentUser.full_name} mentioned you on "${taskData.title}"`,
-        //   body: htmlBody,
-        // });
+        await base44.integrations.Core.SendEmail({
+          to: email,
+          subject: `${currentUser.full_name} mentioned you on "${taskData.title}"`,
+          body: htmlBody,
+        });
       }
 
       setNewComment("");

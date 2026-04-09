@@ -156,7 +156,7 @@ export default function TaskDetailMain({ task, allUsers, currentUser, onUpdate, 
 
       <Separator />
 
-      <TaskChecklists taskId={task.id} onRefresh={onRefresh} />
+      <TaskChecklists taskId={task.id} allUsers={allUsers} onRefresh={onRefresh} />
 
       <Separator />
 

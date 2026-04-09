@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckSquare, Plus, Pencil, Trash2, GripVertical } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CheckSquare, Plus, Pencil, Trash2, GripVertical, UserPlus, X } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   AlertDialog,
@@ -44,7 +46,7 @@ const LinkifiedText = ({ text }) => {
   );
 };
 
-export default function TaskChecklists({ taskId }) {
+export default function TaskChecklists({ taskId, allUsers = [] }) {
   const [checklists, setChecklists] = useState([]);
   const [newChecklistTitle, setNewChecklistTitle] = useState("");
   const [showNewChecklist, setShowNewChecklist] = useState(false);
@@ -112,6 +114,11 @@ export default function TaskChecklists({ taskId }) {
     await ChecklistItem.update(editingItem, { text: editItemText });
     setEditingItem(null);
     setEditItemText("");
+    loadChecklists();
+  };
+
+  const handleAssignItem = async (itemId, email) => {
+    await ChecklistItem.update(itemId, { assigned_to: email || null });
     loadChecklists();
   };
 
@@ -286,7 +293,57 @@ export default function TaskChecklists({ taskId }) {
                                               <span className={`flex-1 text-sm ${item.completed ? 'line-through text-slate-500' : 'text-slate-700'}`}>
                                                 <LinkifiedText text={item.text} />
                                               </span>
+                                              <div className="flex items-center gap-1">
+                                                {item.assigned_to && (() => {
+                                                  const assignedUser = allUsers.find(u => u.email === item.assigned_to);
+                                                  return assignedUser ? (
+                                                    <Avatar className="w-5 h-5" title={assignedUser.full_name}>
+                                                      {assignedUser.profile_picture_url ? (
+                                                        <AvatarImage src={assignedUser.profile_picture_url} />
+                                                      ) : (
+                                                        <AvatarFallback className="text-[9px] bg-blue-400 text-white">{assignedUser.full_name[0]?.toUpperCase()}</AvatarFallback>
+                                                      )}
+                                                    </Avatar>
+                                                  ) : null;
+                                                })()}
+                                              </div>
                                               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Popover>
+                                                  <PopoverTrigger asChild>
+                                                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Assign user">
+                                                      <UserPlus className="w-3 h-3 text-slate-500" />
+                                                    </Button>
+                                                  </PopoverTrigger>
+                                                  <PopoverContent className="w-52 p-2" align="end">
+                                                    <div className="space-y-1">
+                                                      <p className="text-xs font-semibold text-slate-500 px-2 pb-1">Assign to</p>
+                                                      {item.assigned_to && (
+                                                        <button
+                                                          onClick={() => handleAssignItem(item.id, null)}
+                                                          className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded"
+                                                        >
+                                                          <X className="w-3 h-3" /> Unassign
+                                                        </button>
+                                                      )}
+                                                      {allUsers.map(user => (
+                                                        <button
+                                                          key={user.id}
+                                                          onClick={() => handleAssignItem(item.id, user.email)}
+                                                          className={`w-full flex items-center gap-2 px-2 py-1.5 text-xs rounded hover:bg-slate-50 ${item.assigned_to === user.email ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-700'}`}
+                                                        >
+                                                          <Avatar className="w-5 h-5">
+                                                            {user.profile_picture_url ? (
+                                                              <AvatarImage src={user.profile_picture_url} />
+                                                            ) : (
+                                                              <AvatarFallback className="text-[9px] bg-blue-400 text-white">{user.full_name[0]?.toUpperCase()}</AvatarFallback>
+                                                            )}
+                                                          </Avatar>
+                                                          {user.full_name}
+                                                        </button>
+                                                      ))}
+                                                    </div>
+                                                  </PopoverContent>
+                                                </Popover>
                                                 <Button variant="ghost" size="sm" onClick={() => handleEditItem(item)} className="h-7 w-7 p-0">
                                                   <Pencil className="w-3 h-3 text-slate-600" />
                                                 </Button>

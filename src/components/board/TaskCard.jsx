@@ -7,7 +7,22 @@ import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreHoriz
 import { format, isToday, startOfDay } from "date-fns";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
-const getTagColor = (tag) => {
+const getTagColor = (tag, customColors = {}) => {
+  if (customColors && customColors[tag]) {
+    const colorMap = {
+      blue: 'bg-blue-100 text-blue-700 border-blue-200',
+      purple: 'bg-purple-100 text-purple-700 border-purple-200',
+      green: 'bg-green-100 text-green-700 border-green-200',
+      orange: 'bg-orange-100 text-orange-700 border-orange-200',
+      pink: 'bg-pink-100 text-pink-700 border-pink-200',
+      cyan: 'bg-cyan-100 text-cyan-700 border-cyan-200',
+      indigo: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+      teal: 'bg-teal-100 text-teal-700 border-teal-200',
+      red: 'bg-red-100 text-red-700 border-red-200',
+      yellow: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    };
+    return colorMap[customColors[tag]] || colorMap.blue;
+  }
   const colors = [
     'bg-blue-100 text-blue-700 border-blue-200',
     'bg-purple-100 text-purple-700 border-purple-200',
@@ -130,7 +145,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
                 Due today
               </Badge>
             )}
-            {task.priority && task.priority !== 'medium' && !isCompleted && (
+            {task.priority && !isCompleted && (
               <Badge className={`${priorityColors[task.priority]} border text-xs capitalize`}>
                 {task.priority} Priority
               </Badge>
@@ -183,7 +198,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
             {task.tags.slice(0, 3).map((tagItem, index) => (
               <Badge
                 key={index}
-                className={`${getTagColor(tagItem)} border text-xs ${isCompleted ? 'opacity-60' : ''} pointer-events-none`}
+                className={`${getTagColor(tagItem, task.tag_colors)} border text-xs ${isCompleted ? 'opacity-60' : ''} pointer-events-none`}
               >
                 {typeof tagItem === 'object' && tagItem !== null ? tagItem.name : tagItem}
               </Badge>
@@ -202,7 +217,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
                       className={`flex items-center space-x-2 p-2 ${isCompleted ? 'opacity-60' : ''}`}
                       onSelect={(e) => e.preventDefault()}
                     >
-                      <Badge className={`${getTagColor(tagItem)} border text-xs pointer-events-none`}>
+                      <Badge className={`${getTagColor(tagItem, task.tag_colors)} border text-xs pointer-events-none`}>
                         {typeof tagItem === 'object' && tagItem !== null ? tagItem.name : tagItem}
                       </Badge>
                     </DropdownMenuItem>
