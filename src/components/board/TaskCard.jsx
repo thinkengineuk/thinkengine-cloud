@@ -85,7 +85,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         dueStatus === 'overdue' ? 'bg-orange-50 border-orange-200' : ''
       } ${dueStatus === 'today' ? 'bg-blue-50 border-blue-200' : ''}`}
     >
-      <CardContent className="p-4 space-y-3" onClick={onClick}>
+      <CardContent className="px-4 pt-3 pb-4 space-y-3" onClick={onClick}>
         {(dueStatus && !isCompleted) || isCompleted || (isTimerRunning && !isCompleted) || (task.priority && task.priority !== 'medium' && !isCompleted) ? (
           <div className="flex flex-wrap items-center gap-1.5" style={{ marginBottom: '5px' }}>
             {isCompleted && (
