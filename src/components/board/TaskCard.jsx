@@ -282,18 +282,23 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
       {assignedUser && (
         <div className="absolute top-2 right-2 pointer-events-none flex flex-col items-center gap-0.5">
           {(() => {
-            const colorMap = {
-              blue: '#3b82f6', pink: '#ec4899', red: '#ef4444', orange: '#f97316',
-              green: '#22c55e', purple: '#a855f7', yellow: '#eab308', teal: '#14b8a6',
-              indigo: '#6366f1', cyan: '#06b6d4',
+            const nameColorMap = {
+              ben: '#3b82f6',
+              chloe: '#ec4899',
+              josh: '#ef4444',
+              emma: '#a855f7',
+              tom: '#f97316',
+              karl: '#ca8a04',
+              keara: '#22c55e',
             };
-            const nameColor = assignedUser.avatar_border_color ? colorMap[assignedUser.avatar_border_color] : '#64748b';
-            const firstName = assignedUser.full_name?.split(' ')[0] || assignedUser.full_name;
+            const rawFirst = assignedUser.full_name?.split(' ')[0] || assignedUser.full_name;
+            const firstName = rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1).toLowerCase();
+            const nameColor = nameColorMap[rawFirst.toLowerCase()] || '#64748b';
             return (
               <>
                 <Avatar
                   className="w-7 h-7"
-                  style={assignedUser.avatar_border_color ? { outline: `3px solid ${nameColor}`, outlineOffset: '1px' } : {}}
+                  style={{ outline: `3px solid ${nameColor}`, outlineOffset: '1px' }}
                 >
                   {assignedUser.profile_picture_url ? (
                     <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
