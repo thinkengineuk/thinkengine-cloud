@@ -88,10 +88,11 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
       if (!alreadyCompleted && textAfterAt.length >= 0) {
         setMentionSearch(textAfterAt.toLowerCase());
         
-        const filtered = users.filter(user => 
-          user.full_name.toLowerCase().startsWith(textAfterAt.toLowerCase()) ||
-          user.email.toLowerCase().startsWith(textAfterAt.toLowerCase())
-        );
+        const filtered = users.filter(user => {
+          const displayName = user.user_full_name || user.full_name;
+          return displayName.toLowerCase().startsWith(textAfterAt.toLowerCase()) ||
+                 user.email.toLowerCase().startsWith(textAfterAt.toLowerCase());
+        });
         
         setMentionSuggestions(filtered);
         setShowMentionSuggestions(filtered.length > 0 && textAfterAt.length > 0);
@@ -115,13 +116,14 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
       const textBeforeAt = newComment.substring(0, lastAtSymbol);
       const textAfterCursor = newComment.substring(cursorPosition);
       
-      const newText = `${textBeforeAt}@${user.full_name} ${textAfterCursor}`;
+      const displayName = user.user_full_name || user.full_name;
+      const newText = `${textBeforeAt}@${displayName} ${textAfterCursor}`;
       setNewComment(newText);
       setShowMentionSuggestions(false);
       
       // Set cursor position after the mention
       setTimeout(() => {
-        const newPosition = lastAtSymbol + user.full_name.length + 2;
+        const newPosition = lastAtSymbol + displayName.length + 2;
         textarea.setSelectionRange(newPosition, newPosition);
         textarea.focus();
       }, 0);
@@ -158,11 +160,12 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     
     setSubmitting(true);
     try {
-      // Extract mentions by checking if any known user's full name appears after @
+      // Extract mentions by checking if any known user's name appears after @
       const mentions = [];
       const lowercasedNewComment = newComment.toLowerCase();
       for (const user of users) {
-        const mentionPattern = `@${user.full_name.toLowerCase()}`;
+        const displayName = user.user_full_name || user.full_name;
+        const mentionPattern = `@${displayName.toLowerCase()}`;
         if (lowercasedNewComment.includes(mentionPattern) && !mentions.includes(user.email)) {
           mentions.push(user.email);
         }
@@ -228,8 +231,8 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         }));
 
         const htmlBody = buildMentionEmail({
-          recipientName: mentionedUser?.full_name,
-          mentionerName: currentUser.full_name,
+          recipientName: getDisplayName(mentionedUser),
+          mentionerName: getDisplayName(currentUser),
           taskTitle: taskData.title,
           taskUrl,
           conversationItems: safeConversationItems,
@@ -237,7 +240,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
 
         await SendEmail({
           to: email,
-          subject: `${currentUser.full_name} mentioned you on "${taskData.title}"`,
+          subject: `${getDisplayName(currentUser)} mentioned you on "${taskData.title}"`,
           body: htmlBody,
         });
       }
@@ -293,7 +296,10 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     return users.find(u => u.email === comment.created_by);
   };
 
-  const getDisplayName = (user) => user ? (user.user_full_name || user.full_name) : 'Unknown User';
+  const getDisplayName = (user) => {
+    if (!user) return 'Unknown User';
+    return user.user_full_name || user.full_name || 'Unknown User';
+  };
 
   const formatTimestamp = (dateString) => {
     if (!dateString) return '';
@@ -419,15 +425,15 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
               >
                 <Avatar className="w-8 h-8">
                   {user.profile_picture_url ? (
-                    <AvatarImage src={user.profile_picture_url} alt={user.full_name} />
+                    <AvatarImage src={user.profile_picture_url} alt={user.user_full_name || user.full_name} />
                   ) : (
                     <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-400 text-white text-sm">
-                      {user.full_name[0]?.toUpperCase()}
+                      {(user.user_full_name || user.full_name)[0]?.toUpperCase()}
                     </AvatarFallback>
                   )}
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm text-slate-900">{user.full_name}</div>
+                  <div className="font-medium text-sm text-slate-900">{user.user_full_name || user.full_name}</div>
                   <div className="text-xs text-slate-500 truncate">{user.email}</div>
                 </div>
               </div>
@@ -509,10 +515,10 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
                             
                             <Avatar className="w-9 h-9 flex-shrink-0">
                               {author?.profile_picture_url ? (
-                                <AvatarImage src={author.profile_picture_url} alt={author.full_name} />
+                                <AvatarImage src={author.profile_picture_url} alt={getDisplayName(author)} />
                               ) : (
                                 <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-400 text-white text-sm">
-                                  {author?.full_name?.[0]?.toUpperCase() || comment.created_by?.[0]?.toUpperCase() || 'U'}
+                                  {getDisplayName(author)?.[0]?.toUpperCase() || 'U'}
                                 </AvatarFallback>
                               )}
                             </Avatar>

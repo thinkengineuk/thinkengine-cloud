@@ -249,7 +249,7 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
                       {user.profile_picture_url ? (
                         <AvatarImage src={user.profile_picture_url} />
                       ) : (
-                        <AvatarFallback>{user.full_name[0]}</AvatarFallback>
+                        <AvatarFallback>{(user.user_full_name || user.full_name)[0]}</AvatarFallback>
                       )}
                     </Avatar>
                     <div className="flex-1">
@@ -257,7 +257,7 @@ export default function BoardSettingsModal({ boardId, open, onOpenChange, onRefr
                         htmlFor={`user-${user.id}`}
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        {user.full_name}
+                        {user.user_full_name || user.full_name}
                         {user.email === currentUser?.email && " (You)"}
                       </label>
                       <p className="text-xs text-slate-500">{user.email}</p>
