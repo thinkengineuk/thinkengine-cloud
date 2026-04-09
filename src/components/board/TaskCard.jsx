@@ -280,7 +280,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
       </CardContent>
 
       {assignedUser && (
-        <div className="absolute top-2 right-2 pointer-events-none flex flex-col items-center gap-0.5">
+        <div className="absolute top-2 right-2 pointer-events-none flex flex-col items-center gap-1.5">
           {(() => {
             const nameColorMap = {
               ben: '#3b82f6',
