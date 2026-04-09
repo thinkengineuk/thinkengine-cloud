@@ -297,11 +297,11 @@ export default function TaskChecklists({ taskId, allUsers = [] }) {
                                                 {item.assigned_to && (() => {
                                                   const assignedUser = allUsers.find(u => u.email === item.assigned_to);
                                                   return assignedUser ? (
-                                                    <Avatar className="w-5 h-5" title={assignedUser.full_name}>
+                                                    <Avatar className="w-5 h-5" title={assignedUser.user_full_name || assignedUser.full_name}>
                                                       {assignedUser.profile_picture_url ? (
                                                         <AvatarImage src={assignedUser.profile_picture_url} />
                                                       ) : (
-                                                        <AvatarFallback className="text-[9px] bg-blue-400 text-white">{assignedUser.full_name[0]?.toUpperCase()}</AvatarFallback>
+                                                        <AvatarFallback className="text-[9px] bg-blue-400 text-white">{(assignedUser.user_full_name || assignedUser.full_name)[0]?.toUpperCase()}</AvatarFallback>
                                                       )}
                                                     </Avatar>
                                                   ) : null;
@@ -335,10 +335,10 @@ export default function TaskChecklists({ taskId, allUsers = [] }) {
                                                             {user.profile_picture_url ? (
                                                               <AvatarImage src={user.profile_picture_url} />
                                                             ) : (
-                                                              <AvatarFallback className="text-[9px] bg-blue-400 text-white">{user.full_name[0]?.toUpperCase()}</AvatarFallback>
+                                                              <AvatarFallback className="text-[9px] bg-blue-400 text-white">{(user.user_full_name || user.full_name)[0]?.toUpperCase()}</AvatarFallback>
                                                             )}
                                                           </Avatar>
-                                                          {user.full_name}
+                                                          {user.user_full_name || user.full_name}
                                                         </button>
                                                       ))}
                                                     </div>

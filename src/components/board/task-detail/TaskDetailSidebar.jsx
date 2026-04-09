@@ -251,10 +251,10 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
                       {user.profile_picture_url ? (
                         <AvatarImage src={user.profile_picture_url} />
                       ) : (
-                        <AvatarFallback className="text-xs">{user.full_name ? user.full_name[0] : '?'}</AvatarFallback>
+                        <AvatarFallback className="text-xs">{(user.user_full_name || user.full_name)[0] || '?'}</AvatarFallback>
                       )}
                     </Avatar>
-                    <span className="text-sm">{user.full_name}</span>
+                    <span className="text-sm">{user.user_full_name || user.full_name}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -281,9 +281,9 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
                      <div key={user.id} className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer"
                        onClick={() => { onAddWatcher(user.email); setShowWatchersDialog(false); }}>
                        <Avatar className="w-8 h-8">
-                         {user.profile_picture_url ? <AvatarImage src={user.profile_picture_url} /> : <AvatarFallback className="text-xs">{user.full_name ? user.full_name[0] : '?'}</AvatarFallback>}
+                         {user.profile_picture_url ? <AvatarImage src={user.profile_picture_url} /> : <AvatarFallback className="text-xs">{(user.user_full_name || user.full_name)[0] || '?'}</AvatarFallback>}
                        </Avatar>
-                       <span className="text-sm">{user.full_name}</span>
+                       <span className="text-sm">{user.user_full_name || user.full_name}</span>
                      </div>
                    ))}
                  </div>
@@ -298,9 +298,9 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
                return user ? (
                  <div key={email} className="flex items-center gap-1 bg-slate-100 rounded-full pl-1 pr-2 py-1">
                    <Avatar className="w-5 h-5">
-                     {user.profile_picture_url ? <AvatarImage src={user.profile_picture_url} /> : <AvatarFallback className="text-[10px]">{user.full_name ? user.full_name[0] : '?'}</AvatarFallback>}
+                     {user.profile_picture_url ? <AvatarImage src={user.profile_picture_url} /> : <AvatarFallback className="text-[10px]">{(user.user_full_name || user.full_name)[0] || '?'}</AvatarFallback>}
                    </Avatar>
-                   <span className="text-xs">{user.full_name}</span>
+                   <span className="text-xs">{user.user_full_name || user.full_name}</span>
                    <button onClick={() => removeWatcher(email)} className="ml-1 text-slate-400 hover:text-red-600 font-bold text-sm">×</button>
                  </div>
                ) : null;
