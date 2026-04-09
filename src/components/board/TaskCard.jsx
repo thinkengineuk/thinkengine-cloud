@@ -85,50 +85,6 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         dueStatus === 'overdue' ? 'bg-orange-50 border-orange-200' : ''
       } ${dueStatus === 'today' ? 'bg-blue-50 border-blue-200' : ''}`}
     >
-      {allColumns && allColumns.length > 0 && onMoveTask && (
-        <DropdownMenu onOpenChange={(open) => { if (!open) setLinkCopied(false); }}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 left-2 h-7 w-7 text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            <DropdownMenuItem onClick={handleCopyLink} className="flex items-center gap-2">
-              <Link className="h-4 w-4" />
-              {linkCopied ? (
-                <span className="text-green-600 font-medium">Link copied!</span>
-              ) : (
-                'Copy link'
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Move to...</DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  {allColumns.map((col) => (
-                    <DropdownMenuItem
-                      key={col.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMoveTask(task.id, col.id);
-                      }}
-                    >
-                      {col.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-
       <CardContent className="p-4 space-y-3" onClick={onClick}>
         {dueStatus && !isCompleted && (
           <div className="flex items-center gap-2 pb-2">
@@ -172,7 +128,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </Badge>
         )}
 
-        <p className={`text-sm font-semibold leading-snug px-8 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+        <p className={`text-sm font-semibold leading-snug pr-12 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
           {task.title}
         </p>
 
@@ -239,7 +195,50 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
         )}
 
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-          <div className={`flex items-center gap-3 text-xs ${isCompleted ? 'text-slate-400' : 'text-slate-500'}`}>
+          <div className={`flex items-center gap-2 text-xs ${isCompleted ? 'text-slate-400' : 'text-slate-500'}`}>
+            {allColumns && allColumns.length > 0 && onMoveTask && (
+              <DropdownMenu onOpenChange={(open) => { if (!open) setLinkCopied(false); }}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity -ml-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem onClick={handleCopyLink} className="flex items-center gap-2">
+                    <Link className="h-4 w-4" />
+                    {linkCopied ? (
+                      <span className="text-green-600 font-medium">Link copied!</span>
+                    ) : (
+                      'Copy link'
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>Move to...</DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent>
+                        {allColumns.map((col) => (
+                          <DropdownMenuItem
+                            key={col.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onMoveTask(task.id, col.id);
+                            }}
+                          >
+                            {col.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             {formattedDueDate && (
               <div className={`flex items-center gap-1 ${
                 dueStatus === 'overdue' ? 'text-orange-700 font-semibold' : ''
