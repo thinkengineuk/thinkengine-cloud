@@ -289,20 +289,18 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
             };
             const borderColor = assignedUser.avatar_border_color ? colorMap[assignedUser.avatar_border_color] : null;
             return (
-              <div
-                className="rounded-full p-0.5"
-                style={{ background: borderColor || 'transparent' }}
+              <Avatar
+                className="w-7 h-7"
+                style={borderColor ? { outline: `3px solid ${borderColor}`, outlineOffset: '1px' } : {}}
               >
-                <Avatar className="w-7 h-7">
-                  {assignedUser.profile_picture_url ? (
-                    <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
-                  ) : (
-                    <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
-                      {assignedUser.full_name[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-              </div>
+                {assignedUser.profile_picture_url ? (
+                  <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
+                ) : (
+                  <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
+                    {assignedUser.full_name[0]?.toUpperCase()}
+                  </AvatarFallback>
+                )}
+              </Avatar>
             );
           })()}
         </div>
