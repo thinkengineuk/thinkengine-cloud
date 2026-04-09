@@ -54,8 +54,8 @@ export default function Users() {
   const handleSaveName = async (userId) => {
     if (!editingNameValue.trim()) return;
     await updateUserName({ userId, full_name: editingNameValue });
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, full_name: editingNameValue.trim() } : u));
     setEditingNameId(null);
+    loadUsers();
   };
 
   const handleCancelName = () => {
