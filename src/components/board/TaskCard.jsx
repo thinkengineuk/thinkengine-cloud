@@ -86,47 +86,42 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
       } ${dueStatus === 'today' ? 'bg-blue-50 border-blue-200' : ''}`}
     >
       <CardContent className="p-4 space-y-3" onClick={onClick}>
-        {dueStatus && !isCompleted && (
-          <div className="flex items-center gap-2 pb-2">
-            {dueStatus === 'overdue' && (
+        {(dueStatus && !isCompleted) || isCompleted || (isTimerRunning && !isCompleted) || (task.priority && task.priority !== 'medium' && !isCompleted) ? (
+          <div className="flex flex-wrap items-center gap-1.5" style={{ marginBottom: '5px' }}>
+            {isCompleted && (
+              <Badge className="bg-green-100 text-green-700 border-green-200 border flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" />
+                Completed
+              </Badge>
+            )}
+            {dueStatus === 'overdue' && !isCompleted && (
               <Badge className="bg-orange-100 text-orange-700 border-orange-200 border flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />
                 Overdue
               </Badge>
             )}
-            {dueStatus === 'today' && (
+            {dueStatus === 'today' && !isCompleted && (
               <Badge className="bg-blue-100 text-blue-700 border-blue-200 border flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 Due today
               </Badge>
             )}
+            {task.priority && task.priority !== 'medium' && !isCompleted && (
+              <Badge className={`${priorityColors[task.priority]} border text-xs capitalize`}>
+                {task.priority} Priority
+              </Badge>
+            )}
+            {isTimerRunning && !isCompleted && (
+              <div className="flex items-center gap-1.5">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                </span>
+                <span className="text-xs font-medium text-green-600">Timer running</span>
+              </div>
+            )}
           </div>
-        )}
-
-        {isCompleted && (
-          <div className="flex items-center gap-2 pb-2">
-            <Badge className="bg-green-100 text-green-700 border-green-200 border flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" />
-              Completed
-            </Badge>
-          </div>
-        )}
-
-        {isTimerRunning && !isCompleted && (
-          <div className="flex items-center gap-1.5 pb-1">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-            </span>
-            <span className="text-xs font-medium text-green-600">Timer running</span>
-          </div>
-        )}
-
-        {task.priority && task.priority !== 'medium' && !isCompleted && (
-          <Badge className={`${priorityColors[task.priority]} border text-xs capitalize w-fit`}>
-            {task.priority} Priority
-          </Badge>
-        )}
+        ) : null}
 
         <div className="flex items-center gap-3">
           <p className={`text-sm font-semibold leading-snug flex-1 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
