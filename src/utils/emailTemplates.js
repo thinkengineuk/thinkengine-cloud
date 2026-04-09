@@ -16,7 +16,7 @@ export function generateEmailHtml({
   const conversationHtml = conversationItems.length > 0 ? `
     <div style="margin: 24px 0 0 0;">
       <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; margin-bottom: 12px;">Conversation</div>
-      ${conversationItems.map(item => `
+      ${[...conversationItems].reverse().map(item => `
         <div style="border-left: 3px solid #3b82f6; padding: 10px 16px; margin-bottom: 12px; background: #f8fafc; border-radius: 0 6px 6px 0;">
           <div style="font-size: 13px; margin-bottom: 6px;">
             <span style="font-weight: 600; color: #1e293b;">${item.authorName}</span>

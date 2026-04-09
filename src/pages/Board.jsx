@@ -462,9 +462,9 @@ export default function BoardPage() {
                     <SelectItem value="all">All members</SelectItem>
                     {users.map((user) => (
                       <SelectItem key={user.id} value={user.email}>
-                        {user.full_name}
+                        {user.user_full_name || user.full_name}
                       </SelectItem>
-                    ))}
+                    ))};
                   </SelectContent>
                 </Select>
 
@@ -583,7 +583,7 @@ export default function BoardPage() {
                 <SelectItem value="all">All members</SelectItem>
                 {users.map((user) => (
                   <SelectItem key={user.id} value={user.email}>
-                    {user.full_name}
+                    {user.user_full_name || user.full_name}
                   </SelectItem>
                 ))}
               </SelectContent>
