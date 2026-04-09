@@ -128,42 +128,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </Badge>
         )}
 
-        {task.tags && task.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5" onClick={(e) => e.stopPropagation()}>
-            {task.tags.slice(0, 3).map((tagItem, index) => (
-              <Badge
-                key={index}
-                className={`${getTagColor(tagItem)} border text-xs ${isCompleted ? 'opacity-60' : ''} pointer-events-none`}
-              >
-                {typeof tagItem === 'object' && tagItem !== null ? tagItem.name : tagItem}
-              </Badge>
-            ))}
-            {task.tags.length > 3 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Badge variant="outline" className={`text-xs cursor-pointer ${isCompleted ? 'opacity-60' : ''}`}>
-                    +{task.tags.length - 3}
-                  </Badge>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48 p-1">
-                  {task.tags.slice(3).map((tagItem, index) => (
-                    <DropdownMenuItem
-                      key={index}
-                      className={`flex items-center space-x-2 p-2 ${isCompleted ? 'opacity-60' : ''}`}
-                      onSelect={(e) => e.preventDefault()}
-                    >
-                      <Badge className={`${getTagColor(tagItem)} border text-xs pointer-events-none`}>
-                        {typeof tagItem === 'object' && tagItem !== null ? tagItem.name : tagItem}
-                      </Badge>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        )}
-
-        <div className="flex items-center gap-3" style={{ marginTop: task.tags && task.tags.length > 0 ? '5px' : undefined }}>
+        <div className="flex items-center gap-3">
           <p className={`text-sm font-semibold leading-snug flex-1 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
             {task.title}
           </p>
@@ -224,6 +189,41 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
             </p>
           )}
         </div>
+
+        {task.tags && task.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5" onClick={(e) => e.stopPropagation()}>
+            {task.tags.slice(0, 3).map((tagItem, index) => (
+              <Badge
+                key={index}
+                className={`${getTagColor(tagItem)} border text-xs ${isCompleted ? 'opacity-60' : ''} pointer-events-none`}
+              >
+                {typeof tagItem === 'object' && tagItem !== null ? tagItem.name : tagItem}
+              </Badge>
+            ))}
+            {task.tags.length > 3 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Badge variant="outline" className={`text-xs cursor-pointer ${isCompleted ? 'opacity-60' : ''}`}>
+                    +{task.tags.length - 3}
+                  </Badge>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48 p-1">
+                  {task.tags.slice(3).map((tagItem, index) => (
+                    <DropdownMenuItem
+                      key={index}
+                      className={`flex items-center space-x-2 p-2 ${isCompleted ? 'opacity-60' : ''}`}
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <Badge className={`${getTagColor(tagItem)} border text-xs pointer-events-none`}>
+                        {typeof tagItem === 'object' && tagItem !== null ? tagItem.name : tagItem}
+                      </Badge>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        )}
 
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
           <div className={`flex items-center gap-2 text-xs ${isCompleted ? 'text-slate-400' : 'text-slate-500'}`}>
