@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Comment } from "@/entities/Comment";
 import { User } from "@/entities/User";
+import { Task } from "@/entities/Task";
 import { ActivityLog } from "@/entities/ActivityLog";
 import { Attachment } from "@/entities/Attachment";
 import { base44 } from "@/api/base44Client";
@@ -203,6 +204,19 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         timestamp: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         text: newComment,
       });
+
+      // Auto-add mentioned users to watchers if not already assigned or watching
+      const currentWatchers = taskData.watchers || [];
+      const newWatchers = [...currentWatchers];
+      for (const email of mentions) {
+        if (email !== taskData.assigned_to && !currentWatchers.includes(email)) {
+          newWatchers.push(email);
+        }
+      }
+      if (newWatchers.length > currentWatchers.length) {
+        await Task.update(taskData.id || taskId, { watchers: newWatchers });
+        onRefresh();
+      }
 
       for (const email of mentions) {
         // Don't email yourself
