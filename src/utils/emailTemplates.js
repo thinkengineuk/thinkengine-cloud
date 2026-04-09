@@ -11,7 +11,7 @@ export function generateEmailHtml({
   conversationItems = [],
   ctaUrl = '',
   ctaLabel = 'View Task & Reply',
-  footerNote = 'TaskFlow Task Management - Automated Message'
+  footerNote = 'ThinkEngine Cloud - Automated Message'
 }) {
   const conversationHtml = conversationItems.length > 0 ? `
     <div style="margin: 24px 0 0 0;">
@@ -45,7 +45,7 @@ export function generateEmailHtml({
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:10px 10px 0 0;padding:28px 32px;text-align:center;">
-              <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">TASKFLOW</div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">THINKENGINE CLOUD</div>
               <div style="font-size:22px;font-weight:700;color:#ffffff;">${subject}</div>
             </td>
           </tr>
