@@ -10,7 +10,7 @@ function buildEmailHtml({ subject, greeting, introHtml, conversationItems, ctaUr
   const conversationHtml = conversationItems && conversationItems.length > 0 ? `
     <div style="margin:24px 0 0 0;">
       <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#64748b;text-transform:uppercase;margin-bottom:12px;">Conversation</div>
-      ${conversationItems.map(item => `
+      ${[...conversationItems].reverse().map(item => `
         <div style="border-left:3px solid #3b82f6;padding:10px 16px;margin-bottom:12px;background:#f8fafc;border-radius:0 6px 6px 0;">
           <div style="font-size:13px;margin-bottom:6px;">
             <span style="font-weight:600;color:#1e293b;">${item.authorName}</span>
@@ -31,7 +31,7 @@ function buildEmailHtml({ subject, greeting, introHtml, conversationItems, ctaUr
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
         <tr>
           <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:10px 10px 0 0;padding:28px 32px;text-align:center;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">TASKFLOW</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">THINKENGINE CLOUD</div>
             <div style="font-size:22px;font-weight:700;color:#ffffff;">${subject}</div>
           </td>
         </tr>
@@ -48,7 +48,7 @@ function buildEmailHtml({ subject, greeting, introHtml, conversationItems, ctaUr
         </tr>
         <tr>
           <td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:18px 32px;text-align:center;">
-            <div style="font-size:12px;color:#94a3b8;">TaskFlow Task Management · Automated Message</div>
+           <div style="font-size:12px;color:#94a3b8;">ThinkEngine Cloud - Automated Message</div>
           </td>
         </tr>
       </table>
@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
 
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: email,
-        subject: `[TaskFlow] Task Updated: ${task.title}`,
+        subject: `[ThinkEngine Cloud] Task Updated: ${task.title}`,
         body: html,
       });
     });
