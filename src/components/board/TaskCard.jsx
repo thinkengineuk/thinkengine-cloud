@@ -280,27 +280,33 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
       </CardContent>
 
       {assignedUser && (
-        <div className="absolute top-2 right-2 pointer-events-none">
+        <div className="absolute top-2 right-2 pointer-events-none flex flex-col items-center gap-0.5">
           {(() => {
             const colorMap = {
               blue: '#3b82f6', pink: '#ec4899', red: '#ef4444', orange: '#f97316',
               green: '#22c55e', purple: '#a855f7', yellow: '#eab308', teal: '#14b8a6',
               indigo: '#6366f1', cyan: '#06b6d4',
             };
-            const borderColor = assignedUser.avatar_border_color ? colorMap[assignedUser.avatar_border_color] : null;
+            const nameColor = assignedUser.avatar_border_color ? colorMap[assignedUser.avatar_border_color] : '#64748b';
+            const firstName = assignedUser.full_name?.split(' ')[0] || assignedUser.full_name;
             return (
-              <Avatar
-                className="w-7 h-7"
-                style={borderColor ? { outline: `3px solid ${borderColor}`, outlineOffset: '1px' } : {}}
-              >
-                {assignedUser.profile_picture_url ? (
-                  <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
-                ) : (
-                  <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
-                    {assignedUser.full_name[0]?.toUpperCase()}
-                  </AvatarFallback>
-                )}
-              </Avatar>
+              <>
+                <Avatar
+                  className="w-7 h-7"
+                  style={assignedUser.avatar_border_color ? { outline: `3px solid ${nameColor}`, outlineOffset: '1px' } : {}}
+                >
+                  {assignedUser.profile_picture_url ? (
+                    <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
+                  ) : (
+                    <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
+                      {assignedUser.full_name[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <span className="text-[10px] font-semibold leading-none" style={{ color: nameColor }}>
+                  {firstName}
+                </span>
+              </>
             );
           })()}
         </div>
