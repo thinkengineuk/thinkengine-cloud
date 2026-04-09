@@ -4,6 +4,7 @@ import { User } from "@/entities/User";
 import { ActivityLog } from "@/entities/ActivityLog";
 import { Attachment } from "@/entities/Attachment";
 import { base44 } from "@/api/base44Client";
+import { SendEmail } from "@/integrations/Core";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -219,7 +220,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
           conversationItems: safeConversationItems,
         });
 
-        await base44.integrations.Core.SendEmail({
+        await SendEmail({
           to: email,
           subject: `${currentUser.full_name} mentioned you on "${taskData.title}"`,
           body: htmlBody,
