@@ -53,7 +53,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return null;
-      return format(date, 'do MMMM');
+      return format(date, 'd MMM');
     } catch {
       return null;
     }
