@@ -159,9 +159,10 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     try {
       // Extract mentions by checking if any known user's full name appears after @
       const mentions = [];
+      const lowercasedNewComment = newComment.toLowerCase();
       for (const user of users) {
-        const mention = `@${user.full_name}`;
-        if (newComment.includes(mention) && !mentions.includes(user.email)) {
+        const mentionPattern = `@${user.full_name.toLowerCase()}`;
+        if (lowercasedNewComment.includes(mentionPattern) && !mentions.includes(user.email)) {
           mentions.push(user.email);
         }
       }
