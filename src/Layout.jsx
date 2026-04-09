@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ProfilePictureUpload from "@/components/user/ProfilePictureUpload";
 
-const RECENT_BOARDS_KEY = "taskflow_recent_boards";
+const RECENT_BOARDS_KEY = "thinkenginecloud_recent_boards";
 const MAX_RECENT = 3;
 
 function getRecentBoardIds() {
