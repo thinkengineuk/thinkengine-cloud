@@ -131,6 +131,35 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           {task.title}
         </p>
 
+        {task.attachmentPreview && (
+          <div className="w-full rounded-md overflow-hidden bg-slate-100" style={{height: '160px'}}>
+            {task.attachmentPreview.type.startsWith('image/') ? (
+              <img
+                src={task.attachmentPreview.url}
+                alt="Attachment preview"
+                className="w-full h-full object-cover object-top"
+              />
+            ) : (
+              <video
+                src={task.attachmentPreview.url}
+                className="w-full h-full object-cover"
+                muted
+                playsInline
+              />
+            )}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {task.description && (
+            <p className={`text-sm line-clamp-2 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-600'}`}>
+              {task.description}
+            </p>
+          )}
+        </div>
+
+        {null}
+
         {/* Status/priority/timer badges inline with tags */}
         <div className="flex flex-wrap items-center gap-1.5">
           {isCompleted && (
@@ -174,35 +203,6 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
             </Badge>
           ))}
         </div>
-
-        {task.attachmentPreview && (
-          <div className="w-full rounded-md overflow-hidden bg-slate-100" style={{height: '160px'}}>
-            {task.attachmentPreview.type.startsWith('image/') ? (
-              <img
-                src={task.attachmentPreview.url}
-                alt="Attachment preview"
-                className="w-full h-full object-cover object-top"
-              />
-            ) : (
-              <video
-                src={task.attachmentPreview.url}
-                className="w-full h-full object-cover"
-                muted
-                playsInline
-              />
-            )}
-          </div>
-        )}
-
-        <div className="space-y-2">
-          {task.description && (
-            <p className={`text-sm line-clamp-2 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-600'}`}>
-              {task.description}
-            </p>
-          )}
-        </div>
-
-        {null}
 
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
           <div className={`flex items-center gap-2 text-xs ${isCompleted ? 'text-slate-400' : 'text-slate-500'}`}>
