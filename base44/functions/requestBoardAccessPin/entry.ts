@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
-              <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7);">TaskFlow Security</p>
+              <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7);">THINKENGINE CLOUD</p>
               <h1 style="margin:8px 0 0;font-size:26px;font-weight:700;color:#ffffff;">Board Access Code</h1>
             </td>
           </tr>
@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
           <!-- Footer -->
           <tr>
             <td style="background:#f8faff;border-radius:0 0 16px 16px;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
-              <p style="margin:0;font-size:12px;color:#9ca3af;">TaskFlow Security System &nbsp;•&nbsp; Automated Message</p>
+              <p style="margin:0;font-size:12px;color:#9ca3af;">ThinkEngine Cloud Security System &nbsp;•&nbsp; Automated Message</p>
             </td>
           </tr>
 
