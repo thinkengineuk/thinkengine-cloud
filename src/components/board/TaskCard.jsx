@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreVertical, MessageSquare, Paperclip, CheckSquare, Link } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreHorizontal, MessageSquare, Paperclip, CheckSquare, Link } from "lucide-react";
 import { format, isToday, startOfDay } from "date-fns";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
@@ -94,7 +94,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
               className="absolute top-2 left-2 h-7 w-7 text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity z-10"
               onClick={(e) => e.stopPropagation()}
             >
-              <MoreVertical className="h-4 w-4" />
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48">
@@ -172,7 +172,7 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
           </Badge>
         )}
 
-        <p className={`text-sm font-semibold leading-snug pr-8 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+        <p className={`text-sm font-semibold leading-snug px-8 ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
           {task.title}
         </p>
 
