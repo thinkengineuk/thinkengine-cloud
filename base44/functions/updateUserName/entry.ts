@@ -9,12 +9,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const { userId, full_name } = await req.json();
-    if (!userId || !full_name?.trim()) {
-      return Response.json({ error: 'userId and full_name are required' }, { status: 400 });
+    const { userId, user_full_name } = await req.json();
+    if (!userId || !user_full_name?.trim()) {
+      return Response.json({ error: 'userId and user_full_name are required' }, { status: 400 });
     }
 
-    await base44.asServiceRole.entities.User.update(userId, { full_name: full_name.trim() });
+    await base44.asServiceRole.entities.User.update(userId, { user_full_name: user_full_name.trim() });
 
     return Response.json({ success: true });
   } catch (error) {

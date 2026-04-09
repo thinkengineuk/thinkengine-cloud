@@ -196,11 +196,11 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         const author = users.find(u => u.email === c.created_by);
         const date = new Date(c.created_date);
         const timestamp = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        return { authorName: author?.full_name || c.created_by || 'Unknown', timestamp, text: c.text };
+        return { authorName: getDisplayName(author) || c.created_by || 'Unknown', timestamp, text: c.text };
       });
       // Add current comment
       conversationItems.push({
-        authorName: currentUser?.full_name || 'Unknown',
+        authorName: getDisplayName(currentUser) || 'Unknown',
         timestamp: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         text: newComment,
       });
@@ -292,6 +292,8 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     if (!comment.created_by) return null;
     return users.find(u => u.email === comment.created_by);
   };
+
+  const getDisplayName = (user) => user ? (user.user_full_name || user.full_name) : 'Unknown User';
 
   const formatTimestamp = (dateString) => {
     if (!dateString) return '';
@@ -519,7 +521,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
                               <div className="flex items-start justify-between gap-2 mb-2">
                                 <div className="flex flex-col">
                                   <span className="font-semibold text-sm text-slate-900">
-                                    {author?.full_name || comment.created_by || 'Unknown User'}
+                                    {getDisplayName(author)}
                                   </span>
                                   <span className="text-xs text-slate-500">
                                     {formatTimestamp(comment.created_date)}
@@ -608,7 +610,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
                                     const mentionedUser = users.find(u => u.email === email);
                                     return (
                                       <span key={idx} className="font-medium">
-                                        {mentionedUser?.full_name || email}
+                                        {getDisplayName(mentionedUser)}
                                         {idx < comment.mentions.length - 1 && ','}
                                       </span>
                                     );

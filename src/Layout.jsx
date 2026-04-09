@@ -270,7 +270,7 @@ export default function Layout({ children }) {
               <div className="flex items-center gap-3">
                 <ProfilePictureUpload user={user} onUpdated={(url) => setUser(prev => ({ ...prev, profile_picture_url: url }))} />
                 <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-                  <p className="font-medium text-slate-900 text-sm truncate">{user?.full_name || 'User'}</p>
+                  <p className="font-medium text-slate-900 text-sm truncate">{user?.user_full_name || user?.full_name || 'User'}</p>
                   <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                 </div>
               </div>

@@ -41,6 +41,10 @@
     "board_access_dates": {
       "type": "object",
       "description": "Map of board ID to last access date (for 2FA boards)"
+    },
+    "user_full_name": {
+      "type": "string",
+      "description": "Display name set by admins, takes precedence over system full_name"
     }
   },
   "required": []

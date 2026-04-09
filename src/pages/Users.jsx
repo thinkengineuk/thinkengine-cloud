@@ -48,12 +48,12 @@ export default function Users() {
 
   const handleEditName = (user) => {
     setEditingNameId(user.id);
-    setEditingNameValue(user.full_name);
+    setEditingNameValue(user.user_full_name || '');
   };
 
   const handleSaveName = async (userId) => {
     if (!editingNameValue.trim()) return;
-    await updateUserName({ userId, full_name: editingNameValue });
+    await updateUserName({ userId, user_full_name: editingNameValue });
     setEditingNameId(null);
     loadUsers();
   };
@@ -149,28 +149,38 @@ export default function Users() {
                     </Avatar>
                   </div>
                   <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    {editingNameId === user.id ? (
-                      <div className="flex items-center gap-1 flex-1">
-                        <Input
-                          value={editingNameValue}
-                          onChange={e => setEditingNameValue(e.target.value)}
-                          onKeyDown={e => { if (e.key === 'Enter') handleSaveName(user.id); if (e.key === 'Escape') handleCancelName(); }}
-                          className="h-7 text-sm py-0 px-2"
-                          autoFocus
-                        />
-                        <button onClick={() => handleSaveName(user.id)} className="text-green-600 hover:text-green-800"><Check className="w-4 h-4" /></button>
-                        <button onClick={handleCancelName} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <p className="text-xs text-slate-400 mb-1">System Full Name</p>
+                        <p className="font-semibold text-slate-900 truncate">{user.full_name}</p>
                       </div>
-                    ) : (
-                      <>
-                        <h3 className="font-semibold text-slate-900 truncate">{user.full_name}</h3>
-                        {user.id === currentUser.id && (
-                          <Badge variant="outline" className="text-xs">You</Badge>
-                        )}
-                        <button onClick={() => handleEditName(user)} className="text-slate-300 hover:text-slate-600 ml-auto flex-shrink-0"><Pencil className="w-3.5 h-3.5" /></button>
-                      </>
-                    )}
+                      {user.id === currentUser.id && (
+                        <Badge variant="outline" className="text-xs">You</Badge>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 mb-1">User Full Name</p>
+                      {editingNameId === user.id ? (
+                        <div className="flex items-center gap-1 flex-1">
+                          <Input
+                            value={editingNameValue}
+                            onChange={e => setEditingNameValue(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') handleSaveName(user.id); if (e.key === 'Escape') handleCancelName(); }}
+                            placeholder="Optional custom display name"
+                            className="h-7 text-sm py-0 px-2"
+                            autoFocus
+                          />
+                          <button onClick={() => handleSaveName(user.id)} className="text-green-600 hover:text-green-800"><Check className="w-4 h-4" /></button>
+                          <button onClick={handleCancelName} className="text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-slate-700">{user.user_full_name || <span className="text-slate-400 italic">Not set</span>}</p>
+                          <button onClick={() => handleEditName(user)} className="text-slate-300 hover:text-slate-600 flex-shrink-0"><Pencil className="w-3.5 h-3.5" /></button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                     <p className="text-sm text-slate-600 truncate mb-3">{user.email}</p>
                     <div className="flex items-center gap-2">
@@ -218,7 +228,7 @@ export default function Users() {
                       </Select>
                     </div>
                     {user.created_date && (
-                      <p className="text-xs text-slate-500 mt-2">
+                      <p className="text-xs text-slate-500 mt-3">
                         Joined {new Date(user.created_date).toLocaleDateString()}
                       </p>
                     )}

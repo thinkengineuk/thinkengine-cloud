@@ -41,7 +41,8 @@ const getTagColor = (tag, customColors = {}) => {
 };
 
 const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete, allColumns, onMoveTask, counts }) => {
-  const assignedUser = task.assigned_to ? usersMap[task.assigned_to] : null;
+const assignedUser = task.assigned_to ? usersMap[task.assigned_to] : null;
+const displayName = assignedUser ? (assignedUser.user_full_name || assignedUser.full_name) : null;
   const [linkCopied, setLinkCopied] = useState(false);
   const copyTimeoutRef = useRef(null);
 
@@ -119,10 +120,10 @@ const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTask
               <div className="flex flex-col items-center flex-shrink-0" style={{ gap: '4px' }}>
                 <Avatar className="w-7 h-7" style={{ outline: `3px solid ${nameColor}`, outlineOffset: '1px' }}>
                   {assignedUser.profile_picture_url ? (
-                    <AvatarImage src={assignedUser.profile_picture_url} alt={assignedUser.full_name} />
+                    <AvatarImage src={assignedUser.profile_picture_url} alt={displayName} />
                   ) : (
                     <AvatarFallback className="text-xs bg-gradient-to-br from-blue-400 to-purple-400 text-white">
-                      {assignedUser.full_name[0]?.toUpperCase()}
+                      {displayName[0]?.toUpperCase()}
                     </AvatarFallback>
                   )}
                 </Avatar>
