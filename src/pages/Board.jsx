@@ -330,6 +330,7 @@ export default function BoardPage() {
     // Persist to database
     try {
       await Promise.all(tasksToUpdate.map(({ id, updates }) => Task.update(id, updates)));
+      loadBoard();
     } catch (error) {
       console.error('Error updating tasks:', error);
       loadBoard();
