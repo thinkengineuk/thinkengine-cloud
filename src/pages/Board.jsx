@@ -142,7 +142,7 @@ export default function BoardPage() {
 
       const loggedInUser = await base44.auth.me();
       setCurrentUser(loggedInUser);
-      const twoFaBoards = ["Ben Tasks", "Management"];
+      const twoFaBoards = ["Ben Tasks", "Management", "Chloe's Projects"];
       if (twoFaBoards.includes(fetchedBoard.name)) {
         const today = new Date().toISOString().slice(0, 10);
         const boardAccessDates = loggedInUser.board_access_dates || {};
@@ -346,7 +346,7 @@ export default function BoardPage() {
   }
 
   // Show 2FA screen if this board requires 2FA and user hasn't been granted access today
-  const twoFaBoardNames = ["Ben Tasks", "Management"];
+  const twoFaBoardNames = ["Ben Tasks", "Management", "Chloe's Projects"];
   if (board && twoFaBoardNames.includes(board.name) && !hasAccess) {
     return (
       <TwoFactorAuthScreen
