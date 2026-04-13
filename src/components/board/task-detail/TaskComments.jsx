@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Send, Pencil, Trash2, X, Check, Paperclip, FileIcon, ExternalLink, GripVertical } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format, formatDistanceToNow } from "date-fns";
-import { buildMentionEmail } from "@/utils/emailTemplates";
+import { buildMentionEmail, buildWatcherCommentEmail } from "@/utils/emailTemplates";
 
 export default function TaskComments({ taskId, task, allUsers, currentUser: currentUserProp, onRefresh }) {
   const [comments, setComments] = useState([]);
@@ -241,6 +241,30 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         await SendEmail({
           to: email,
           subject: `${getDisplayName(currentUser)} mentioned you on "${taskData.title}"`,
+          body: htmlBody,
+        });
+      }
+
+      // Notify watchers who weren't mentioned
+      const watchersToNotify = (taskData.watchers || []).filter(
+        email => email !== currentUser?.email && !mentions.includes(email)
+      );
+      for (const email of watchersToNotify) {
+        const watcher = users.find(u => u.email === email);
+        const safeConversationItems = conversationItems.map(item => ({
+          ...item,
+          text: item.text.replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+        }));
+        const htmlBody = buildWatcherCommentEmail({
+          recipientName: getDisplayName(watcher),
+          commenterName: getDisplayName(currentUser),
+          taskTitle: taskData.title,
+          taskUrl,
+          conversationItems: safeConversationItems,
+        });
+        await SendEmail({
+          to: email,
+          subject: `New comment on "${taskData.title}"`,
           body: htmlBody,
         });
       }

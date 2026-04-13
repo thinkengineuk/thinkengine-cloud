@@ -109,6 +109,20 @@ export function buildWatcherEmail({ recipientName, adderName, taskTitle, boardNa
 }
 
 /**
+ * Build watcher comment notification email HTML.
+ */
+export function buildWatcherCommentEmail({ recipientName, commenterName, taskTitle, taskUrl, conversationItems }) {
+  return generateEmailHtml({
+    subject: 'New comment on a task you\'re watching',
+    greeting: `Hi ${recipientName || 'there'},`,
+    introHtml: `<strong>${commenterName}</strong> posted a comment on the task <strong>${taskTitle}</strong> that you are watching.`,
+    conversationItems: conversationItems || [],
+    ctaUrl: taskUrl,
+    ctaLabel: 'View Task & Reply',
+  });
+}
+
+/**
  * Build mention notification email HTML.
  */
 export function buildMentionEmail({ recipientName, mentionerName, taskTitle, taskUrl, conversationItems }) {
