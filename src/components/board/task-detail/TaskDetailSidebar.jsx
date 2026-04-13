@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CalendarIcon, User, Eye, Tag, AlertCircle, Trash2, Repeat, CheckCircle2, FolderKanban, ChevronDown, X } from "lucide-react";
+import { CalendarIcon, User, Eye, Tag, AlertCircle, Trash2, Repeat, CheckCircle2, FolderKanban, ChevronDown, X, MapPin } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TimeTrackingSection from "./TimeTrackingSection";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Task } from "@/entities/Task";
+import { Column } from "@/entities/Column";
 import { Board } from "@/entities/Board";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -55,6 +57,9 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
   const [showWatcherDialog, setShowWatcherDialog] = useState(false); // Potentially new watcher dialog state (singular)
   const [boardMembers, setBoardMembers] = useState([]);
   const [clientProjects, setClientProjects] = useState([]);
+  const [boardName, setBoardName] = useState("");
+  const [columnName, setColumnName] = useState("");
+  const navigate = useNavigate();
 
   const usersMap = React.useMemo(() => {
     return (allUsers || []).reduce((acc, user) => {
@@ -62,6 +67,19 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
       return acc;
     }, {});
   }, [allUsers]);
+
+  React.useEffect(() => {
+    const loadLocation = async () => {
+      if (!task?.board_id || !task?.column_id) return;
+      const [boards, columns] = await Promise.all([
+        Board.filter({ id: task.board_id }),
+        Column.filter({ id: task.column_id }),
+      ]);
+      if (boards.length > 0) setBoardName(boards[0].name);
+      if (columns.length > 0) setColumnName(columns[0].name);
+    };
+    loadLocation();
+  }, [task?.board_id, task?.column_id]);
 
   React.useEffect(() => {
     const loadClientProjects = async () => {
@@ -195,6 +213,20 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
   return (
     <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 bg-white overflow-y-auto flex-shrink-0">
       <div className="p-4 space-y-6">
+        {/* Board / Column Location */}
+        {boardName && (
+          <button
+            onClick={() => navigate(`/Board?id=${task.board_id}`)}
+            className="w-full flex items-start gap-2 p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors text-left group"
+          >
+            <MapPin className="w-4 h-4 text-slate-400 group-hover:text-teal-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-semibold text-slate-700 group-hover:text-teal-700">{boardName}</p>
+              {columnName && <p className="text-xs text-slate-500">{columnName}</p>}
+            </div>
+          </button>
+        )}
+
         {/* Complete Task Button */}
         {task.status !== 'completed' && (
           <Button
