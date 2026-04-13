@@ -14,6 +14,17 @@ Deno.serve(async (req) => {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().slice(0, 10); // YYYY-MM-DD
 
+  // Check if Tomorrow column is empty first
+  const tomorrowExisting = await base44.asServiceRole.entities.Task.filter({
+    board_id: BOARD_ID,
+    column_id: TOMORROW_COL_ID,
+    status: 'active',
+  });
+
+  if (tomorrowExisting.length > 0) {
+    return Response.json({ message: 'Tomorrow column is not empty, skipping move', count: tomorrowExisting.length });
+  }
+
   // Fetch active tasks in Upcoming Tasks column
   const tasks = await base44.asServiceRole.entities.Task.filter({
     board_id: BOARD_ID,
