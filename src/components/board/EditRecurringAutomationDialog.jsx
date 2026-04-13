@@ -315,6 +315,7 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
               <div className="space-y-1 mt-1">
                 {checklistItems.map((item, index) => (
                   <div key={index} className="flex items-center gap-2 bg-slate-50 rounded px-2 py-1">
+                    <CheckSquare className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                     <span className="text-sm flex-1">{item}</span>
                     <button type="button" onClick={() => setChecklistItems(prev => prev.filter((_, i) => i !== index))} className="text-slate-400 hover:text-red-500">
                       <X className="w-3.5 h-3.5" />

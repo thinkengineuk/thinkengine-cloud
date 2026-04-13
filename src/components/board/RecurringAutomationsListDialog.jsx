@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Zap, Calendar, Clock, User, Trash2, Eye, EyeOff, Pencil } from "lucide-react";
+import { Zap, Calendar, Clock, User, Trash2, Eye, EyeOff, Pencil, Tag, CheckSquare } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import EditRecurringAutomationDialog from "./EditRecurringAutomationDialog";
 
@@ -97,6 +97,27 @@ export default function RecurringAutomationsListDialog({ open, onOpenChange, boa
                     <span className="text-slate-400">{automation.watchers.length} watcher{automation.watchers.length > 1 ? 's' : ''}</span>
                   )}
                 </div>
+
+                {automation.tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {automation.tags.map(tag => (
+                      <span key={tag} className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs rounded px-2 py-0.5">
+                        <Tag className="w-2.5 h-2.5" />{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {automation.checklist_items?.length > 0 && (
+                  <div className="mt-2 space-y-0.5">
+                    {automation.checklist_items.map((item, i) => (
+                      <div key={i} className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <CheckSquare className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <div className="flex items-center justify-end gap-2 mt-3 pt-2 border-t border-slate-100">
                   <Button variant="ghost" size="sm" className="h-7 text-xs text-slate-500 hover:text-slate-700" onClick={() => setEditingAutomation(automation)}>
