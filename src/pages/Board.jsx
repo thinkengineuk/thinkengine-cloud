@@ -327,10 +327,10 @@ export default function BoardPage() {
     });
     setAllTasks(updatedAllTasks);
 
-    // Persist to database
+    // Persist to database — don't reload on success; optimistic state is already correct.
+    // Only reload on error to revert to server state.
     try {
       await Promise.all(tasksToUpdate.map(({ id, updates }) => Task.update(id, updates)));
-      loadBoard();
     } catch (error) {
       console.error('Error updating tasks:', error);
       loadBoard();
