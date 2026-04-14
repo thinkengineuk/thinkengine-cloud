@@ -412,8 +412,6 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
                           isDragging={snapshot.isDragging}
                           onToggleTaskComplete={onToggleTaskComplete}
                           allColumns={otherColumns}
-                          allBoardColumns={allBoardColumns}
-                          currentColumnId={column.id}
                           onMoveTask={onMoveTask}
                           counts={taskCountsMap?.[task.id]}
                         />
