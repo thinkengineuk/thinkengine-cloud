@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Board as BoardEntity } from "@/entities/Board";
 import { Column } from "@/entities/Column";
 import { Task } from "@/entities/Task";
@@ -80,6 +80,8 @@ export default function BoardPage() {
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
   const [taskCountsMap, setTaskCountsMap] = useState({});
+  // Track whether we've already loaded users for this board (avoid re-fetching on every refresh)
+  const usersLoadedForBoard = useRef(null);
 
   const loadBoard = useCallback(async () => {
     if (!boardId) {
@@ -105,13 +107,17 @@ export default function BoardPage() {
       setBoard(fetchedBoard);
       setColumns(columnsData);
 
-      const usersResponse = await getBoardUsers({ boardId });
-      const allUsers = usersResponse.data?.users || [];
-      const usersByEmail = {};
-      allUsers.forEach(u => { usersByEmail[u.email] = u; });
-      setUsersMap(usersByEmail);
-      setUsers(allUsers);
-      
+      // Only fetch users once per board (not on every refresh)
+      if (usersLoadedForBoard.current !== boardId) {
+        const usersResponse = await getBoardUsers({ boardId });
+        const allUsers = usersResponse.data?.users || [];
+        const usersByEmail = {};
+        allUsers.forEach(u => { usersByEmail[u.email] = u; });
+        setUsersMap(usersByEmail);
+        setUsers(allUsers);
+        usersLoadedForBoard.current = boardId;
+      }
+
       const uniqueTasks = [];
       const seenIds = new Set();
       for (const task of tasksData) {
@@ -121,10 +127,12 @@ export default function BoardPage() {
         }
       }
 
+      // Filter comments/attachments/checklists to only this board's tasks
+      const taskIds = uniqueTasks.map(t => t.id);
       const [commentsData, attachmentsData, checklistsData] = await Promise.all([
-        Comment.list(),
-        Attachment.list(),
-        Checklist.list(),
+        Comment.filter({ task_id: taskIds }),
+        Attachment.filter({ task_id: taskIds }),
+        Checklist.filter({ task_id: taskIds }),
       ]);
       const countsMap = {};
       const previewMap = {};
