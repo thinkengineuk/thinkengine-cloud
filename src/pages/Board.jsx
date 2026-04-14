@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Board as BoardEntity } from "@/entities/Board";
 import { Column } from "@/entities/Column";
 import { Task } from "@/entities/Task";
@@ -80,6 +80,7 @@ export default function BoardPage() {
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
   const [taskCountsMap, setTaskCountsMap] = useState({});
+  const columnSortedTaskIdsRef = React.useRef({});
 
   const loadBoard = useCallback(async () => {
     if (!boardId) {
@@ -267,21 +268,20 @@ export default function BoardPage() {
     const sourceColumnId = source.droppableId;
     const destColumnId = destination.droppableId;
 
+    // Use the actual rendered order from columns (respecting sort mode)
+    const getRenderedColumnTasks = (colId) => {
+      const ids = columnSortedTaskIdsRef.current[colId] || [];
+      return ids.map(id => allTasks.find(t => t.id === id)).filter(Boolean);
+    };
 
-
-    // Get tasks in each column, sorted by current position to ensure consistency
-    const sourceColumnTasks = allTasks
-      .filter(t => t.column_id === sourceColumnId)
-      .sort((a, b) => (a.position || 0) - (b.position || 0));
-    const destColumnTasks = allTasks
-      .filter(t => t.column_id === destColumnId)
-      .sort((a, b) => (a.position || 0) - (b.position || 0));
+    const sourceColumnTasks = getRenderedColumnTasks(sourceColumnId);
+    const destColumnTasks = getRenderedColumnTasks(destColumnId);
 
     // Find the dragged task
     const draggedTask = allTasks.find(t => t.id === taskId);
     if (!draggedTask) return;
 
-    // Remove dragged task from source and rebuild destination
+    // Remove dragged task from source and insert into destination at drop index
     const newSourceTasks = sourceColumnTasks.filter(t => t.id !== taskId);
     let newDestTasks = destColumnTasks.filter(t => t.id !== taskId);
     newDestTasks.splice(destination.index, 0, draggedTask);
@@ -295,10 +295,9 @@ export default function BoardPage() {
       newStatus = 'active';
     }
 
-    // Create updates array with recalculated positions
+    // Build updates based on rendered order
     const tasksToUpdate = [];
     
-    // Update positions in destination column
     newDestTasks.forEach((task, index) => {
       tasksToUpdate.push({
         id: task.id,
@@ -310,7 +309,6 @@ export default function BoardPage() {
       });
     });
 
-    // If different columns, update positions in source column too
     if (sourceColumnId !== destColumnId) {
       newSourceTasks.forEach((task, index) => {
         tasksToUpdate.push({
@@ -327,8 +325,7 @@ export default function BoardPage() {
     });
     setAllTasks(updatedAllTasks);
 
-    // Persist to database — don't reload on success; optimistic state is already correct.
-    // Only reload on error to revert to server state.
+    // Persist — no reload on success
     try {
       await Promise.all(tasksToUpdate.map(({ id, updates }) => Task.update(id, updates)));
     } catch (error) {
@@ -716,9 +713,12 @@ export default function BoardPage() {
                           dragHandleProps={provided.dragHandleProps}
                           isDragging={snapshot.isDragging}
                           onToggleTaskComplete={handleToggleTaskComplete}
-                           allBoardColumns={columns}
-                           onMoveTask={handleMoveTask}
-                           taskCountsMap={taskCountsMap}
+                          allBoardColumns={columns}
+                          onMoveTask={handleMoveTask}
+                          taskCountsMap={taskCountsMap}
+                          onSortedTaskIdsChange={(ids) => {
+                            columnSortedTaskIdsRef.current[column.id] = ids;
+                          }}
                         />
                       </div>
                     )}
