@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreHorizontal, MessageSquare, Paperclip, CheckSquare, Link } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, AlertCircle, CheckCircle, Eye, MoreHorizontal, MessageSquare, Paperclip, CheckSquare, Link, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, isToday, startOfDay } from "date-fns";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
@@ -40,7 +40,7 @@ const getTagColor = (tag, customColors = {}) => {
   return colors[Math.abs(hash) % colors.length];
 };
 
-const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete, allColumns, onMoveTask, counts }) => {
+const TaskCard = React.memo(({ task, usersMap, onClick, isDragging, onToggleTaskComplete, allColumns, allBoardColumns, currentColumnId, onMoveTask, counts }) => {
 const assignedUser = task.assigned_to ? usersMap[task.assigned_to] : null;
 const displayName = assignedUser ? (assignedUser.user_full_name || assignedUser.full_name) : null;
   const [linkCopied, setLinkCopied] = useState(false);
@@ -208,6 +208,32 @@ const displayName = assignedUser ? (assignedUser.user_full_name || assignedUser.
 
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
           <div className={`flex items-center gap-2 text-xs ${isCompleted ? 'text-slate-400' : 'text-slate-500'}`}>
+            {allBoardColumns && currentColumnId && onMoveTask && (() => {
+              const sortedCols = [...allBoardColumns].sort((a, b) => (a.position || 0) - (b.position || 0));
+              const currentIdx = sortedCols.findIndex(c => c.id === currentColumnId);
+              const prevCol = currentIdx > 0 ? sortedCols[currentIdx - 1] : null;
+              const nextCol = currentIdx < sortedCols.length - 1 ? sortedCols[currentIdx + 1] : null;
+              return (
+                <div className="flex items-center gap-0.5">
+                  <button
+                    disabled={!prevCol}
+                    onClick={(e) => { e.stopPropagation(); if (prevCol) onMoveTask(task.id, prevCol.id); }}
+                    title={prevCol ? `Move to ${prevCol.name}` : 'No column to the left'}
+                    className={`flex items-center justify-center w-5 h-5 rounded text-xs font-bold transition-colors ${prevCol ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-800 cursor-pointer' : 'text-slate-200 cursor-not-allowed'}`}
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    disabled={!nextCol}
+                    onClick={(e) => { e.stopPropagation(); if (nextCol) onMoveTask(task.id, nextCol.id); }}
+                    title={nextCol ? `Move to ${nextCol.name}` : 'No column to the right'}
+                    className={`flex items-center justify-center w-5 h-5 rounded text-xs font-bold transition-colors ${nextCol ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-800 cursor-pointer' : 'text-slate-200 cursor-not-allowed'}`}
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              );
+            })()}
             {formattedDueDate && (
               <div className={`flex items-center gap-1 ${
                 dueStatus === 'overdue' ? 'text-orange-700 font-semibold' : ''
