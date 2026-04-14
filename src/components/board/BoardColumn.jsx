@@ -36,7 +36,7 @@ const colorMap = {
   black: { bg: 'from-slate-700 to-slate-900', light: 'bg-slate-50' },
 };
 
-export default function BoardColumn({ column, tasks, users, usersMap, currentUser, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete, allBoardColumns, onMoveTask, taskCountsMap, onSortedTaskIdsChange }) {
+export default function BoardColumn({ column, tasks, users, usersMap, currentUser, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete, allBoardColumns, onMoveTask, taskCountsMap }) {
   const otherColumns = React.useMemo(() => {
     if (!allBoardColumns) return [];
     return allBoardColumns.filter(c => c.id !== column.id);
@@ -179,13 +179,7 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
     }
     
     return tasksCopy;
-  }, [tasks, sortBy, column.name, usersMap]);
-
-  useEffect(() => {
-    if (onSortedTaskIdsChange) {
-      onSortedTaskIdsChange(sortedTasks.map(t => t.id));
-    }
-  }, [sortedTasks, onSortedTaskIdsChange]);
+  }, [tasks, sortBy, column.name]);
 
   const handleCreateTask = async (taskData) => {
     const position = tasks.length;
