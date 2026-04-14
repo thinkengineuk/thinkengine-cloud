@@ -17,6 +17,9 @@ import TaskDetailHeader from "./TaskDetailHeader";
 import TaskDetailSidebar from "./TaskDetailSidebar";
 import TaskDetailMain from "./TaskDetailMain";
 
+// Helper to get display name from a user object
+const getDisplayName = (user) => user?.user_full_name || user?.full_name || user?.email || 'Unknown';
+
 export default function TaskDetailModal({ task, boardId, onClose, onRefresh, allColumns, onMoveTask }) {
   const [taskData, setTaskData] = useState(task);
   const [allUsers, setAllUsers] = useState([]);
@@ -100,7 +103,7 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh, all
     await ActivityLog.create({
       task_id: taskData.id,
       action_type: 'assigned',
-      action_description: `${currentUser?.full_name} assigned this task to ${assignedUser?.full_name}`,
+      action_description: `${getDisplayName(currentUser)} assigned this task to ${getDisplayName(assignedUser)}`,
       user_email: currentUser?.email,
     });
   };
@@ -135,7 +138,7 @@ export default function TaskDetailModal({ task, boardId, onClose, onRefresh, all
         await ActivityLog.create({
           task_id: taskData.id,
           action_type: 'updated',
-          action_description: `${currentUser?.full_name} added ${watcherUser?.full_name} as a watcher`,
+          action_description: `${getDisplayName(currentUser)} added ${getDisplayName(watcherUser)} as a watcher`,
           user_email: currentUser?.email,
         });
       }

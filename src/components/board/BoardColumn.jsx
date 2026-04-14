@@ -36,6 +36,9 @@ const colorMap = {
   black: { bg: 'from-slate-700 to-slate-900', light: 'bg-slate-50' },
 };
 
+// Helper to get display name from a user object
+const getDisplayName = (user) => user?.user_full_name || user?.full_name || user?.email || 'Unknown';
+
 export default function BoardColumn({ column, tasks, users, usersMap, currentUser, onTaskClick, onRefresh, dragHandleProps, isDragging, onToggleTaskComplete, allBoardColumns, onMoveTask, taskCountsMap }) {
   const otherColumns = React.useMemo(() => {
     if (!allBoardColumns) return [];
@@ -206,39 +209,23 @@ export default function BoardColumn({ column, tasks, users, usersMap, currentUse
       ));
     }
 
+    const currentUserDisplayName = getDisplayName(currentUser);
+
     await ActivityLog.create({
       task_id: createdTask.id,
       action_type: 'created',
-      action_description: `${currentUser.full_name} created task "${taskData.title}"`,
+      action_description: `${currentUserDisplayName} created task "${taskData.title}"`,
       user_email: currentUser.email
     });
 
     if (taskData.assigned_to) {
-      const assignedUser = await User.filter({ email: taskData.assigned_to });
-      const taskUrl = `${window.location.origin}/Board?id=${column.board_id}&taskId=${createdTask.id}`;
-      const boardDetails = await Board.filter({ id: column.board_id });
-      const board = boardDetails[0];
-
-      const htmlBody = buildAssignedEmail({
-        recipientName: assignedUser[0]?.full_name,
-        assignerName: currentUser.full_name,
-        taskTitle: taskData.title,
-        boardName: board?.name,
-        dueDate: taskData.due_date,
-        taskUrl,
-      });
-
-      // EMAIL PAUSED
-      // await SendEmail({
-      //   to: taskData.assigned_to,
-      //   subject: `New task assigned: "${taskData.title}"`,
-      //   body: htmlBody,
-      // });
+      const assignedUser = users.find(u => u.email === taskData.assigned_to);
+      const assignedUserDisplayName = assignedUser ? getDisplayName(assignedUser) : taskData.assigned_to;
 
       await ActivityLog.create({
         task_id: createdTask.id,
         action_type: 'assigned',
-        action_description: `${currentUser.full_name} assigned this task to ${taskData.assigned_to}`,
+        action_description: `${currentUserDisplayName} assigned this task to ${assignedUserDisplayName}`,
         user_email: currentUser.email
       });
     }
