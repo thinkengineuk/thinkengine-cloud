@@ -56,6 +56,41 @@ Deno.serve(async (req) => {
       total_rows_exported: totalRows,
     });
 
+    const appUrl = Deno.env.get("APP_URL") || "https://app.base44.com";
+    const dataExportsUrl = `${appUrl}/DataExports`;
+
+    await base44.integrations.Core.SendEmail({
+      to: "ben@thinkengine.co",
+      subject: `Monthly Data Export Complete — ${exportDate}`,
+      body: `<!DOCTYPE html>
+<html>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:#f1f5f9;margin:0;padding:40px 16px;">
+  <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+    <tr><td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:10px 10px 0 0;padding:28px 32px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">THINKENGINE CLOUD</div>
+      <div style="font-size:20px;font-weight:700;color:#fff;">Monthly Data Export Complete</div>
+    </td></tr>
+    <tr><td style="background:#fff;padding:32px;border:1px solid #e2e8f0;border-top:none;">
+      <p style="font-size:15px;color:#1e293b;margin:0 0 12px;">Hi Ben,</p>
+      <p style="font-size:15px;color:#475569;margin:0 0 20px;">The monthly data export for <strong>${exportDate}</strong> completed successfully.</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:24px;">
+        <tr><td style="font-size:13px;color:#64748b;padding:4px 0;"><strong style="color:#1e293b;">Total rows exported:</strong> ${totalRows.toLocaleString()}</td></tr>
+        <tr><td style="font-size:13px;color:#64748b;padding:4px 0;"><strong style="color:#1e293b;">Files exported:</strong> ${files.length} entities</td></tr>
+      </table>
+      <div style="text-align:center;">
+        <a href="${dataExportsUrl}" style="display:inline-block;background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:#fff;text-decoration:none;padding:13px 32px;border-radius:7px;font-weight:600;font-size:15px;">View & Download Files</a>
+      </div>
+    </td></tr>
+    <tr><td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:16px 32px;text-align:center;">
+      <div style="font-size:12px;color:#94a3b8;">ThinkEngine Cloud — Automated Monthly Export</div>
+    </td></tr>
+  </table>
+  </td></tr></table>
+</body>
+</html>`,
+    });
+
     return Response.json({ success: true, export_date: exportDate, total_rows_exported: totalRows, files_count: files.length });
   } catch (error) {
     const base44 = createClientFromRequest(req);
