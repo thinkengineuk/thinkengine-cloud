@@ -1,0 +1,49 @@
+{
+  "name": "DataExport",
+  "type": "object",
+  "properties": {
+    "export_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the export was run"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed"
+      ],
+      "description": "Whether the export succeeded or failed"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entity_name": {
+            "type": "string"
+          },
+          "file_uri": {
+            "type": "string"
+          },
+          "row_count": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "List of exported files with their private storage URIs"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error details if the export failed"
+    },
+    "total_rows_exported": {
+      "type": "number",
+      "description": "Total number of rows exported across all entities"
+    }
+  },
+  "required": [
+    "export_date",
+    "status"
+  ]
+}

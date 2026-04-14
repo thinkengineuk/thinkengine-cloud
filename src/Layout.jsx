@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, User, LogOut, BarChart2, FolderKanban, Users, Briefcase, Archive, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LayoutDashboard, User, LogOut, BarChart2, FolderKanban, Users, Briefcase, Archive, Database, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { User as UserEntity } from "@/entities/User";
 import { Board } from "@/entities/Board";
 import {
@@ -105,6 +105,12 @@ export default function Layout({ children }) {
       url: "/ArchivedTasks",
       icon: Archive,
       show: true,
+    },
+    {
+      title: "Data Exports",
+      url: "/DataExports",
+      icon: Database,
+      show: user?.role === "admin",
     },
     {
       title: "Clients",
