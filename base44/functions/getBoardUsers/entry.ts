@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.26';
 
 // Simple in-memory cache to avoid hammering the API on repeated calls
 const usersCache = { data: null, fetchedAt: 0 };

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.26';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 

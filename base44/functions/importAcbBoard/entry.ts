@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.26';
 import { parse } from 'npm:csv-parse@5.5.3/sync';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));

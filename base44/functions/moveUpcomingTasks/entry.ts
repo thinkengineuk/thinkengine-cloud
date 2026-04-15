@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.26';
 
 const UPCOMING_TASKS_COL_ID = '69d4d769e797d94e49edffa5';
 const TOMORROW_COL_ID = '69d4d7683036fb078175e45a';

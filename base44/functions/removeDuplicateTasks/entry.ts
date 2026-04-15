@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.26';
 
 function generateId() {
     return Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
