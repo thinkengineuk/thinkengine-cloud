@@ -1,7 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 function addInterval(date, pattern) {
-  const d = new Date(date); // always clone to avoid mutation
+  const d = new Date(date);
   switch (pattern) {
     case 'daily': d.setDate(d.getDate() + 1); break;
     case 'weekly': d.setDate(d.getDate() + 7); break;
@@ -14,34 +14,25 @@ function addInterval(date, pattern) {
   return d;
 }
 
-function toDateOnly(date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   let spawned = 0;
-
-  const today = toDateOnly(new Date());
-  const todayStr = today.toISOString().split('T')[0];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   // --- Spawn from recurring Task templates ---
   const recurringTasks = await base44.asServiceRole.entities.Task.filter({ is_recurring: true });
 
   for (const template of recurringTasks) {
-    if (!template.recurrence_start_date) continue;
+    const startDate = template.recurrence_start_date ? new Date(template.recurrence_start_date) : null;
+    if (!startDate) continue;
 
-    const startDate = toDateOnly(new Date(template.recurrence_start_date));
-    const lastSpawned = template.last_spawned_date ? toDateOnly(new Date(template.last_spawned_date)) : null;
-
-    // Calculate next spawn date
-    const nextSpawnDate = lastSpawned
-      ? toDateOnly(addInterval(lastSpawned, template.recurrence_pattern))
-      : startDate;
+    const lastSpawned = template.last_spawned_date ? new Date(template.last_spawned_date) : null;
+    let nextSpawnDate = lastSpawned ? addInterval(lastSpawned, template.recurrence_pattern) : startDate;
+    nextSpawnDate.setHours(0, 0, 0, 0);
 
     if (today >= nextSpawnDate) {
+      const todayStr = today.toISOString().split('T')[0];
       await base44.asServiceRole.entities.Task.create({
         board_id: template.board_id,
         column_id: template.column_id,
@@ -54,42 +45,33 @@ Deno.serve(async (req) => {
         parent_recurring_task_id: template.id,
         position: 9999,
         tags: template.tags || [],
-        due_date: nextSpawnDate.toISOString(),
       });
       await base44.asServiceRole.entities.Task.update(template.id, { last_spawned_date: todayStr });
       spawned++;
-      console.log(`Spawned task template: "${template.title}" with due_date: ${nextSpawnDate.toISOString()}`);
+      console.log(`Spawned task template: "${template.title}"`);
     }
   }
 
   // --- Spawn from RecurringAutomation entities ---
   const automations = await base44.asServiceRole.entities.RecurringAutomation.filter({ is_active: true });
 
-  // Get current time in Europe/London
-  const nowLondon = new Date(new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' }));
-
   for (const automation of automations) {
-    if (!automation.recurrence_start_date) continue;
+    const startDate = automation.recurrence_start_date ? new Date(automation.recurrence_start_date) : null;
+    if (!startDate) continue;
 
-    // Check scheduled_time against London local time
-    if (automation.scheduled_time) {
-      const [schedHour, schedMin] = automation.scheduled_time.split(':').map(Number);
-      const londonHour = nowLondon.getHours();
-      const londonMin = nowLondon.getMinutes();
-      if (londonHour < schedHour || (londonHour === schedHour && londonMin < schedMin)) {
-        console.log(`Skipping "${automation.title}" — scheduled time not yet reached (${automation.scheduled_time} London)`);
-        continue;
-      }
-    }
+    // Check scheduled_time — only spawn if current hour:min >= scheduled_time
+    const [schedHour, schedMin] = (automation.scheduled_time || '00:00').split(':').map(Number);
+    const now = new Date();
+    const todayAtScheduledTime = new Date(today);
+    todayAtScheduledTime.setHours(schedHour, schedMin, 0, 0);
+    if (now < todayAtScheduledTime) continue; // Not yet time today
 
-    const startDate = toDateOnly(new Date(automation.recurrence_start_date));
-    const lastSpawned = automation.last_spawned_date ? toDateOnly(new Date(automation.last_spawned_date)) : null;
-
-    const nextSpawnDate = lastSpawned
-      ? toDateOnly(addInterval(lastSpawned, automation.recurrence_pattern))
-      : startDate;
+    const lastSpawned = automation.last_spawned_date ? new Date(automation.last_spawned_date) : null;
+    let nextSpawnDate = lastSpawned ? addInterval(lastSpawned, automation.recurrence_pattern) : startDate;
+    nextSpawnDate.setHours(0, 0, 0, 0);
 
     if (today >= nextSpawnDate) {
+      const todayStr = today.toISOString().split('T')[0];
       const newTask = await base44.asServiceRole.entities.Task.create({
         board_id: automation.board_id,
         column_id: automation.column_id,
@@ -101,14 +83,13 @@ Deno.serve(async (req) => {
         tags: automation.tags || [],
         status: 'active',
         position: 9999,
-        due_date: nextSpawnDate.toISOString(),
       });
 
       // Create checklist if automation has checklist items
       if (automation.checklist_items?.length > 0) {
         const checklist = await base44.asServiceRole.entities.Checklist.create({
           task_id: newTask.id,
-          title: 'Checklist',
+          title: "Checklist",
           position: 0,
         });
         for (let i = 0; i < automation.checklist_items.length; i++) {
@@ -123,7 +104,7 @@ Deno.serve(async (req) => {
 
       await base44.asServiceRole.entities.RecurringAutomation.update(automation.id, { last_spawned_date: todayStr });
       spawned++;
-      console.log(`Spawned automation task: "${automation.title}" with due_date: ${nextSpawnDate.toISOString()}`);
+      console.log(`Spawned automation task: "${automation.title}"`);
     }
   }
 
