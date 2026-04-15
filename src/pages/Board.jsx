@@ -240,6 +240,63 @@ export default function BoardPage() {
     loadBoard();
   };
 
+  // Get the sort preference for a column (mirrors BoardColumn's localStorage key)
+  const getColumnSortedTasks = (columnId, columnName, taskList) => {
+    let sortBy = 'due_date';
+    try {
+      const saved = localStorage.getItem(`column-${columnId}-sort`);
+      if (saved) sortBy = saved;
+    } catch {}
+
+    const colTasks = taskList.filter(t => t.column_id === columnId);
+
+    // Completed column always sorts by recently updated
+    if (columnName?.toLowerCase() === 'completed') {
+      return colTasks.sort((a, b) => new Date(b.updated_date || 0) - new Date(a.updated_date || 0));
+    }
+
+    if (sortBy === 'priority') {
+      const order = { high: 0, medium: 1, low: 2 };
+      return colTasks.sort((a, b) => (order[a.priority] ?? 3) - (order[b.priority] ?? 3));
+    } else if (sortBy === 'title') {
+      return colTasks.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === 'created') {
+      return colTasks.sort((a, b) => new Date(b.created_date || 0) - new Date(a.created_date || 0));
+    } else if (sortBy === 'manual') {
+      return colTasks.sort((a, b) => (a.position || 0) - (b.position || 0));
+    } else if (sortBy === 'team_order') {
+      const teamOrder = ['josh', 'tom', 'emma', 'karl', 'keara', 'chloe', 'ben'];
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      return colTasks.sort((a, b) => {
+        const aUser = usersMap[a.assigned_to];
+        const bUser = usersMap[b.assigned_to];
+        const aFirst = aUser?.full_name?.split(' ')[0]?.toLowerCase() || '';
+        const bFirst = bUser?.full_name?.split(' ')[0]?.toLowerCase() || '';
+        const teamDiff = (teamOrder.indexOf(aFirst) === -1 ? 999 : teamOrder.indexOf(aFirst)) -
+                         (teamOrder.indexOf(bFirst) === -1 ? 999 : teamOrder.indexOf(bFirst));
+        if (teamDiff !== 0) return teamDiff;
+        return (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3);
+      });
+    } else {
+      // due_date (default)
+      const statusPriority = { overdue: 0, today: 1, upcoming: 2, none: 3 };
+      const getDueStatus = (task) => {
+        if (!task.due_date) return 'none';
+        const today = new Date(); today.setHours(0,0,0,0);
+        const due = new Date(task.due_date); due.setHours(0,0,0,0);
+        if (due < today) return 'overdue';
+        if (due.getTime() === today.getTime()) return 'today';
+        return 'upcoming';
+      };
+      return colTasks.sort((a, b) => {
+        const diff = statusPriority[getDueStatus(a)] - statusPriority[getDueStatus(b)];
+        if (diff !== 0) return diff;
+        if (a.due_date && b.due_date) return new Date(a.due_date) - new Date(b.due_date);
+        return 0;
+      });
+    }
+  };
+
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
 
@@ -258,10 +315,7 @@ export default function BoardPage() {
 
       (async () => {
         try {
-          const updates = reorderedColumns.map((col, index) => 
-            Column.update(col.id, { position: index })
-          );
-          await Promise.all(updates);
+          await Promise.all(reorderedColumns.map((col, index) => Column.update(col.id, { position: index })));
         } catch (error) {
           console.error('Error updating column positions:', error);
           loadBoard();
@@ -275,27 +329,21 @@ export default function BoardPage() {
     const sourceColumnId = source.droppableId;
     const destColumnId = destination.droppableId;
 
+    const sourceColumn = columns.find(c => c.id === sourceColumnId);
+    const destColumn = columns.find(c => c.id === destColumnId);
 
+    // Use the same sort order that BoardColumn uses, so destination.index matches the visual position
+    const sourceColumnTasks = getColumnSortedTasks(sourceColumnId, sourceColumn?.name, allTasks);
+    const destColumnTasks = getColumnSortedTasks(destColumnId, destColumn?.name, allTasks);
 
-    // Get tasks in each column, sorted by current position to ensure consistency
-    const sourceColumnTasks = allTasks
-      .filter(t => t.column_id === sourceColumnId)
-      .sort((a, b) => (a.position || 0) - (b.position || 0));
-    const destColumnTasks = allTasks
-      .filter(t => t.column_id === destColumnId)
-      .sort((a, b) => (a.position || 0) - (b.position || 0));
-
-    // Find the dragged task
     const draggedTask = allTasks.find(t => t.id === taskId);
     if (!draggedTask) return;
 
-    // Remove dragged task from source and rebuild destination
     const newSourceTasks = sourceColumnTasks.filter(t => t.id !== taskId);
-    let newDestTasks = destColumnTasks.filter(t => t.id !== taskId);
+    const newDestTasks = destColumnTasks.filter(t => t.id !== taskId);
     newDestTasks.splice(destination.index, 0, draggedTask);
 
     // Check if moving to/from completed column
-    const destColumn = columns.find(col => col.id === destColumnId);
     let newStatus = draggedTask.status;
     if (destColumn?.name.toLowerCase() === 'completed' && draggedTask.status !== 'completed') {
       newStatus = 'completed';
@@ -303,10 +351,8 @@ export default function BoardPage() {
       newStatus = 'active';
     }
 
-    // Create updates array with recalculated positions
     const tasksToUpdate = [];
-    
-    // Update positions in destination column
+
     newDestTasks.forEach((task, index) => {
       tasksToUpdate.push({
         id: task.id,
@@ -318,13 +364,9 @@ export default function BoardPage() {
       });
     });
 
-    // If different columns, update positions in source column too
     if (sourceColumnId !== destColumnId) {
       newSourceTasks.forEach((task, index) => {
-        tasksToUpdate.push({
-          id: task.id,
-          updates: { position: index }
-        });
+        tasksToUpdate.push({ id: task.id, updates: { position: index } });
       });
     }
 
@@ -335,8 +377,6 @@ export default function BoardPage() {
     });
     setAllTasks(updatedAllTasks);
 
-    // Persist to database — don't reload on success; optimistic state is already correct.
-    // Only reload on error to revert to server state.
     try {
       await Promise.all(tasksToUpdate.map(({ id, updates }) => Task.update(id, updates)));
     } catch (error) {
