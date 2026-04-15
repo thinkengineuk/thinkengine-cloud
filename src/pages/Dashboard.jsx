@@ -67,10 +67,9 @@ export default function Dashboard() {
     });
     setBoardsMap(bMap);
 
-    // Fetch tasks, activity, users, and columns in parallel
-    const [allAssignedTasks, allActivityLogs, allUsers, allColumns] = await Promise.all([
+    // Fetch tasks, users, and columns in parallel
+    const [allAssignedTasks, allUsers, allColumns] = await Promise.all([
       Task.filter({ assigned_to: currentUser.email, status: 'active' }, "-created_date"),
-      ActivityLog.list("-created_date", 10),
       User.list(),
       Column.list()
     ]);
@@ -99,7 +98,22 @@ export default function Dashboard() {
     });
 
     setTasks(sortedTasks);
-    setRecentActivity(allActivityLogs);
+
+    // Activity feed: Chloe sees everything, others only see activity on their own tasks
+    const isChloe = currentUser.full_name?.toLowerCase().startsWith('chloe') ||
+                    currentUser.email?.toLowerCase().startsWith('chloe');
+
+    let activityLogs;
+    if (isChloe) {
+      activityLogs = await ActivityLog.list("-created_date", 20);
+    } else {
+      // Get all tasks assigned to the current user (not just active/today) to find their task IDs
+      const allMyTasks = await Task.filter({ assigned_to: currentUser.email }, "-created_date");
+      const myTaskIds = new Set(allMyTasks.map(t => t.id));
+      const allLogs = await ActivityLog.list("-created_date", 100);
+      activityLogs = allLogs.filter(log => myTaskIds.has(log.task_id)).slice(0, 20);
+    }
+    setRecentActivity(activityLogs);
   };
 
   const handleDeleteBoard = async () => {
