@@ -160,13 +160,13 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     
     setSubmitting(true);
     try {
-      // Extract mentions by checking if any known user's name appears after @
+      // Extract mentions using regex: @Name must be followed by a space, punctuation, or end of string
       const mentions = [];
-      const lowercasedNewComment = newComment.toLowerCase();
       for (const user of users) {
         const displayName = user.user_full_name || user.full_name;
-        const mentionPattern = `@${displayName.toLowerCase()}`;
-        if (lowercasedNewComment.includes(mentionPattern) && !mentions.includes(user.email)) {
+        const escaped = displayName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const mentionRegex = new RegExp(`@${escaped}(?=[^a-zA-Z0-9]|$)`, 'i');
+        if (mentionRegex.test(newComment) && !mentions.includes(user.email)) {
           mentions.push(user.email);
         }
       }
