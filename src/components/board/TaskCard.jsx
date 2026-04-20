@@ -222,9 +222,7 @@ const displayName = assignedUser ? (assignedUser.user_full_name || assignedUser.
           ))}
         </div>
 
-        <p className="text-[11px] italic text-slate-400 -mt-1">
-          Remember to note how long it took in the comments
-        </p>
+
 
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
           <div className={`flex items-center gap-2 text-xs ${isCompleted ? 'text-slate-400' : 'text-slate-500'}`}>
