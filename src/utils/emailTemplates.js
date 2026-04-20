@@ -123,6 +123,19 @@ export function buildWatcherCommentEmail({ recipientName, commenterName, taskTit
 }
 
 /**
+ * Build emoji reaction notification email HTML.
+ */
+export function buildReactionEmail({ recipientName, reactorName, emoji, taskTitle, taskUrl }) {
+  return generateEmailHtml({
+    subject: `${emoji} Reaction on your comment`,
+    greeting: `Hi ${recipientName || 'there'},`,
+    introHtml: `<strong>${reactorName}</strong> reacted <strong style="font-size:20px;">${emoji}</strong> to your comment on the task <strong>${taskTitle}</strong>.`,
+    ctaUrl: taskUrl,
+    ctaLabel: 'View Task',
+  });
+}
+
+/**
  * Build mention notification email HTML.
  */
 export function buildMentionEmail({ recipientName, mentionerName, taskTitle, taskUrl, conversationItems }) {

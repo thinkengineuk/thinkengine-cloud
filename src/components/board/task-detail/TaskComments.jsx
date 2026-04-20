@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Send, Pencil, Trash2, X, Check, Paperclip, FileIcon, ExternalLink, GripVertical } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format, formatDistanceToNow } from "date-fns";
-import { buildMentionEmail, buildWatcherCommentEmail } from "@/utils/emailTemplates";
+import { buildMentionEmail, buildWatcherCommentEmail, buildReactionEmail } from "@/utils/emailTemplates";
 
 export default function TaskComments({ taskId, task, allUsers, currentUser: currentUserProp, onRefresh }) {
   const [comments, setComments] = useState([]);
@@ -430,6 +430,26 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         emoji,
       });
       setReactions(prev => [...prev, created]);
+
+      // Notify the comment author (if it's not yourself)
+      const comment = comments.find(c => c.id === commentId);
+      if (comment && comment.created_by && comment.created_by !== currentUser.email) {
+        const author = users.find(u => u.email === comment.created_by);
+        const taskData = task || {};
+        const taskUrl = `${window.location.origin}/Board?id=${taskData.board_id}&taskId=${taskData.id || taskId}`;
+        const htmlBody = buildReactionEmail({
+          recipientName: getDisplayName(author),
+          reactorName: getDisplayName(currentUser),
+          emoji,
+          taskTitle: taskData.title,
+          taskUrl,
+        });
+        await base44.integrations.Core.SendEmail({
+          to: comment.created_by,
+          subject: `${emoji} ${getDisplayName(currentUser)} reacted to your comment on "${taskData.title}"`,
+          body: htmlBody,
+        });
+      }
     }
   };
 
