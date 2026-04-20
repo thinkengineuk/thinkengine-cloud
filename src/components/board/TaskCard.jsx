@@ -93,6 +93,16 @@ const displayName = assignedUser ? (assignedUser.user_full_name || assignedUser.
   const formattedDueDate = formatDate(task.due_date);
   const dueStatus = getDueStatus();
 
+  const formatMinutes = (mins) => {
+    if (!mins || mins === 0) return null;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h === 0) return `${m}m`;
+    if (m === 0) return `${h}h`;
+    return `${h}h ${m}m`;
+  };
+  const estimatedDisplay = formatMinutes(task.estimated_minutes);
+
   return (
     <Card
       className={`group relative cursor-pointer hover:shadow-lg transition-shadow duration-150 border-slate-200 ${
@@ -196,6 +206,12 @@ const displayName = assignedUser ? (assignedUser.user_full_name || assignedUser.
               <span className="text-xs font-medium text-green-600">Timer running</span>
             </div>
           )}
+          {estimatedDisplay && !isCompleted && (
+            <Badge className="bg-slate-100 text-slate-700 border-slate-200 border flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Est: {estimatedDisplay}
+            </Badge>
+          )}
           {task.tags && task.tags.map((tagItem, index) => (
             <Badge
               key={index}
@@ -205,6 +221,12 @@ const displayName = assignedUser ? (assignedUser.user_full_name || assignedUser.
             </Badge>
           ))}
         </div>
+
+        {estimatedDisplay && !isCompleted && (
+          <p className="text-[11px] italic text-slate-400 -mt-1">
+            Remember to note how long it took in the comments
+          </p>
+        )}
 
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
           <div className={`flex items-center gap-2 text-xs ${isCompleted ? 'text-slate-400' : 'text-slate-500'}`}>
