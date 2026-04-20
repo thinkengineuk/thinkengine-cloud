@@ -148,6 +148,15 @@ export default function BoardPage() {
       setTaskCountsMap(countsMap);
       setAllTasks(uniqueTasks.map(t => ({ ...t, attachmentPreview: previewMap[t.id] || null })));
 
+      // Collect all unique tags from tasks for the tag filter
+      const tagSet = new Set();
+      uniqueTasks.forEach(t => {
+        if (Array.isArray(t.tags)) {
+          t.tags.forEach(tag => { if (tag) tagSet.add(tag); });
+        }
+      });
+      setAllTags(Array.from(tagSet));
+
       const loggedInUser = await base44.auth.me();
       setCurrentUser(loggedInUser);
       const twoFaBoards = ["Ben Tasks", "Management", "Chloe's Projects"];
