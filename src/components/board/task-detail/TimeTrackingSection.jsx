@@ -157,10 +157,6 @@ export default function TimeTrackingSection({ task, currentUser, onRefresh, onUp
                 )}
             </Button>
 
-            <p className="text-xs italic text-slate-500">
-                Remember to note how long it took in the comments
-            </p>
-
             {/* Est & Actual */}
             <div className="text-sm text-slate-600 space-y-1">
                 <div className="flex items-center justify-between gap-2">

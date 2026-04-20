@@ -481,7 +481,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Add a comment... Type @ to mention someone"
+          placeholder="Add a comment... Type @ to mention someone — remember to note how long the task took"
           className="min-h-[80px] resize-none"
         />
         
