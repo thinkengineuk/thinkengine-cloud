@@ -12,7 +12,7 @@ function formatMinutes(minutes) {
     return `${h}h ${m}m`;
 }
 
-export default function TimeTrackingSection({ task, currentUser, onRefresh }) {
+export default function TimeTrackingSection({ task, currentUser, onRefresh, onUpdate }) {
     const [loading, setLoading] = useState(false);
     const [editingEstimate, setEditingEstimate] = useState(false);
     const [estimateHours, setEstimateHours] = useState("");
@@ -74,13 +74,17 @@ export default function TimeTrackingSection({ task, currentUser, onRefresh }) {
     };
 
     const handleSaveEstimate = async () => {
-        const { Task } = await import("@/entities/Task");
         const hrs = parseInt(estimateHours) || 0;
         const mins = parseInt(estimateMinutes) || 0;
         const total = hrs * 60 + mins;
-        await Task.update(task.id, { estimated_minutes: total });
+        if (onUpdate) {
+            await onUpdate({ estimated_minutes: total });
+        } else {
+            const { Task } = await import("@/entities/Task");
+            await Task.update(task.id, { estimated_minutes: total });
+            onRefresh();
+        }
         setEditingEstimate(false);
-        onRefresh();
     };
 
     const startEditEstimate = () => {
@@ -98,13 +102,17 @@ export default function TimeTrackingSection({ task, currentUser, onRefresh }) {
     };
 
     const handleSaveActual = async () => {
-        const { Task } = await import("@/entities/Task");
         const hrs = parseInt(actualHoursInput) || 0;
         const mins = parseInt(actualMinutesInput) || 0;
         const total = hrs * 60 + mins;
-        await Task.update(task.id, { actual_minutes: total });
+        if (onUpdate) {
+            await onUpdate({ actual_minutes: total });
+        } else {
+            const { Task } = await import("@/entities/Task");
+            await Task.update(task.id, { actual_minutes: total });
+            onRefresh();
+        }
         setEditingActual(false);
-        onRefresh();
     };
 
     const actualMinutes = task.actual_minutes || 0;

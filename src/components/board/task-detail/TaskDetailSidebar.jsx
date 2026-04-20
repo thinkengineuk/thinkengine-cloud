@@ -254,6 +254,7 @@ export default function TaskDetailSidebar({ task, allUsers, currentUser, onUpdat
             task={task}
             currentUser={currentUser}
             onRefresh={onRefresh}
+            onUpdate={onUpdate}
           />
         </div>
 
