@@ -17,6 +17,9 @@ export default function TimeTrackingSection({ task, currentUser, onRefresh }) {
     const [editingEstimate, setEditingEstimate] = useState(false);
     const [estimateHours, setEstimateHours] = useState("");
     const [estimateMinutes, setEstimateMinutes] = useState("");
+    const [editingActual, setEditingActual] = useState(false);
+    const [actualHoursInput, setActualHoursInput] = useState("");
+    const [actualMinutesInput, setActualMinutesInput] = useState("");
     const [elapsed, setElapsed] = useState(0);
     const [localTimeEntries, setLocalTimeEntries] = useState(task.time_entries || []);
 
@@ -87,6 +90,23 @@ export default function TimeTrackingSection({ task, currentUser, onRefresh }) {
         setEditingEstimate(true);
     };
 
+    const startEditActual = () => {
+        const act = task.actual_minutes || 0;
+        setActualHoursInput(String(Math.floor(act / 60)));
+        setActualMinutesInput(String(act % 60));
+        setEditingActual(true);
+    };
+
+    const handleSaveActual = async () => {
+        const { Task } = await import("@/entities/Task");
+        const hrs = parseInt(actualHoursInput) || 0;
+        const mins = parseInt(actualMinutesInput) || 0;
+        const total = hrs * 60 + mins;
+        await Task.update(task.id, { actual_minutes: total });
+        setEditingActual(false);
+        onRefresh();
+    };
+
     const actualMinutes = task.actual_minutes || 0;
     const estimatedMinutes = task.estimated_minutes || 0;
 
@@ -143,13 +163,52 @@ export default function TimeTrackingSection({ task, currentUser, onRefresh }) {
                         <Edit2 className="w-3.5 h-3.5" />
                     </button>
                 </div>
-                <div>
-                    <span className="font-medium">Actual:</span>{" "}
-                    <span className={actualMinutes > estimatedMinutes && estimatedMinutes > 0 ? "text-red-600 font-semibold" : ""}>
-                        {formatMinutes(actualMinutes)}
+                <div className="flex items-center justify-between">
+                    <span>
+                        <span className="font-medium">Actual:</span>{" "}
+                        <span className={actualMinutes > estimatedMinutes && estimatedMinutes > 0 ? "text-red-600 font-semibold" : ""}>
+                            {formatMinutes(actualMinutes)}
+                        </span>
                     </span>
+                    <button
+                        onClick={startEditActual}
+                        className="text-slate-400 hover:text-slate-700 transition-colors"
+                        title="Manually edit actual time"
+                    >
+                        <Edit2 className="w-3.5 h-3.5" />
+                    </button>
                 </div>
             </div>
+
+            {/* Edit Actual */}
+            {editingActual && (
+                <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-2">
+                    <div className="flex items-center gap-1 flex-1">
+                        <Input
+                            type="number"
+                            min="0"
+                            value={actualHoursInput}
+                            onChange={(e) => setActualHoursInput(e.target.value)}
+                            placeholder="0"
+                            className="h-8 text-sm w-16"
+                        />
+                        <span className="text-xs text-slate-500">h</span>
+                        <Input
+                            type="number"
+                            min="0"
+                            max="59"
+                            value={actualMinutesInput}
+                            onChange={(e) => setActualMinutesInput(e.target.value)}
+                            placeholder="0"
+                            className="h-8 text-sm w-16"
+                        />
+                        <span className="text-xs text-slate-500">m</span>
+                    </div>
+                    <Button size="sm" className="h-8 px-2" onClick={handleSaveActual}>
+                        <Check className="w-3.5 h-3.5" />
+                    </Button>
+                </div>
+            )}
 
             {/* Edit Estimate */}
             {editingEstimate && (
