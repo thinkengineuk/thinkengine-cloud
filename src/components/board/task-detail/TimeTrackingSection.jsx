@@ -151,29 +151,32 @@ export default function TimeTrackingSection({ task, currentUser, onRefresh }) {
 
             {/* Est & Actual */}
             <div className="text-sm text-slate-600 space-y-1">
-                <div className="flex items-center justify-between">
-                    <span>
+                <div className="flex items-center justify-between gap-2">
+                    <span className="flex-1 min-w-0">
                         <span className="font-medium">Est:</span>{" "}
                         {estimatedMinutes > 0 ? formatMinutes(estimatedMinutes) : "Not set"}
                     </span>
                     <button
+                        type="button"
                         onClick={startEditEstimate}
-                        className="text-slate-400 hover:text-slate-700 transition-colors"
+                        className="text-slate-400 hover:text-slate-700 transition-colors flex-shrink-0"
+                        title="Edit estimated time"
                     >
                         <Edit2 className="w-3.5 h-3.5" />
                     </button>
                 </div>
-                <div className="flex items-center justify-between">
-                    <span>
+                <div className="flex items-center justify-between gap-2">
+                    <span className="flex-1 min-w-0">
                         <span className="font-medium">Actual:</span>{" "}
                         <span className={actualMinutes > estimatedMinutes && estimatedMinutes > 0 ? "text-red-600 font-semibold" : ""}>
                             {formatMinutes(actualMinutes)}
                         </span>
                     </span>
                     <button
+                        type="button"
                         onClick={startEditActual}
-                        className="text-slate-400 hover:text-slate-700 transition-colors"
-                        title="Manually edit actual time"
+                        className="text-slate-400 hover:text-slate-700 transition-colors flex-shrink-0"
+                        title="Edit actual time"
                     >
                         <Edit2 className="w-3.5 h-3.5" />
                     </button>
