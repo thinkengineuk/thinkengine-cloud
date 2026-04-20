@@ -5,6 +5,7 @@ import { Task } from "@/entities/Task";
 import { ActivityLog } from "@/entities/ActivityLog";
 import { Attachment } from "@/entities/Attachment";
 import { base44 } from "@/api/base44Client";
+import CommentReactions from "./CommentReactions";
 import { SendEmail } from "@/integrations/Core";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +26,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [commentAttachments, setCommentAttachments] = useState({});
+  const [reactions, setReactions] = useState([]);
   const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
   const [mentionSearch, setMentionSearch] = useState("");
   const [mentionSuggestions, setMentionSuggestions] = useState([]);
@@ -50,6 +52,15 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         }
       });
       setCommentAttachments(byComment);
+
+      // Load reactions for all comments on this task
+      if (taskComments.length > 0) {
+        const commentIds = taskComments.map(c => c.id);
+        const allReactions = await base44.entities.Reaction.filter({ comment_id: commentIds });
+        setReactions(allReactions);
+      } else {
+        setReactions([]);
+      }
     } finally {
       loadingRef.current = false;
     }
@@ -404,6 +415,24 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
     return formattedElements;
   };
 
+  const handleReactionToggle = async (commentId, emoji) => {
+    if (!currentUser) return;
+    const existing = reactions.find(
+      r => r.comment_id === commentId && r.emoji === emoji && r.user_email === currentUser.email
+    );
+    if (existing) {
+      await base44.entities.Reaction.delete(existing.id);
+      setReactions(prev => prev.filter(r => r.id !== existing.id));
+    } else {
+      const created = await base44.entities.Reaction.create({
+        comment_id: commentId,
+        user_email: currentUser.email,
+        emoji,
+      });
+      setReactions(prev => [...prev, created]);
+    }
+  };
+
   const handleCommentDragEnd = async (result) => {
     if (!result.destination) return;
     const { source, destination } = result;
@@ -631,6 +660,15 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
                                     </a>
                                   ))}
                                 </div>
+                              )}
+
+                              {!isEditing && (
+                                <CommentReactions
+                                  commentId={comment.id}
+                                  reactions={reactions.filter(r => r.comment_id === comment.id)}
+                                  currentUserEmail={currentUser?.email}
+                                  onReactionToggle={handleReactionToggle}
+                                />
                               )}
 
                               {comment.mentions && comment.mentions.length > 0 && !isEditing && (

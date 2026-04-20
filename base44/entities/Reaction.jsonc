@@ -1,0 +1,23 @@
+{
+  "name": "Reaction",
+  "type": "object",
+  "properties": {
+    "comment_id": {
+      "type": "string",
+      "description": "ID of the comment this reaction belongs to"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who reacted"
+    },
+    "emoji": {
+      "type": "string",
+      "description": "The emoji character used as reaction"
+    }
+  },
+  "required": [
+    "comment_id",
+    "user_email",
+    "emoji"
+  ]
+}
