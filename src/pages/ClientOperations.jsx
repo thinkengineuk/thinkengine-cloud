@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ClientOperationDialog from "@/components/client-ops/ClientOperationDialog";
 import BulkImportDialog from "@/components/client-ops/BulkImportDialog";
 import { useToast } from "@/components/ui/use-toast";
+import { listAllUsers } from "@/functions/listAllUsers";
 
 const SERVICE_COLORS = {
   "SEO": "bg-blue-100 text-blue-700",
@@ -59,7 +60,8 @@ export default function ClientOperations() {
     try {
       const me = await base44.auth.me();
       const allProjects = await base44.entities.ClientProject.list("name");
-      const allUsers = await base44.entities.User.list();
+      const usersResponse = await listAllUsers({});
+      const allUsers = usersResponse?.data?.users || [];
       setUser(me);
       // Exclude Client Projects (records created via Client Projects page use stage tracking).
       // Client Operations records are identified by having an agreement_type set.

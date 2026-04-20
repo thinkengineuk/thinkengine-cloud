@@ -4,6 +4,7 @@ import { Task } from "@/entities/Task";
 import { ActivityLog } from "@/entities/ActivityLog";
 import { Column } from "@/entities/Column";
 import { User } from "@/entities/User";
+import { listAllUsers } from "@/functions/listAllUsers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -68,11 +69,13 @@ export default function Dashboard() {
     setBoardsMap(bMap);
 
     // Fetch tasks, users, and columns in parallel
-    const [allAssignedTasks, allUsers, allColumns] = await Promise.all([
+    const [allAssignedTasks, usersResponse, allColumns] = await Promise.all([
       Task.filter({ assigned_to: currentUser.email, status: 'active' }, "-created_date"),
-      User.list(),
+      listAllUsers({}),
       Column.list()
     ]);
+
+    const allUsers = usersResponse?.data?.users || [];
 
     // Build users map keyed by email
     const uMap = {};
