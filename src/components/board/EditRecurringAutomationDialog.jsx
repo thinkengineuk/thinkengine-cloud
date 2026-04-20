@@ -27,6 +27,7 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
   const [existingBoardTags, setExistingBoardTags] = useState([]);
   const [checklistItems, setChecklistItems] = useState([]);
   const [checklistInput, setChecklistInput] = useState("");
+  const [dueDateOffsetDays, setDueDateOffsetDays] = useState(0);
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
@@ -44,6 +45,7 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
       setPriority(automation.priority || "medium");
       setTags(automation.tags || []);
       setChecklistItems(automation.checklist_items || []);
+      setDueDateOffsetDays(automation.due_date_offset_days ?? 0);
     }
   }, [automation]);
 
@@ -90,6 +92,7 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
       priority,
       tags: tags.length > 0 ? tags : undefined,
       checklist_items: checklistItems.length > 0 ? checklistItems : undefined,
+      due_date_offset_days: Number(dueDateOffsetDays) || 0,
     });
     setSaving(false);
     onOpenChange(false);
@@ -157,6 +160,19 @@ export default function EditRecurringAutomationDialog({ open, onOpenChange, auto
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Time of Day</p>
               <Input type="time" value={scheduledTime} onChange={e => setScheduledTime(e.target.value)} className="text-sm" />
             </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Due In (Days After Creation)</p>
+            <Input
+              type="number"
+              min="0"
+              value={dueDateOffsetDays}
+              onChange={e => setDueDateOffsetDays(e.target.value)}
+              placeholder="0 = due same day"
+              className="text-sm"
+            />
+            <p className="text-xs text-slate-400 mt-1">0 = due the same day it spawns</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

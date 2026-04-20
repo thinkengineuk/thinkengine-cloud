@@ -84,6 +84,11 @@
       },
       "description": "Checklist items to be created for each spawned task",
       "default": []
+    },
+    "due_date_offset_days": {
+      "type": "number",
+      "description": "Number of days after task creation that spawned tasks are due (0 = same day)",
+      "default": 0
     }
   },
   "required": [

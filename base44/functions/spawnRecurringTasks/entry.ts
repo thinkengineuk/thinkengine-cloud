@@ -72,6 +72,13 @@ Deno.serve(async (req) => {
 
     if (today >= nextSpawnDate) {
       const todayStr = today.toISOString().split('T')[0];
+
+      // Calculate due date based on offset (0 = same day)
+      const offsetDays = Number(automation.due_date_offset_days) || 0;
+      const dueDate = new Date(today);
+      dueDate.setDate(dueDate.getDate() + offsetDays);
+      dueDate.setHours(23, 59, 0, 0);
+
       const newTask = await base44.asServiceRole.entities.Task.create({
         board_id: automation.board_id,
         column_id: automation.column_id,
@@ -83,6 +90,7 @@ Deno.serve(async (req) => {
         tags: automation.tags || [],
         status: 'active',
         position: 9999,
+        due_date: dueDate.toISOString(),
       });
 
       // Create checklist if automation has checklist items
