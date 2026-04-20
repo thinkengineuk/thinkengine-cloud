@@ -61,7 +61,10 @@ export default function ClientOperations() {
       const allProjects = await base44.entities.ClientProject.list("name");
       const allUsers = await base44.entities.User.list();
       setUser(me);
-      setProjects(allProjects);
+      // Exclude Client Projects (records created via Client Projects page use stage tracking).
+      // Client Operations records are identified by having an agreement_type set.
+      const opsOnly = allProjects.filter(p => !!p.agreement_type);
+      setProjects(opsOnly);
       setUsers(allUsers || []);
     } catch (error) {
       console.error("Error loading data:", error);
