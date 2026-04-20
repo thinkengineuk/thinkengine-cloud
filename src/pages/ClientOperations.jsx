@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { listAllAppUsers } from "@/functions/listAllAppUsers";
+import { listAllUsers } from "@/functions/listAllUsers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +60,7 @@ export default function ClientOperations() {
     try {
       const me = await base44.auth.me();
       const allProjects = await base44.entities.ClientProject.list("name");
-      const { users: allUsers } = await listAllAppUsers();
+      const { users: allUsers } = await listAllUsers();
       setUser(me);
       setProjects(allProjects);
       setUsers(allUsers || []);
