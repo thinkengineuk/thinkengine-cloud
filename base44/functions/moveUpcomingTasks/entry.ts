@@ -7,14 +7,12 @@ const BOARD_ID = '69d4d6504c4765df04fb98e0';
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  // Calculate tomorrow's date in Europe/London timezone
+  // Calculate today's date in Europe/London timezone
   const now = new Date();
   const londonDateStr = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
-  const tomorrow = new Date(londonDateStr);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().slice(0, 10); // YYYY-MM-DD
+  const todayStr = londonDateStr.toISOString().slice(0, 10); // YYYY-MM-DD
 
-  // Check if Tomorrow column is empty first
+  // Check if Tomorrow column is empty first — only pull when empty
   const tomorrowExisting = await base44.asServiceRole.entities.Task.filter({
     board_id: BOARD_ID,
     column_id: TOMORROW_COL_ID,
@@ -32,33 +30,30 @@ Deno.serve(async (req) => {
     status: 'active',
   });
 
-  // Filter to tasks due tomorrow
-  const tasksDueTomorrow = tasks.filter(task => {
-    if (!task.due_date) return false;
-    return task.due_date.slice(0, 10) === tomorrowStr;
-  });
+  // Find the earliest future due date among upcoming tasks (strictly after today)
+  const futureTasks = tasks.filter(task => task.due_date && task.due_date.slice(0, 10) > todayStr);
 
-  if (!tasksDueTomorrow.length) {
-    return Response.json({ message: 'No tasks due tomorrow', tomorrowDate: tomorrowStr, checked: tasks.length });
+  if (!futureTasks.length) {
+    return Response.json({ message: 'No upcoming tasks with future due dates', todayDate: todayStr, checked: tasks.length });
   }
 
-  // Get current count in Tomorrow column to append positions
-  const tomorrowTasks = await base44.asServiceRole.entities.Task.filter({
-    board_id: BOARD_ID,
-    column_id: TOMORROW_COL_ID,
-  });
-  const nextPosition = tomorrowTasks.length;
+  const earliestDueDate = futureTasks
+    .map(t => t.due_date.slice(0, 10))
+    .sort()[0];
 
-  await Promise.all(tasksDueTomorrow.map((task, i) =>
+  // Filter tasks due on that earliest date
+  const tasksToMove = futureTasks.filter(task => task.due_date.slice(0, 10) === earliestDueDate);
+
+  await Promise.all(tasksToMove.map((task, i) =>
     base44.asServiceRole.entities.Task.update(task.id, {
       column_id: TOMORROW_COL_ID,
-      position: nextPosition + i,
+      position: i,
     })
   ));
 
   return Response.json({
-    message: `Moved ${tasksDueTomorrow.length} task(s) to Tomorrow column`,
-    tomorrowDate: tomorrowStr,
-    moved: tasksDueTomorrow.map(t => t.title),
+    message: `Moved ${tasksToMove.length} task(s) due ${earliestDueDate} to Tomorrow column`,
+    dueDate: earliestDueDate,
+    moved: tasksToMove.map(t => t.title),
   });
 });
