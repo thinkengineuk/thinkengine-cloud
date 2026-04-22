@@ -62,6 +62,7 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
     company: project?.company || "ThinkEngine Marketing",
     client_type: project?.client_type || "Retained",
     agreement_type: project?.agreement_type || "",
+
     services: project?.services || [],
     client_lead: resolveStaff("client_lead"),
     client_exec: resolveStaff("client_exec"),
@@ -144,7 +145,7 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Agreement Type</Label>
+              <Label>Agreement Type <span className="text-red-500">*</span></Label>
               <Select value={form.agreement_type} onValueChange={v => setForm({ ...form, agreement_type: v })}>
                 <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                 <SelectContent>
@@ -213,7 +214,7 @@ export default function ClientOperationDialog({ open, onOpenChange, project, use
 
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={saving || !form.name} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button type="submit" disabled={saving || !form.name || !form.agreement_type} className="bg-blue-600 hover:bg-blue-700 text-white">
               {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Client Operations"}
             </Button>
           </div>
