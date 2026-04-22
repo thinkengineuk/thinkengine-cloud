@@ -474,6 +474,10 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
         <span className="text-sm text-slate-500">({comments.length})</span>
       </div>
 
+      <p className="text-sm text-amber-800 bg-amber-50 border-l-4 border-amber-400 p-2 rounded-r-md">
+        ⏱️ Reminder: Please track your time for this task using the time tracker.
+      </p>
+
       {/* Add Comment */}
       <div className="space-y-2 relative">
         <Textarea
@@ -481,7 +485,7 @@ export default function TaskComments({ taskId, task, allUsers, currentUser: curr
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Add a comment... Type @ to mention someone — remember to note how long the task took"
+          placeholder="Add a comment... Type @ to mention someone"
           className="min-h-[80px] resize-none"
         />
         
