@@ -59,13 +59,6 @@ Deno.serve(async (req) => {
     const startDate = automation.recurrence_start_date ? new Date(automation.recurrence_start_date) : null;
     if (!startDate) continue;
 
-    // Check scheduled_time — only spawn if current hour:min >= scheduled_time
-    const [schedHour, schedMin] = (automation.scheduled_time || '00:00').split(':').map(Number);
-    const now = new Date();
-    const todayAtScheduledTime = new Date(today);
-    todayAtScheduledTime.setHours(schedHour, schedMin, 0, 0);
-    if (now < todayAtScheduledTime) continue; // Not yet time today
-
     const lastSpawned = automation.last_spawned_date ? new Date(automation.last_spawned_date) : null;
     let nextSpawnDate = lastSpawned ? addInterval(lastSpawned, automation.recurrence_pattern) : startDate;
     nextSpawnDate.setHours(0, 0, 0, 0);
