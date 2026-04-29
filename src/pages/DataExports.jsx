@@ -22,8 +22,7 @@ export default function DataExports() {
 
   const runExport = async () => {
     setRunning(true);
-    const { exportAllDataToCsv } = await import("@/functions/exportAllDataToCsv");
-    await exportAllDataToCsv({});
+    await base44.functions.invoke("exportAllDataToCsv", {});
     await load();
     setRunning(false);
   };
