@@ -82,15 +82,13 @@ export default function ClientProjects() {
                 Gantt
               </button>
             </div>
-            {user?.role === "admin" && (
-              <Button
-                onClick={() => setShowCreate(true)}
-                className="bg-white text-teal-700 hover:bg-white/90 font-semibold shadow-lg"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Project
-              </Button>
-            )}
+            <Button
+              onClick={() => setShowCreate(true)}
+              className="bg-white text-teal-700 hover:bg-white/90 font-semibold shadow-lg"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Project
+            </Button>
           </div>
         </div>
 
@@ -113,7 +111,7 @@ export default function ClientProjects() {
           <ClientProjectKanban
             projects={projects.filter(p => companyFilter === "all" || p.company === companyFilter)}
             onRefresh={loadData}
-            isAdmin={user?.role === "admin"}
+            isAdmin={true}
           />
         ) : (
           <ClientProjectGantt projects={projects.filter(p => companyFilter === "all" || p.company === companyFilter)} />
